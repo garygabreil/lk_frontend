@@ -1,0 +1,279 @@
+<!-- <div class="container mt-3" style="margin-left: 17%; width: 90%" id="invoice">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="customerName">Customer Name</label>
+      <input
+        formControlName="customerName"
+        type="text"
+        class="form-control"
+        id="customerName"
+      />
+    </div>
+    <div class="col-md-6">
+      <label for="invoiceDate">Invoice Date</label>
+      <input
+        formControlName="invoiceDate"
+        type="date"
+        class="form-control"
+        id="invoiceDate"
+      />
+    </div>
+  </div>
+
+  <form [formGroup]="invoiceForm" style="margin-left: 17%">
+    <div formArrayName="items">
+      <div
+        *ngFor="let item of items.controls; let i = index"
+        [formGroupName]="i"
+      >
+        <input
+          type="text"
+          formControlName="medicineName"
+          (keyup)="onSearch($any($event.target).value, i)"
+          placeholder="Search for medicine"
+          class="form-control"
+        />
+        <ul *ngIf="suggestions[i] && suggestions[i].length > 0">
+          <li
+            *ngFor="let suggestion of suggestions[i]"
+            (click)="onSelectMedicine(suggestion, i)"
+          >
+            {{ suggestion.medicineName }} - {{ suggestion.price }}
+          </li>
+        </ul>
+        <input
+          formControlName="price"
+          placeholder="Price"
+          class="form-control"
+        />
+        <input
+          formControlName="quantity"
+          placeholder="Quantity"
+          type="number"
+          class="form-control"
+        />
+      </div>
+    </div>
+
+    <button type="button" (click)="addItem()">Add Item</button>
+  </form>
+
+  <div class="row">
+    <div class="col-md-6">
+      <button type="button" (click)="addItem()" class="btn btn-primary">
+        Add Item
+      </button>
+    </div>
+    <div class="col-md-6 text-right">
+      <h5>Total: {{ calculateTotal() }}</h5>
+    </div>
+  </div>
+  <button class="btn btn-primary" (click)="downloadPDF()">Download PDF</button>
+</div> -->
+
+<form [formGroup]="invoiceForm" style="margin-left: 17%" id="invoice">
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label for="customerName" class="fw-lighter">Patient Name</label>
+      <input
+        type="text"
+        formControlName="patientName"
+        (keyup)="onSearchName($any($event.target).value)"
+        placeholder="Search for Patient"
+        class="form-control fw-lighter"
+      />
+      <ul *ngIf="suggestionsName && suggestionsName.length > 0">
+        <option
+          *ngFor="let suggestionsName of suggestionsName"
+          (click)="onSelectPatientName(suggestionsName)"
+        >
+          {{ suggestionsName.patientName }},
+          {{ suggestionsName.patientAddress }}
+        </option>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <label for="invoiceDate" class="fw-lighter">Patient Address</label>
+      <input
+        formControlName="patientAddress"
+        type="text"
+        class="form-control fw-lighter"
+        id="patientAddress"
+      />
+    </div>
+    <div class="col-md-2">
+      <label for="invoiceDate" class="fw-lighter">PID</label>
+      <input
+        formControlName="pid"
+        type="text"
+        class="form-control fw-lighter"
+        id="pid"
+        readonly
+      />
+    </div>
+    <div class="col-md-3">
+      <label for="invoiceDate" class="fw-lighter">Invoice Date</label>
+      <input
+        formControlName="invoiceDate"
+        type="date"
+        class="form-control fw-lighter"
+        id="invoiceDate"
+      />
+    </div>
+    <div class="col-md-3">
+      <label for="invoiceID" class="fw-lighter">Invoice ID</label>
+      <input
+        formControlName="invoiceID"
+        type="text"
+        class="form-control fw-lighter"
+        id="invoiceID"
+        readonly
+      />
+      <a
+        href="javascript:void(0);"
+        class="fw-lighter"
+        (click)="generateUniqueNumber()"
+        >Generate</a
+      >
+    </div>
+    <div class="col-md-2">
+      <label for="paymentType" class="fw-lighter">Payment Type</label>
+      <select class="form-select fw-lighter" formControlName="paymentType">
+        <option value="null">select payment type</option>
+        <option value="UPI">UPI</option>
+        <option value="CASH">CASH</option>
+        <option value="NETBANKING">NETBANKING</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label for="paymentStatus" class="fw-lighter">Payment Status</label>
+      <select class="form-select fw-lighter" formControlName="paymentStatus">
+        <option value="null">select payment status</option>
+        <option value="PAID">PAID</option>
+        <option value="NOT_PAID">NOT PAID</option>
+        <option value="PENDING">PENDING</option>
+      </select>
+    </div>
+  </div>
+  <hr />
+  <div formArrayName="items">
+    <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
+      <div class="row fw-lighter" style="margin-top: 1%">
+        {{ i + 1 }})
+        <div class="col">
+          <input
+            type="text"
+            formControlName="medicineName"
+            (keyup)="onSearch($any($event.target).value, i)"
+            placeholder="Search for medicine"
+            class="form-control fw-lighter"
+          />
+          <ul *ngIf="suggestions[i] && suggestions[i].length > 0">
+            <option
+              *ngFor="let suggestion of suggestions[i]"
+              (click)="onSelectMedicine(suggestion, i)"
+            >
+              {{ suggestion.medicineName }}
+            </option>
+          </ul>
+        </div>
+        <!-- col -->
+        <div class="col">
+          <input
+            formControlName="price"
+            placeholder="Price &#8377;"
+            class="form-control fw-lighter"
+          />
+        </div>
+
+        <div class="col">
+          <input
+            formControlName="quantity"
+            placeholder="Quantity"
+            type="text"
+            class="form-control fw-lighter"
+            (ngModelChange)="calculateTotal()"
+          />
+        </div>
+
+        <div class="col">
+          <input
+            formControlName="total"
+            placeholder="Total &#8377; "
+            type="text"
+            class="form-control fw-lighter"
+            (keydown.Tab)="addItem()"
+          />
+        </div>
+        <div class="col">
+          <button
+            class="btn btn-sm btn-danger fw-lighter"
+            type="button"
+            (click)="deleteItem(i)"
+          >
+            <mat-icon>restore_from_trash</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr />
+
+  <div class="fw-lighter" style="margin-bottom: 1%">
+    Total : &#8377; {{ total }}
+  </div>
+  <!-- without GST -->
+  <div
+    class="fw-lighter"
+    style="margin-bottom: 1%"
+    *ngIf="showWithoutGST == false"
+  >
+    Grand Total: &#8377; {{ grandTotalWithoutGst }}
+    <br />
+    <a
+      class="fw-lighter"
+      href="javascript:void(0);"
+      (click)="addGST()"
+      *ngIf="showWithoutGST == false"
+      >add gst</a
+    >
+  </div>
+  <!-- with GST -->
+  <div class="fw-lighter" style="margin-bottom: 1%" *ngIf="showWithoutGST">
+    Grand Total:&#8377; {{ grandTotalWithGst }}
+    <br />
+
+    <a
+      class="fw-lighter"
+      href="javascript:void(0);"
+      *ngIf="showWithoutGST"
+      (click)="removeGST()"
+      >remove gst</a
+    >
+  </div>
+  <hr />
+  <div class="align-items-center align-text-center mt-1">
+    <!--             -->
+    <button
+      class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
+      [disabled]="invoiceForm.invalid"
+      (click)="createInvoice()"
+    >
+      <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+      <span *ngIf="!showProgressBar">Save</span>
+      <div
+        class="spinner-border text-light"
+        role="status"
+        *ngIf="showProgressBar"
+      >
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </button>
+  </div>
+  <br />
+  <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
+    Invoice created!!
+  </div>
+
+  <br />
+</form>

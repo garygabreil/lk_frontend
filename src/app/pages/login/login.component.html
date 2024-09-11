@@ -1,0 +1,43 @@
+<form [formGroup]="loginForm">
+  <div
+    class="container d-flex justify-content-center align-items-center vh-100"
+  >
+    <div class="card p-4" style="width: 300px">
+      <h4 class="text-center fw-lighter">Lakshmi Hospital</h4>
+      <div class="form-group fw-lighter">
+        <label>PID</label>
+        <input
+          type="text"
+          class="form-control fw-lighter"
+          name="username"
+          placeholder="Enter your PID"
+          formControlName="pid"
+        />
+      </div>
+      <div
+        *ngIf="loginForm.get('pid')?.invalid"
+        style="color: red; font-size: small"
+      >
+        Required
+      </div>
+      <button
+        type="submit"
+        class="btn btn-success mt-3 w-100"
+        (click)="login()"
+      >
+        <span *ngIf="!showProgressBar">Login</span>
+        <div
+          class="spinner-border text-light"
+          role="status"
+          *ngIf="showProgressBar"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </button>
+      <br />
+      <div class="alert alert-danger fw-lighter" role="alert" *ngIf="showAlert">
+        User not found!
+      </div>
+    </div>
+  </div>
+</form>

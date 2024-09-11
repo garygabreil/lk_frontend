@@ -1,0 +1,320 @@
+<div class="card" style="margin-left: 17%; width: 90%">
+  <div class="container fw-lighter">
+    <h5 class="mb-4 fw-bolder"></h5>
+    <!-- Search input -->
+    <div class="row">
+      <div class="col-3">
+        <input
+          type="text"
+          class="form-control fw-lighter mb-2"
+          placeholder="Search..."
+          aria-label="search"
+          [(ngModel)]="search"
+        />
+      </div>
+      <div class="col"></div>
+    </div>
+
+    <div class="fw-bolder text-capitalize">
+      <u>Doctors</u> : {{ totalNumberOfEntries }}
+    </div>
+    <br />
+    <!-- Table -->
+    <table
+      class="table table-bordered table-striped fw-lighter"
+      *ngIf="doctorData.length > 0; else no_data_content"
+    >
+      <thead class="thead-dark">
+        <tr>
+          <th class="fw-lighter text-capitalize">#</th>
+          <th class="fw-lighter text-capitalize">consultant Name</th>
+          <th class="fw-lighter">PID</th>
+          <th class="fw-lighter text-capitalize">specaility</th>
+          <th class="fw-lighter text-capitalize">phone number</th>
+          <th colspan="2" class="fw-lighter text-capitalize">edit</th>
+          <th class="fw-lighter text-capitalize">delete</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr
+          *ngFor="
+            let doctor of doctorData
+              | search : search
+              | paginate : { itemsPerPage: 10, currentPage: p };
+            let i = index
+          "
+        >
+          <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
+          <td class="fw-lighter text-capitalize">
+            {{ doctor.title }}{{ doctor.consultantName }}
+          </td>
+          <td class="fw-lighter text-capitalize">{{ doctor.pid }}</td>
+          <td class="fw-lighter text-capitalize">
+            {{ doctor.speciality }}
+          </td>
+          <td class="fw-lighter text-capitalize">{{ doctor.phone }}</td>
+          <td class="fw-lighter text-capitalize" colspan="2">
+            <button
+              class="btn btn-sm btn-success text-capitalize fw-lighter"
+              (click)="editDoctorById(doctor._id)"
+              data-bs-toggle="modal"
+              data-bs-target="#editModal"
+            >
+              edit
+            </button>
+          </td>
+          <td>
+            <button
+              class="btn btn-sm btn-danger text-capitalize fw-lighter"
+              (click)="deleteDoctorById(doctor._id)"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal"
+            >
+              delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #no_data_content class="fw-bolder"
+      >No Doctor data available</ng-template
+    >
+    <pagination-controls
+      (pageChange)="p = $event"
+      *ngIf="doctorData.length > 0"
+    ></pagination-controls>
+  </div>
+</div>
+
+<!-- edit patient -->
+<div
+  class="modal fade"
+  id="editModal"
+  tabindex="-1"
+  aria-labelledby="editModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" style="width: 200%">
+    <div class="modal-content" style="width: 130%">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editModal">Edit Doctor</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="editSessionByID()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <!-- edit -->
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title"></h5>
+            <div class="container">
+              <form [formGroup]="doctorForm">
+                <div class="row">
+                  <div class="col">
+                    <label for="title" class="fw-lighter">Title</label>
+                    <input
+                      type="text"
+                      class="form-control fw-lighter text-capitalize"
+                      placeholder="title"
+                      formControlName="title"
+                    />
+                    <div
+                      *ngIf="doctorForm.get('title')?.invalid"
+                      style="color: red; font-size: small"
+                    >
+                      Required
+                    </div>
+                  </div>
+
+                  <div class="col">
+                    <label
+                      for="ConsultantName"
+                      class="fw-lighter text-capitalize"
+                      >Consultant Name</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control fw-lighter text-capitalize"
+                      placeholder="Consultant Name"
+                      formControlName="consultantName"
+                    />
+                    <div
+                      *ngIf="doctorForm.get('consultantName')?.invalid"
+                      style="color: red; font-size: small"
+                    >
+                      Required
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <label for="speciality" class="fw-lighter text-capitalize"
+                      >Speciality</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control fw-lighter text-capitalize"
+                      placeholder="speciality"
+                      formControlName="speciality"
+                    />
+
+                    <div
+                      *ngIf="doctorForm.get('speciality')?.invalid"
+                      style="color: red; font-size: small"
+                    >
+                      Required
+                    </div>
+                  </div>
+                  <div class="col">
+                    <label for="phoneNumber" class="fw-lighter text-capitalize"
+                      >Phone Number</label
+                    >
+
+                    <input
+                      type="text"
+                      class="form-control fw-lighter text-capitalize"
+                      placeholder="Phone number"
+                      formControlName="phone"
+                    />
+                    <div
+                      *ngIf="doctorForm.get('phone')?.invalid"
+                      style="color: red"
+                    >
+                      <small
+                        *ngIf="doctorForm.get('phone')?.errors?.['required']"
+                        style="color: red"
+                        >Required</small
+                      >
+                      <small
+                        *ngIf="doctorForm.get('phone')?.errors?.['pattern']"
+                        style="color: red"
+                        >Phone number must be 10 digits.</small
+                      >
+                    </div>
+                  </div>
+                  <div class="col">
+                    <label for="Address" class="fw-lighter text-capitalize"
+                      >Address</label
+                    >
+
+                    <input
+                      type="text"
+                      class="form-control fw-lighter text-capitalize"
+                      placeholder="Address"
+                      formControlName="address"
+                    />
+                    <div
+                      *ngIf="doctorForm.get('address')?.invalid"
+                      style="color: red; font-size: small"
+                    >
+                      Required
+                    </div>
+                  </div>
+                </div>
+                <div class="align-items-center align-text-center mt-1">
+                  <button
+                    class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter text-capitalize"
+                    [disabled]="doctorForm.invalid"
+                    (click)="updateChanges()"
+                  >
+                    <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+                    <span *ngIf="!showProgressBar">Save</span>
+                    <div
+                      class="spinner-border text-light"
+                      role="status"
+                      *ngIf="showProgressBar"
+                    >
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="container">
+            <div
+              class="alert alert-success fw-lighter text-capitalize"
+              role="alert"
+              *ngIf="showAlert"
+            >
+              <p class="alert-heading fw-lighter">
+                Success! Doctor details has been updated
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+          (click)="editSessionByID()"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal dialog to delete patient -->
+<div
+  class="modal fade"
+  id="deleteModal"
+  tabindex="-1"
+  aria-labelledby="deleteModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1
+          class="modal-title fs-5 fw-lighter text-capitalize"
+          id="deleteModal"
+        >
+          Delete doctor
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="deleteSessionByID()"
+        ></button>
+      </div>
+      <div class="modal-body fw-lighter">
+        Are you sure, you want to delete the doctor entry?
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-danger btn-sm fw-lighter text-capitalize"
+          (click)="deleteDoctor()"
+        >
+          <span *ngIf="!showDeleteProgressBar">yes</span>
+          <div
+            class="spinner-border text-light"
+            role="status"
+            *ngIf="showDeleteProgressBar"
+          >
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
+          data-bs-dismiss="modal"
+          #closeModal
+          (click)="deleteSessionByID()"
+        >
+          no
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

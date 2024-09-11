@@ -1,0 +1,521 @@
+<div class="card" style="margin-left: 17%; width: 90%">
+  <div class="container fw-lighter">
+    <br />
+    <!-- Search input -->
+    <div class="row">
+      <div class="col-3">
+        <input
+          type="text"
+          class="form-control fw-lighter mb-2"
+          placeholder="Search..."
+          aria-label="search"
+          [(ngModel)]="search"
+        />
+      </div>
+      <div class="col"></div>
+    </div>
+    <div class="fw-bolder text-capitalize">
+      <u> patients information :</u> {{ totalNumberOfEntries }}
+    </div>
+    <br />
+
+    <!-- Table -->
+
+    <table class="table table-bordered table-striped fw-lighter">
+      <thead class="thead-dark">
+        <tr>
+          <th class="fw-lighter text-capitalize">#</th>
+          <th class="fw-lighter text-capitalize">patient name</th>
+          <th class="fw-lighter">PID</th>
+          <th class="fw-lighter text-capitalize">phone number</th>
+          <th class="fw-lighter text-capitalize">father name</th>
+          <th class="fw-lighter text-capitalize">address</th>
+          <th class="fw-lighter text-capitalize">type</th>
+          <th class="fw-lighter text-capitalize">admission Date</th>
+          <th class="fw-lighter text-capitalize">consultant Name</th>
+          <th colspan="2" class="fw-lighter text-capitalize">edit</th>
+          <th class="fw-lighter text-capitalize">delete</th>
+        </tr>
+      </thead>
+      <tbody
+        id="tableBody"
+        *ngIf="patientData.length > 0; else no_data_content"
+      >
+        <tr
+          *ngFor="
+            let patient of patientData
+              | search : search
+              | paginate : { itemsPerPage: 10, currentPage: p };
+            let i = index
+          "
+        >
+          <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
+          <td class="fw-lighter text-capitalize">{{ patient.patientName }}</td>
+          <td class="fw-lighter text-capitalize">{{ patient.pid }}</td>
+          <td class="fw-lighter text-capitalize">
+            {{ patient.patientPhoneNumber }}
+          </td>
+          <td class="fw-lighter text-capitalize">{{ patient.fatherName }}</td>
+          <td class="fw-lighter text-capitalize">
+            {{ patient.patientAddress }}
+          </td>
+          <td class="fw-lighter text-capitalize">
+            {{ patient.type }}
+          </td>
+          <td class="fw-lighter text-capitalize">
+            {{ patient.visitDate }}
+          </td>
+          <td class="fw-lighter text-capitalize">
+            Dr.{{ patient.consultantName }}
+          </td>
+          <td class="fw-lighter text-capitalize" colspan="2">
+            <button
+              class="btn btn-sm btn-success text-capitalize fw-lighter"
+              (click)="editPatientById(patient._id)"
+              data-bs-toggle="modal"
+              data-bs-target="#editModal"
+            >
+              edit
+            </button>
+          </td>
+          <td>
+            <button
+              class="btn btn-sm btn-danger text-capitalize fw-lighter"
+              (click)="deletePatientById(patient._id)"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal"
+            >
+              delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+
+      <ng-template #no_data_content class="fw-bolder"
+        >No patient data available</ng-template
+      >
+    </table>
+    <pagination-controls (pageChange)="p = $event"></pagination-controls>
+  </div>
+</div>
+
+<!-- edit patient -->
+<div
+  class="modal fade"
+  id="editModal"
+  tabindex="-1"
+  aria-labelledby="editModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" style="width: 200%">
+    <div class="modal-content" style="width: 150%">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editModal">Patient Information</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="clearEditbyPatientIdInSession()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <!-- edit -->
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title"></h5>
+            <form [formGroup]="patientForm">
+              <div class="row">
+                <!-- title -->
+                <div class="col-md-2 mb-3">
+                  <label
+                    for="patientName"
+                    class="form-label fw-lighter text-capitalize"
+                    >title</label
+                  >
+                  <select
+                    id="title"
+                    class="form-control fw-lighter text-capitalize"
+                    formControlName="title"
+                  >
+                    <option value="null">choose...</option>
+                    <option>Mr.</option>
+                    <option>Mrs.</option>
+                    <option>Miss.</option>
+                    <option>Master.</option>
+                  </select>
+                  <div
+                    *ngIf="patientForm.get('title')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+                <!-- Patient Name -->
+                <div class="col-md-4 mb-3">
+                  <label for="patientName" class="form-label fw-lighter"
+                    >Patient Name</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control fw-lighter text-capitalize"
+                    id="patientName"
+                    placeholder="Enter patient name"
+                    formControlName="patientName"
+                  />
+                  <div
+                    *ngIf="patientForm.get('patientName')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="col-md-3 mb-3">
+                  <label
+                    for="gender"
+                    class="form-label fw-lighter text-capitalize"
+                    >Gender</label
+                  >
+                  <select
+                    id="title"
+                    class="form-control fw-lighter text-capitalize"
+                    formControlName="gender"
+                  >
+                    <option value="null">choose...</option>
+                    <option>male</option>
+                    <option>female</option>
+                  </select>
+                  <div
+                    *ngIf="patientForm.get('gender')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+
+                <!-- dob -->
+                <div class="col-md-2 mb-3">
+                  <label for="age" class="form-label fw-lighter text-capitalize"
+                    >age</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control fw-lighter text-capitalize"
+                    id="age"
+                    placeholder="age"
+                    formControlName="age"
+                  />
+                  <div
+                    *ngIf="patientForm.get('age')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+
+                <div class="row">
+                  <!-- Phone Number -->
+                  <div class="col-md-3 mb-3">
+                    <label for="phoneNumber" class="form-label fw-lighter"
+                      >Phone Number</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control fw-lighter"
+                      id="phoneNumber"
+                      placeholder="Enter phone number"
+                      formControlName="patientPhoneNumber"
+                    />
+                    <div
+                      *ngIf="patientForm.get('patientPhoneNumber')?.invalid"
+                      style="color: red"
+                    >
+                      <small
+                        *ngIf="patientForm.get('patientPhoneNumber')?.errors?.['required']"
+                        style="color: red"
+                        >Required</small
+                      >
+                      <small
+                        *ngIf="patientForm.get('patientPhoneNumber')?.errors?.['pattern']"
+                        style="color: red"
+                        >Phone number must be 10 digits.</small
+                      >
+                    </div>
+                  </div>
+                  <!-- father name -->
+                  <div class="col-md-3 mb-3">
+                    <label for="fatherName" class="form-label fw-lighter"
+                      >Father Name</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control fw-lighter text-capitalize"
+                      id="fatherName"
+                      placeholder="Enter Patient's Father Name"
+                      formControlName="fatherName"
+                    />
+                    <div
+                      *ngIf="patientForm.get('fatherName')?.invalid"
+                      style="color: red; font-size: small"
+                    >
+                      Required
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="address" class="form-label fw-lighter"
+                      >Address</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control fw-lighter text-capitalize"
+                      id="address"
+                      placeholder="Enter address"
+                      formControlName="patientAddress"
+                    />
+                    <div
+                      *ngIf="patientForm.get('patientAddress')?.invalid"
+                      style="color: red; font-size: small"
+                    >
+                      Required
+                    </div>
+                  </div>
+                </div>
+
+                <!-- admissionDate -->
+                <div class="col-md-3 mb-3">
+                  <label
+                    for="admissionDate"
+                    class="form-label fw-lighter text-capitalize"
+                    >visit Date</label
+                  >
+                  <input
+                    type="date"
+                    class="form-control fw-lighter"
+                    id="visitDate"
+                    formControlName="visitDate"
+                  />
+                  <div
+                    *ngIf="patientForm.get('visitDate')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+                <!-- pid -->
+                <div class="col-md-3 mb-3">
+                  <label for="pid" class="form-label fw-lighter">PID</label>
+                  <input
+                    type="text"
+                    class="form-control fw-lighter"
+                    id="pincode"
+                    placeholder="PatientID"
+                    formControlName="pid"
+                    readonly
+                  />
+                  <div
+                    *ngIf="patientForm.get('pid')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="pid" class="form-label fw-lighter"
+                    >Consultant Name</label
+                  >
+                  <select
+                    formControlName="consultantName"
+                    class="form-control fw-lighter dropdown-toggle text-capitalize"
+                  >
+                    <option value="null">Select Consultant</option>
+                    <option
+                      *ngFor="let doctor of doctorData"
+                      [value]="doctor.consultantName"
+                      selected
+                    >
+                      Dr.{{ doctor.consultantName }}
+                    </option>
+                  </select>
+                  <div
+                    *ngIf="patientForm.get('consultantName')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-2 mb-3">
+                  <label class="form-label fw-lighter" style="font-size: 15px"
+                    >Appointment type</label
+                  >
+                  <select
+                    formControlName="type"
+                    class="form-control fw-lighter dropdown-toggle text-capitalize"
+                  >
+                    <option value="null">Choose...</option>
+                    <option>OP</option>
+                    <option>IP</option>
+                  </select>
+                  <div
+                    *ngIf="patientForm.get('type')?.invalid"
+                    style="color: red; font-size: small"
+                  >
+                    Required
+                  </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                  <label class="form-label fw-lighter text-capitalize"
+                    >symptoms</label
+                  >
+                  <textarea
+                    class="form-control fw-lighter"
+                    formControlName="symptoms"
+                    rows="2"
+                  ></textarea>
+                </div>
+                <div class="col-md-2 mb-3">
+                  <label class="form-label fw-lighter">BP</label>
+                  <input
+                    type="text"
+                    class="form-control fw-lighter"
+                    formControlName="bp"
+                  />
+                </div>
+                <div class="col-md-2 mb-3">
+                  <label class="form-label fw-lighter text-capitalize"
+                    >sp02</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control fw-lighter"
+                    formControlName="sp02"
+                  />
+                </div>
+                <div class="col-md-2 mb-3">
+                  <label class="form-label fw-lighter text-capitalize"
+                    >pulse</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control fw-lighter"
+                    formControlName="pulse"
+                  />
+                </div>
+                <div class="col-md-2 mb-3">
+                  <label class="form-label fw-lighter text-capitalize"
+                    >Sugar</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control fw-lighter"
+                    formControlName="sugar"
+                  />
+                </div>
+              </div>
+
+              <div class="align-items-center align-text-center mt-1">
+                <!--             -->
+                <button
+                  class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
+                  [disabled]="patientForm.invalid"
+                  (click)="updateChanges()"
+                >
+                  <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+                  <span *ngIf="!showProgressBar">Save</span>
+                  <div
+                    class="spinner-border text-light"
+                    role="status"
+                    *ngIf="showProgressBar"
+                  >
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </button>
+              </div>
+            </form>
+          </div>
+          <div class="container">
+            <div
+              class="alert alert-success fw-lighter"
+              role="alert"
+              *ngIf="showAlert"
+            >
+              <p class="alert-heading fw-lighter">
+                Success! Patient details has been updated
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+          (click)="clearEditbyPatientIdInSession()"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal dialog to delete patient -->
+<div
+  class="modal fade"
+  id="deleteModal"
+  tabindex="-1"
+  aria-labelledby="deleteModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1
+          class="modal-title fs-5 fw-lighter text-capitalize"
+          id="deleteModal"
+        >
+          Delete Patient
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="clearDeleteIdInSession()"
+        ></button>
+      </div>
+      <div class="modal-body fw-lighter">
+        Are you sure, you want to delete the patient entry?
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-danger btn-sm fw-lighter text-capitalize"
+          (click)="deletePatient()"
+        >
+          <span *ngIf="!showDeleteProgressBar">yes</span>
+          <div
+            class="spinner-border text-light"
+            role="status"
+            *ngIf="showDeleteProgressBar"
+          >
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
+          data-bs-dismiss="modal"
+          #closeModal
+          (click)="clearDeleteIdInSession()"
+        >
+          no
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+@media print {
+  #noshow {
+    display: none;
+  }
+
+  input,
+  select,
+  textarea {
+    border: none;
+    box-shadow: none;
+  }
+
+  .modal-body {
+    margin: 0;
+    padding: 0;
+  }
+}

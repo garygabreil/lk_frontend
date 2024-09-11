@@ -1,0 +1,185 @@
+<div class="container" style="margin-left: 20%; width: 80%; padding: 2%">
+  <form [formGroup]="staffForm">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title text-capitalize">new staff registration</h5>
+        <div class="row">
+          <div class="col-2">
+            <label for="title" class="fw-lighter">Title</label>
+            <select
+              id="title"
+              class="form-control fw-lighter text-capitalize"
+              formControlName="title"
+            >
+              <option selected>Mr/Mrs...</option>
+              <option>Mr.</option>
+              <option>Mrs.</option>
+              <option>Miss.</option>
+            </select>
+            <div
+              *ngIf="
+                staffForm.get('title')?.invalid ||
+                !staffForm.get('title')?.dirty
+              "
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+
+          <div class="col">
+            <label for="Staff Name" class="fw-lighter text-capitalize"
+              >staff name</label
+            >
+            <input
+              id="title"
+              class="form-control fw-lighter text-capitalize"
+              formControlName="staffName"
+              placeholder="staff name"
+            />
+
+            <div
+              *ngIf="
+                staffForm.get('title')?.invalid ||
+                !staffForm.get('title')?.dirty
+              "
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+
+          <div class="col-3">
+            <label for="StaffName" class="fw-lighter text-capitalize"
+              >pid</label
+            >
+            <input
+              type="text"
+              class="form-control fw-lighter text-capitalize"
+              placeholder="pid"
+              formControlName="pid"
+              readonly
+            />
+            <div
+              *ngIf="staffForm.get('pid')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-2">
+            <label for="Type" class="fw-lighter text-capitalize">type</label>
+
+            <select
+              name="type"
+              id=""
+              formControlName="type"
+              class="form-control fw-lighter text-capitalize"
+            >
+              <option value="null" class="fw-lighter text-capitalize">
+                select type
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                Technician
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                pharmacist
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                Nurse
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                physiotherapist
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                Medical Intern
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                Pathologist
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                Dietitians and Nutritionists
+              </option>
+              <option class="fw-lighter text-capitalize text-nowrap">
+                Others
+              </option>
+            </select>
+
+            <div
+              *ngIf="
+                staffForm.get('type')?.invalid || !staffForm.get('type')?.dirty
+              "
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-3">
+            <label for="phoneNumber" class="fw-lighter">Phone</label>
+
+            <input
+              type="text"
+              class="form-control fw-lighter text-capitalize"
+              placeholder="Phone"
+              formControlName="phone"
+            />
+            <div *ngIf="staffForm.get('phone')?.invalid" style="color: red">
+              <small
+                *ngIf="staffForm.get('phone')?.errors?.['required']"
+                style="color: red"
+                >Required</small
+              >
+              <small
+                *ngIf="staffForm.get('phone')?.errors?.['pattern']"
+                style="color: red"
+                >Phone number must be 10 digits.</small
+              >
+            </div>
+          </div>
+          <div class="col">
+            <label for="Address" class="fw-lighter text-capitalize"
+              >Address</label
+            >
+
+            <input
+              type="text"
+              class="form-control fw-lighter text-capitalize"
+              placeholder="Address"
+              formControlName="address"
+            />
+            <div
+              *ngIf="staffForm.get('address')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+        </div>
+        <div class="align-items-center align-text-center mt-1">
+          <button
+            class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
+            [disabled]="staffForm.invalid"
+            (click)="onSubmit()"
+          >
+            <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+            <span *ngIf="!showProgressBar">Save</span>
+            <div
+              class="spinner-border text-light"
+              role="status"
+              *ngIf="showProgressBar"
+            >
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="container">
+    <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
+      <h6 class="alert-heading fw-lighter">Staff added!</h6>
+    </div>
+  </div>
+</div>

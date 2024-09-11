@@ -1,0 +1,91 @@
+/* Add this to your global stylesheet or a dedicated print stylesheet */
+
+/* Hide elements during print */
+@media print {
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    page-break-inside: avoid;
+  }
+
+  .col-md-3,
+  .col-md-6,
+  .col-md-2 {
+    /* Adjust for your column sizes */
+    width: 33%; /* 3 columns in a row, adjust as per your grid */
+    box-sizing: border-box;
+    padding: 5px; /* Ensure padding for better spacing */
+  }
+
+  .col-md-12 {
+    width: 100%;
+  }
+
+  /* Hide the sidemenu */
+  .sidemenu {
+    display: none;
+  }
+
+  /* Hide input borders */
+  input,
+  select,
+  textarea .button label .fw-lighter {
+    border: none;
+    box-shadow: none;
+    white-space: nowrap;
+    word-wrap: break-word;
+    word-break: normal;
+    font-size: 10px;
+  }
+
+  /* Hide other elements if needed */
+  .other-class-to-hide {
+    display: none;
+  }
+
+  /* Ensure the layout adjusts to print correctly */
+  .modal-body {
+    margin-right: 0;
+    padding: 0;
+    border: none;
+  }
+
+  /* Additional print-specific adjustments */
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+  #noshow {
+    display: none;
+  }
+}
+
+/* In your component's CSS file (e.g., invoice-dashboard.component.css) */
+
+@media print {
+  .sidemenu {
+    display: none;
+  }
+
+  input,
+  select,
+  textarea {
+    border: none;
+    box-shadow: none;
+    border: none;
+    box-shadow: none;
+    white-space: nowrap;
+    word-wrap: break-word;
+    word-break: normal;
+    font-size: 10px;
+  }
+
+  .modal-body {
+    margin: 0;
+    padding: 0;
+  }
+
+  label {
+    font-size: 10px;
+  }
+}

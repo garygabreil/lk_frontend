@@ -1,0 +1,28 @@
+/* Dashboard Styles */
+.dashboard-container {
+  margin-left: 250px; /* Space for the sidemenu */
+  padding: 20px; /* Padding around content */
+}
+
+.dashboard-header {
+  background-color: #007bff; /* Header background color */
+  color: #ffffff; /* Header text color */
+  padding: 15px;
+  border-radius: 5px; /* Rounded corners */
+  margin-bottom: 20px; /* Space below header */
+}
+
+.dashboard-content {
+  background-color: #f8f9fa; /* Light background for content */
+  padding: 20px;
+  border-radius: 5px; /* Rounded corners for content */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow for content area */
+}
+
+.dashboard-footer {
+  margin-top: 20px; /* Space above footer */
+  background-color: #343a40; /* Footer background color */
+  color: #ffffff; /* Footer text color */
+  padding: 10px;
+  text-align: center; /* Center text in footer */
+}

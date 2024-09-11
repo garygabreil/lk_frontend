@@ -1,0 +1,48 @@
+<div class="container mt-4" style="margin-left: 6">
+  <h2 class="text-center mb-4">In Patient</h2>
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Patient Name</th>
+          <th scope="col">Doctor Name</th>
+          <th scope="col">Date</th>
+          <th scope="col">Time</th>
+          <th scope="col">Status</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row"></th>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <!-- <td>
+            <span
+              class="badge badge-success"
+              *ngIf="appointment.status === 'Confirmed'"
+              >Confirmed</span
+            >
+            <span
+              class="badge badge-warning"
+              *ngIf="appointment.status === 'Pending'"
+              >Pending</span
+            >
+            <span
+              class="badge badge-danger"
+              *ngIf="appointment.status === 'Cancelled'"
+              >Cancelled</span
+            >
+          </td> -->
+          <td>
+            <button class="btn btn-primary btn-sm">Edit</button>
+            <button class="btn btn-danger btn-sm">Cancel</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

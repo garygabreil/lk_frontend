@@ -1,0 +1,65 @@
+<ng-container *ngIf="!isLoginPage()">
+  <!-- <nav class="navbar" style="background-color: #495057 !important">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-lighter" href="#" style="color: white"
+        >Lakshmi Hospital</a
+      >
+    </div>
+  </nav> -->
+  <nav
+    class="navbar navbar-expand-lg navbar-light bg-light"
+    style="background-color: #495057 !important"
+  >
+    <div class="container-fluid">
+      <!-- Heading on the left -->
+      <a
+        class="navbar-brand fw-lighter"
+        href="#"
+        style="color: white"
+        id="noshow"
+        >Lakshmi Hospital</a
+      >
+
+      <!-- Toggler for small screens -->
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+        id="noshow"
+      >
+        <span class="navbar-toggler-icon" id="noshow"></span>
+      </button>
+
+      <!-- Navbar content -->
+      <div class="collapse navbar-collapse" id="noshow">
+        <ul class="navbar-nav ms-auto">
+          <!-- Logout button on the far right -->
+          <li class="nav-item">
+            <button
+              type="submit"
+              class="btn btn-sm btn-success fw-lighter"
+              (click)="logOut()"
+            >
+              <span *ngIf="!showProgressBar">Logout</span>
+              <div
+                class="spinner-border text-light"
+                role="status"
+                *ngIf="showProgressBar"
+              >
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <app-sidemenu id="noshow" />
+</ng-container>
+<div class="container mt-4">
+  <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,261 @@
+<div class="sidemenu">
+  <ul>
+    <div class="accordion accordion-flush" id="accordionFlushExample">
+      <!-- appointment -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#flush-collapseFour"
+            aria-expanded="false"
+            aria-controls="flush-collapseFour"
+          >
+            <mat-icon>calendar_today</mat-icon>
+
+            <div class="fw-lighter text-capitalize">Appointments</div>
+          </button>
+        </h2>
+        <div
+          id="flush-collapseFour"
+          class="accordion-collapse collapse"
+          data-bs-parent="#accordionFlushExample"
+        >
+          <div class="accordion-body">
+            <div>
+              <button
+                type="button"
+                routerLink="/op-appointment"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>medical_services</mat-icon>
+                <span class="text-capitalize">OP (Out Patient)</span>
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+                routerLink="/ip-appointment"
+                style="margin-top: 1%; width: 150px"
+              >
+                <mat-icon>hotel</mat-icon>
+                <span class="text-capitalize">IP (In Patient)</span>
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                routerLink="/create-patient"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+                style="margin-top: 1%; width: 150px"
+              >
+                <mat-icon>person</mat-icon>
+                <span class="text-capitalize">create</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- start of patient -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#flush-collapseOne"
+            aria-expanded="false"
+            aria-controls="flush-collapseOne"
+          >
+            <mat-icon>assignment_ind</mat-icon>
+            <div class="fw-lighter">Patients</div>
+          </button>
+        </h2>
+        <div
+          id="flush-collapseOne"
+          class="accordion-collapse collapse"
+          data-bs-parent="#accordionFlushExample"
+        >
+          <div class="accordion-body">
+            <div>
+              <button
+                type="button"
+                routerLink="/manage-patient"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>settings</mat-icon>
+                <span class="text-capitalize">manage</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end of patient -->
+
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#flush-collapseTwo"
+            aria-expanded="false"
+            aria-controls="flush-collapseTwo"
+          >
+            <mat-icon>medical_services</mat-icon>
+            <div class="fw-lighter">Doctors</div>
+          </button>
+        </h2>
+        <div
+          id="flush-collapseTwo"
+          class="accordion-collapse collapse"
+          data-bs-parent="#accordionFlushExample"
+        >
+          <div class="accordion-body">
+            <div>
+              <button
+                type="button"
+                routerLink="/create-doctor"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>add</mat-icon>
+                <span class="text-capitalize">create</span>
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                routerLink="/manage-doctor"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>settings</mat-icon>
+                <span class="text-capitalize">manage</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#flush-collapseThree"
+            aria-expanded="false"
+            aria-controls="flush-collapseThree"
+          >
+            <mat-icon>person</mat-icon>
+            <div class="fw-lighter">Staffs</div>
+          </button>
+        </h2>
+        <div
+          id="flush-collapseThree"
+          class="accordion-collapse collapse"
+          data-bs-parent="#accordionFlushExample"
+        >
+          <div class="accordion-body">
+            <div>
+              <button
+                type="button"
+                routerLink="/create-staff"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>add</mat-icon>
+                <span class="text-capitalize">create</span>
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                routerLink="/manage-staff"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>settings</mat-icon>
+                <span class="text-capitalize">manage</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- start of pharmacy -->
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#flush-collapsePharmacy"
+            aria-expanded="false"
+            aria-controls="flush-collapsePharmacy"
+          >
+            <mat-icon>local_hospital</mat-icon>
+            <div class="fw-lighter text-capitalize">pharmacy</div>
+          </button>
+        </h2>
+        <div
+          id="flush-collapsePharmacy"
+          class="accordion-collapse collapse"
+          data-bs-parent="#accordionFlushExample"
+        >
+          <div class="accordion-body">
+            <div>
+              <button
+                type="button"
+                routerLink="/create-medicine"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>add</mat-icon>
+                <span class="text-capitalize fw-lighter">new medicine</span>
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                routerLink="/manage-medicine"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>settings</mat-icon>
+                <span class="text-capitalize fw-lighter">view-medicines</span>
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                routerLink="/create-bill"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>receipt</mat-icon>
+                <span class="text-capitalize fw-lighter">create invoices</span>
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                routerLink="/view-bill"
+                style="margin-top: 1%; width: 150px"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+              >
+                <mat-icon>receipt</mat-icon>
+                <span class="text-capitalize fw-lighter">view-invoices</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end of pharmacy -->
+    </div>
+  </ul>
+</div>

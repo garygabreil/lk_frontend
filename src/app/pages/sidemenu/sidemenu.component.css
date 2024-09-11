@@ -1,0 +1,70 @@
+.sidemenu {
+  width: 250px; /* Adjust the width of the sidemenu */
+  height: 100vh; /* Full-height */
+  position: fixed; /* Make it fixed on the left */
+  top: 8.2%;
+  left: 0;
+  background-color: #343a40; /* Background color */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+}
+
+.sidemenu ul {
+  list-style-type: none; /* Remove bullet points */
+  padding: 0;
+  margin: 0;
+}
+
+.sidemenu ul li {
+  padding: 10px 20px; /* Adjust padding for menu items */
+}
+
+.sidemenu ul li a {
+  text-decoration: none; /* Remove underline from links */
+  color: #ffffff; /* Text color */
+  display: block;
+  font-size: 16px;
+  transition: background-color 0.3s; /* Smooth hover effect */
+}
+
+.sidemenu ul li a:hover {
+  background-color: #495057; /* Change background on hover */
+  padding-left: 30px; /* Indent the text on hover */
+}
+
+.sidemenu ul li a.active {
+  background-color: #007bff; /* Highlight active link */
+}
+
+.sidemenu ul li a:visited {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .sidemenu {
+    width: 200px;
+  }
+
+  .sidemenu ul li {
+    padding: 8px 15px;
+  }
+
+  .sidemenu ul li a {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .sidemenu {
+    width: 100%; /* Full width on small screens */
+    height: auto;
+    position: relative;
+  }
+
+  .sidemenu ul li {
+    text-align: center; /* Center menu items */
+  }
+
+  .sidemenu ul li a {
+    padding: 10px;
+  }
+}
