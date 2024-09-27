@@ -3,6 +3,7 @@
     <div class="accordion accordion-flush" id="accordionFlushExample">
       <!-- appointment -->
       <div class="accordion-item">
+        <!-- 
         <h2 class="accordion-header">
           <button
             class="accordion-button collapsed"
@@ -16,7 +17,7 @@
 
             <div class="fw-lighter text-capitalize">Appointments</div>
           </button>
-        </h2>
+        </h2> -->
         <div
           id="flush-collapseFour"
           class="accordion-collapse collapse"
@@ -81,6 +82,17 @@
           data-bs-parent="#accordionFlushExample"
         >
           <div class="accordion-body">
+            <div>
+              <button
+                type="button"
+                routerLink="/create-patient"
+                class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
+                style="margin-top: 1%; width: 150px"
+              >
+                <mat-icon>person</mat-icon>
+                <span class="text-capitalize">create</span>
+              </button>
+            </div>
             <div>
               <button
                 type="button"
@@ -226,8 +238,7 @@
                 style="margin-top: 1%; width: 150px"
                 class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
               >
-                <mat-icon>settings</mat-icon>
-                <span class="text-capitalize fw-lighter">view-medicines</span>
+                <span class="text-capitalize fw-lighter">manage-medicines</span>
               </button>
             </div>
             <div>
@@ -248,8 +259,7 @@
                 style="margin-top: 1%; width: 150px"
                 class="btn btn-sm fw-lighter btn-outline-dark d-flex align-items-center justify-content-center"
               >
-                <mat-icon>receipt</mat-icon>
-                <span class="text-capitalize fw-lighter">view-invoices</span>
+                <span class="text-capitalize fw-lighter">manage-invoices</span>
               </button>
             </div>
           </div>

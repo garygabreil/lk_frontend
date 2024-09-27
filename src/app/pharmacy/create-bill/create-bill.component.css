@@ -1,27 +1,78 @@
+/* Add this to your global stylesheet or a dedicated print stylesheet */
+
+/* Add this to your global stylesheet or a dedicated print stylesheet */
+
+/* Hide elements during print */
 @media print {
-  body {
-    padding: 20px;
+  * {
+    font-size: 8px;
+    line-height: 1;
   }
 
-  table {
+  @page {
+    margin: 0; /* Remove default page margins */
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    page-break-inside: avoid;
+  }
+
+  half-a4-page {
+    width: 21cm; /* A4 width */
+    height: 14.85cm; /* Half of A4 height */
+    margin: 0; /* No margin */
+    padding: 0;
+    page-break-after: always; /* Ensure each section is printed on separate pages */
+    transform: scale(0.9); /* Scale down content if necessary */
+    transform-origin: top left;
+  }
+
+  .col-md-3,
+  .col-md-6,
+  .col-md-2 {
+    /* Adjust for your column sizes */
+    width: 33%; /* 3 columns in a row, adjust as per your grid */
+    box-sizing: border-box;
+    padding: 5px; /* Ensure padding for better spacing */
+  }
+
+  .col-md-12 {
     width: 100%;
-    border-collapse: collapse;
   }
 
-  table,
-  th,
-  td {
-    border: 1px solid black;
+  /* Hide the sidemenu */
+  .sidemenu {
+    display: none;
   }
 
-  th,
-  td {
-    padding: 8px;
-    text-align: left;
+  /* Hide input borders */
+  input,
+  select,
+  textarea .button label .fw-lighter {
+    border: none;
+    box-shadow: none;
+    white-space: nowrap;
+    word-wrap: break-word;
+    word-break: normal;
   }
 
-  .container {
-    width: 100%;
-    margin: 0;
+  /* Hide other elements if needed */
+  .other-class-to-hide {
+    display: none;
+  }
+
+  /* Ensure the layout adjusts to print correctly */
+  .modal-body {
+    margin-right: 0;
+    padding: 0;
+    border: none;
+  }
+
+  /* Additional print-specific adjustments */
+
+  #noshow {
+    display: none;
   }
 }

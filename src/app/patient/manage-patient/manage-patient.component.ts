@@ -167,22 +167,6 @@ export class ManagePatientComponent {
     return `${day}-${month}-${year}`;
   }
 
-  // calculate age
-  calculateAge(dob: string): number {
-    const today = new Date();
-    const birthDate = new Date(dob);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  }
-
   updateChanges() {
     this.showProgressBar = true;
     let id = sessionStorage.getItem('editById');
@@ -196,32 +180,36 @@ export class ManagePatientComponent {
             title: this.patientForm.value.title,
             gender: this.patientForm.value.gender,
             patientAddress: this.patientForm.value.patientAddress,
-            age: this.formatDate(this.patientForm.value.dob),
+            age: this.patientForm.value.age,
             fatherName: this.patientForm.value.fatherName,
-            admissionDate: this.formatDate(
-              this.patientForm.value.admissionDate
-            ),
+            admissionDate: this.patientForm.value.admissionDate,
             pid: this.patientForm.value.pid,
             consultantName: this.patientForm.value.consultantName,
+            type: this.patientForm.value.type,
+            symptoms: this.patientForm.value.symptoms,
+            bp: this.patientForm.value.bp,
+            sp02: this.patientForm.value.sp02,
+            pulse: this.patientForm.value.pulse,
+            sugar: this.patientForm.value.sugar,
+            updatedBy: sessionStorage.getItem('user'),
             createdOn: this.patientForm.value.currentDate,
             updatedOn: this.currentDate,
             createdBy: this.patientForm.value.createdBy,
-            updatedBy: sessionStorage.getItem('user'),
           })
           .subscribe(
             (res) => {
+              console.log(res);
               this.showProgressBar = true;
               this.showAlert = true;
               setTimeout(() => (this.showAlert = false), 3000);
               this.showProgressBar = false;
-              sessionStorage.removeItem('editById');
               this.loadData();
             },
             (err) => {
-              console.log(err.name);
+              console.log(err);
             }
           ),
-      3000
+      1000
     );
   }
 
@@ -248,7 +236,7 @@ export class ManagePatientComponent {
             console.log(err.message);
           }
         );
-    }, 3000);
+    }, 1000);
   }
 
   clearDeleteIdInSession() {

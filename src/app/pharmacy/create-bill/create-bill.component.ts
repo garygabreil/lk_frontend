@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { HttpService } from '../../services/http.service';
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 
 export interface Medicine {
   medicineName: string;
@@ -17,122 +16,68 @@ export interface Medicine {
   styleUrl: './create-bill.component.css',
 })
 export class CreateBillComponent {
-  /*
-  
-  invoiceForm: FormGroup;
-  suggestions: any[][] = []; 
-
-  isDropdownVisible: boolean = false;
-
-  constructor(private fb: FormBuilder, private http: HttpService) {
-    this.invoiceForm = this.fb.group({
-      customerName: [''],
-      invoiceDate: [''],
-      items: this.fb.array([]),
-    });
-    this.addItem();
-  }
-
-  addItem() {
-    const itemForm = this.fb.group({
-      medicineName: [''],
-      price: [],
-      quantity: [],
-    });
-    this.items.push(itemForm);
-    this.suggestions.push([]);
-  }
-
-  // Getter for the items FormArray
-  get items(): FormArray {
-    return this.invoiceForm.get('items') as FormArray;
-  }
-
-  calculateTotal() {
-    return this.items.controls.reduce((sum, item) => {
-      const quantity = item.get('quantity')?.value;
-      const price = item.get('price')?.value;
-      return sum + quantity * price;
-    }, 0);
-  }
-  downloadPDF() {
-    const element = document.getElementById('invoice')!;
-    html2canvas(element).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save('invoice.pdf');
-    });
-  }
-
-  searchMedicine(index: any) {
-    const searchText = this.items.controls.at(index)?.value.medicineName;
-    if (Object.values(searchText).length > 2) {
-      this.http.getProductByName(searchText).subscribe((res) => {
-        console.log(res);
-        if (Array.isArray(res)) {
-          this.suggestions[index] = res; // Store suggestions for the specific row
-        } else {
-          this.suggestions[index] = []; // Clear suggestions if the response is not an array
-        }
-      });
-    }
-  }
-
-  getSetPriceAndName(i: any, medicineName: any) {
-    this.suggestions[i] = [i];
-    this.items.controls.at(i)?.patchValue({ medicineName: medicineName });
-    this.suggestions[i] = [i];
-  }
-    */
+  clickedGSTlink: boolean = false;
 
   invoiceForm: FormGroup;
   suggestions: any[][] = []; // Array to store autocomplete suggestions for each row
   total: any;
   grandTotalWithGst: any;
-  grandTotalWithoutGst: any;
+  grandTotalWithOutGst: any;
   currentDate: any;
+  showCreateNewMedicineLink: any;
 
   suggestionsName: any[] = [];
 
   gstRate: any = 18;
   gstAmount: any;
   showWithoutGST = false;
+  showAddGSTButton = true;
   showWithGST = false;
   invoiceUniqueID = Math.floor(100000 + Math.random() * 900000);
   showProgressBar: any;
   showAlert: any;
+  printId: any;
+  noMedicineName: any;
+  showCreateNewPatientLink: any;
+  doctorData: any;
+  disableSaveButton = false;
 
+  no_stock_alert: any;
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private router: Router
   ) {
-    this.currentDate = this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '';
-
     this.invoiceForm = this.fb.group({
-      patientName: [''],
-      patientAddress: [''],
-      pid: [''],
+      patientName: ['', Validators.required],
+      patientAddress: ['', Validators.required],
+      pid: ['', Validators.required],
       title: [''],
       gender: [''],
       fatherName: [''],
-      consultantName: [''],
-      paymentType: [null],
-      paymentStatus: [null],
-      invoiceID: [this.invoiceUniqueID],
-      invoiceDate: [this.currentDate],
+      consultantName: ['', Validators.required],
+      paymentType: [null, Validators.required],
+      paymentStatus: [null, Validators.required],
+      invoiceID: [this.invoiceUniqueID, Validators.required],
+      invoiceDate: ['', Validators.required],
       grandTotalWithGST: [''],
-      grandTotalWithOutGST: [''],
+      grandTotalWithOutGst: [''],
       total: [''],
       items: this.fb.array([]), // FormArray for invoice items
+      gstAdded: [],
     });
     // Add one default item on load
     this.addItem();
     this.invoiceForm.valueChanges.subscribe((values) => {
       this.calculateTotal();
+    });
+
+    this.getAllDoctor();
+  }
+  getAllDoctor() {
+    this.http.getAllDoctors().subscribe((res) => {
+      this.doctorData = res as any;
     });
   }
 
@@ -141,22 +86,34 @@ export class CreateBillComponent {
     return this.invoiceForm.get('items') as FormArray;
   }
 
+  formatDate(date: string): string {
+    let dateObj = new Date(date);
+    let day = String(dateObj.getDate()).padStart(2, '0');
+    let month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    let year = dateObj.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
   // Method to add a new item to the FormArray
   addItem() {
     const itemForm = this.fb.group({
       medicineName: ['', Validators.required],
       price: ['', Validators.required],
-      quantity: ['', Validators.required],
+      batch: [''],
+      quantity: [''],
+      expiryDate: [''],
+      mid: [''],
       total: ['', Validators.required],
+      mrp: ['', Validators.required],
+      sgst: ['', Validators.required],
     });
 
     // Listen to changes in price or quantity to update the total for the item
     itemForm
       .get('price')
       ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
-    itemForm
-      .get('quantity')
-      ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
+    itemForm.get('quantity')?.valueChanges.subscribe(() => {
+      this.updateTotal(itemForm);
+    });
 
     this.items.push(itemForm);
     this.suggestions.push([]); // Add an empty array for suggestions for the new row
@@ -168,7 +125,14 @@ export class CreateBillComponent {
       // Call backend API to get the search suggestions
       this.http.getProductByName(query).subscribe(
         (res) => {
-          this.suggestions[index] = res as any; // Store suggestions for the specific row
+          this.suggestions[index] = res as any;
+          // Store suggestions for the specific row
+          if (this.suggestions[index].length == 0) {
+            this.showCreateNewMedicineLink = true;
+          }
+          if (this.suggestions[index].length > 0) {
+            this.showCreateNewMedicineLink = false;
+          }
         },
         (error) => {
           console.error('Search error:', error);
@@ -182,8 +146,11 @@ export class CreateBillComponent {
   updateTotal(itemForm: FormGroup) {
     const price = itemForm.get('price')?.value || 0;
     const quantity = itemForm.get('quantity')?.value || 0;
+    const sgst = itemForm.get('sgst')?.value || 0;
     const total = price * quantity;
-    itemForm.get('total')?.patchValue(total); // Update total without emitting valueChanges
+    const gst = (total * sgst) / 100;
+    const totalAddingSgst = total + gst;
+    itemForm.get('total')?.patchValue(totalAddingSgst); // Update total without emitting valueChanges
     this.calculateTotal();
   }
 
@@ -193,31 +160,61 @@ export class CreateBillComponent {
     itemFormGroup.patchValue({
       medicineName: medicine.medicineName,
       price: medicine.price,
+      mid: medicine.mid,
+      batch: medicine.batch,
+      quantity: medicine.quantity,
+      expiryDate: medicine.expiryDate,
+      mrp: medicine.price,
+      sgst: medicine.sgst,
     });
+
+    this.checkQuantity(medicine.quantity, index);
+
     // Clear suggestions for the current row
     this.suggestions[index] = [];
   }
 
-  calculateTotal() {
-    this.total = this.items.controls.reduce((acc, item) => {
-      const total = item.get('total')?.value || 0;
-      return acc + total;
-    }, 0);
-    this.gstAmount = (this.total * this.gstRate) / 100;
-    this.grandTotalWithGst = this.total + this.gstAmount;
-    this.grandTotalWithoutGst = this.total;
+  checkQuantity(medicinPrice: any, index: any) {
+    if (medicinPrice <= 0) {
+      this.no_stock_alert = true;
+    } else {
+      this.no_stock_alert = false;
+    }
   }
 
-  downloadPDF() {
-    const element = document.getElementById('invoice')!;
-    html2canvas(element).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save('invoice.pdf');
-    });
+  parseDateToMMYYYY(dateString: string): string | null {
+    const regex = /^(\d{2})-(\d{2})-(\d{4})$/; // Matches dd-mm-yyyy
+    const match = dateString.match(regex);
+
+    if (match) {
+      const month = match[2]; // mm
+      const year = match[3]; // yyyy
+      const shortYear = year.slice(-2); // Get last two digits of the year
+
+      // Return the formatted string as mm/yy
+      return `${month}/${shortYear}`;
+    }
+    // Return null if the input format is invalid
+    return null;
+  }
+
+  calculateTotal() {
+    if (this.clickedGSTlink) {
+      this.total = this.items.controls.reduce((acc, item) => {
+        const total = item.get('total')?.value || 0;
+        return acc + total;
+      }, 0);
+      this.gstAmount = (this.total * this.gstRate) / 100;
+      this.grandTotalWithGst = this.total + this.gstAmount;
+    } else {
+      this.total = this.items.controls.reduce((acc, item) => {
+        const total = item.get('total')?.value || 0;
+        return acc + total;
+      }, 0);
+      this.gstAmount = (this.total * this.gstRate) / 100;
+      this.grandTotalWithOutGst = this.total;
+      //this.grandTotalWithGst = this.total + this.gstAmount;
+    }
   }
 
   deleteItem(index: number) {
@@ -227,23 +224,34 @@ export class CreateBillComponent {
     this.calculateTotal(); // Recalculate grand total after item removal
   }
 
+  // Method to reset FormArray and keep only one row
+  resetFormArrayToOneRow() {
+    const itemsArray = this.items;
+    // Clear all existing controls in FormArray
+    while (itemsArray.length !== 0) {
+      itemsArray.removeAt(0);
+    }
+    // Add back one empty row (FormGroup) to the FormArray
+    itemsArray.push(this.addItem());
+  }
+
   addGST() {
-    this.showWithoutGST = true;
-    this.grandTotalWithoutGst = this.total + this.gstAmount;
+    // this.showWithoutGST = true;
+    this.showAddGSTButton = false;
+    this.clickedGSTlink = true;
     this.invoiceForm.patchValue({
       grandTotalWithGST: this.grandTotalWithGst,
-      grandTotalWithOutGST: this.grandTotalWithoutGst,
-      total: this.total,
+      gstAdded: this.clickedGSTlink,
     });
   }
 
   removeGST() {
-    this.showWithoutGST = false;
-    this.grandTotalWithoutGst = this.total;
+    // this.showWithoutGST = false;
+    this.showAddGSTButton = true;
+    this.clickedGSTlink = false;
     this.invoiceForm.patchValue({
-      grandTotalWithGST: this.grandTotalWithGst,
-      grandTotalWithOutGST: this.grandTotalWithoutGst,
-      total: this.total,
+      grandTotalWithOutGst: this.grandTotalWithOutGst,
+      gstAdded: this.clickedGSTlink,
     });
   }
 
@@ -252,6 +260,12 @@ export class CreateBillComponent {
       this.http.getPatientByName(query).subscribe(
         (res) => {
           this.suggestionsName = res as any;
+          if (this.suggestionsName.length == 0) {
+            this.showCreateNewPatientLink = true;
+          }
+          if (this.suggestionsName.length > 0) {
+            this.showCreateNewPatientLink = false;
+          }
         },
         (error) => {
           console.error('Search error:', error);
@@ -261,9 +275,13 @@ export class CreateBillComponent {
       this.suggestionsName = [];
     }
   }
+  convertToISODate(dateString: string): string {
+    const [day, month, year] = dateString.split('-');
+    return `${year}-${month}-${day}`; // Convert to YYYY-MM-DD
+  }
 
-  generateUniqueNumber() {
-    this.invoiceUniqueID = Math.floor(100000 + Math.random() * 900000);
+  async generateUniqueNumber() {
+    this.invoiceUniqueID = await Math.floor(100000 + Math.random() * 900000);
     this.invoiceForm.patchValue({
       invoiceID: this.invoiceUniqueID,
     });
@@ -276,35 +294,60 @@ export class CreateBillComponent {
       pid: res.pid,
       title: res.title,
       gender: res.gender,
-      fatherName: res.fatherName,
       consultantName: res.consultantName,
+      fatherName: res.fatherName,
     });
     this.suggestionsName = [];
   }
 
   createInvoice() {
     this.invoiceForm.patchValue({
+      grandTotalWithGST: this.grandTotalWithGst,
+      total: this.total,
+      grandTotalWithOutGst: this.grandTotalWithOutGst,
+    });
+
+    this.invoiceForm.patchValue({
       invoiceID: this.invoiceUniqueID,
-      invoiceDate: this.currentDate,
+      invoiceDate: this.invoiceForm.value.invoiceDate,
     });
     this.showProgressBar = true;
+
     setTimeout(
       () =>
         this.http.createInvoice(this.invoiceForm.value).subscribe(
-          (res) => {
+          (res: any) => {
             this.showProgressBar = true;
             this.showAlert = true;
-            setTimeout(() => (this.showAlert = false), 3000);
             this.showProgressBar = false;
-            this.invoiceForm.reset();
+            this.showWithoutGST = false;
+            this.inventoryCheck(this.items.value);
+            this.disableSaveButton = true;
+
+            //this.generateUniqueNumber();
+            //this.invoiceForm.reset();
+            this.printId = res['_id'];
           },
           (err) => {
             this.showProgressBar = true;
             this.invoiceForm.reset();
             this.showProgressBar = false;
+            this.generateUniqueNumber();
           }
         ),
-      3000
+      1000
     );
+  }
+
+  newInvoice() {
+    this.invoiceForm.reset();
+    this.generateUniqueNumber();
+  }
+
+  inventoryCheck(ar: any) {
+    this.http.updateQuantity(ar).subscribe((res) => {});
+  }
+  pharmaPatientCreation() {
+    sessionStorage.setItem('locationss', 'pharmarcy');
   }
 }

@@ -12,6 +12,7 @@ export class CreateDoctorComponent {
   doctorForm: FormGroup;
   showProgressBar: any;
   showAlert: any;
+  showExistAlert: any;
 
   currentDate: string;
   uniquePid = Math.floor(100000 + Math.random() * 900000);
@@ -40,7 +41,7 @@ export class CreateDoctorComponent {
     this.showProgressBar = true;
 
     setTimeout(
-      async () =>
+      () =>
         this.http
           .createDoctor({
             title: this.doctorForm.value.title,
@@ -58,15 +59,21 @@ export class CreateDoctorComponent {
             (res) => {
               this.showProgressBar = true;
               this.showAlert = true;
-              setTimeout(() => (this.showAlert = false), 3000);
               this.showProgressBar = false;
               this.doctorForm.reset();
             },
             (err) => {
-              console.log(err);
+              this.doctorForm.reset();
+              this.showProgressBar = true;
+              this.showExistAlert = true;
+              this.showProgressBar = false;
             }
           ),
-      3000
+      1000
     );
+  }
+
+  refresh() {
+    window.location.reload();
   }
 }

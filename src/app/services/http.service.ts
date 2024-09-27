@@ -1,5 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { catchError } from 'rxjs/operators';
+import { throwError, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -105,6 +107,31 @@ export class HttpService {
       invoice
     );
   }
+  getInvoiceDate(formattedDate: any) {
+    return this.http.post(
+      'http://localhost:3000/api/invoices/groupedInvoicesByDate',
+      {
+        date: formattedDate,
+      }
+    );
+  }
+  getInvoicesTodayInvoices() {
+    return this.http.get(
+      'http://localhost:3000/api/invoices/groupedInvoicesCreatedToday'
+    );
+  }
+
+  //Qua
+  updateQuantity(id: any) {
+    return this.http.post('http://localhost:3000/api/product/updateQ', id);
+  }
+  //updateInvoiceByd
+  // getAllInvoiceByDate() {
+  //   return this.http.get('http://localhost:3000/api/invoices/groupedInvoices');
+  // }
+  deleteInvoiceById(id: any) {
+    return this.http.delete('http://localhost:3000/api/invoices/delete/' + id);
+  }
 
   //DOCTORS
   // create doctor
@@ -177,5 +204,29 @@ export class HttpService {
   // getPatient
   getPatientByPid(id: any) {
     return this.http.get('http://localhost:3000/api/staff/getStaffByPID/' + id);
+  }
+
+  // states
+  getInvoicesSpecificDate(todayInvoices: any) {
+    return this.http
+      .post('http://localhost:3000/api/invoices/getInvoiceByDate', {
+        invoiceDate: todayInvoices,
+      })
+      .pipe(
+        catchError(this.handleError) // Handle the error here
+      );
+  }
+  // Error handling method
+  private handleError(error: HttpErrorResponse): Observable<any> {
+    if (error.status === 404) {
+      // Silently handle the 404 error without logging
+      return of(null); // Return a null observable or any fallback data you need
+    } else {
+      // Log and handle other errors if needed
+      console.error(`Error occurred: ${error.message}`);
+      return throwError(
+        () => new Error('Something went wrong, please try again later.')
+      );
+    }
   }
 }

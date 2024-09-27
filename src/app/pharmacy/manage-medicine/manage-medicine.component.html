@@ -1,123 +1,337 @@
-<div class="card" style="margin-left: 17%; width: 90%">
-  <div class="container fw-lighter">
-    <h5 class="mb-4 fw-bolder"></h5>
-    <!-- Search input -->
-    <div class="row">
-      <div class="col-3">
-        <input
-          type="text"
-          class="form-control fw-lighter mb-2"
-          placeholder="Search..."
-          aria-label="search"
-          [(ngModel)]="search"
-        />
-      </div>
-      <div class="col"></div>
-    </div>
-
-    <div class="fw-bolder text-capitalize">
-      <u>Medicine</u> : {{ totalNumberOfEntries }}
-    </div>
-    <br />
-    <!-- Table -->
-    <table
-      class="table table-bordered table-striped fw-lighter"
-      *ngIf="medicineData.length > 0; else no_data_content"
-    >
-      <thead class="thead-dark">
-        <tr>
-          <th class="fw-lighter text-capitalize">#</th>
-          <th class="fw-lighter text-capitalize">Medicine Name</th>
-          <th class="fw-lighter text-capitalize">Price (&#8377;)</th>
-          <th class="fw-lighter text-capitalize">Quantity</th>
-          <th class="fw-lighter text-capitalize">Expiry Date</th>
-          <th colspan="2" class="fw-lighter text-capitalize">edit</th>
-          <th class="fw-lighter text-capitalize">delete</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr
-          *ngFor="
-            let medicine of medicineData
-              | search : search
-              | paginate : { itemsPerPage: 10, currentPage: p };
-            let i = index
-          "
-        >
-          <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-          <td class="fw-lighter text-capitalize">
-            {{ medicine.medicineName }}
-          </td>
-          <td class="fw-lighter text-capitalize">
-            {{ medicine.price }}
-          </td>
-          <td class="fw-lighter text-capitalize">{{ medicine.quantity }}</td>
-
-          <td class="fw-lighter text-capitalize">{{ medicine.expiryDate }}</td>
-          <td class="fw-lighter text-capitalize" colspan="2">
-            <button
-              class="btn btn-sm btn-success text-capitalize fw-lighter"
-              (click)="editMedicineById(medicine._id)"
-              data-bs-toggle="modal"
-              data-bs-target="#editModal"
-            >
-              edit
-            </button>
-          </td>
-          <td>
-            <button
-              class="btn btn-sm btn-danger text-capitalize fw-lighter"
-              (click)="deleteMedicineById(medicine._id)"
-              data-bs-toggle="modal"
-              data-bs-target="#deleteModal"
-            >
-              delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <ng-template #no_data_content class="fw-bolder"
-      >No Medicine data available</ng-template
-    >
-    <pagination-controls
-      (pageChange)="p = $event"
-      *ngIf="medicineData.length > 0"
-    ></pagination-controls>
+<div class="container" style="margin-left: 17%; width: 85%">
+  <div class="scrolling-reminders" style="padding: 2%">
+    <marquee *ngIf="reminderMessages.length > 0">
+      {{ reminderMessages.join(" | ") }}
+    </marquee>
   </div>
 </div>
 
-<!-- edit patient -->
 <div
-  class="modal fade"
-  id="editModal"
-  tabindex="-1"
-  aria-labelledby="editModal"
-  aria-hidden="true"
+  class="accordion accordion-flush"
+  id="accordionFlushExample"
+  style="margin-left: 18%"
 >
-  <div class="modal-dialog" style="width: 200%">
-    <div class="modal-content" style="width: 130%">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="editModal">Edit Medicine</h1>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-          (click)="editSessionByID()"
-        ></button>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="flush-headingOneM">
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flush-collapseOneM"
+        aria-expanded="false"
+        aria-controls="flush-collapseOneM"
+      >
+        All Medicines : {{ totalNumberOfEntries }}
+      </button>
+    </h2>
+    <div
+      id="flush-collapseOneM"
+      class="accordion-collapse collapse"
+      aria-labelledby="flush-headingOneM"
+      data-bs-parent="#accordionFlushExample"
+    >
+      <div class="accordion-body">
+        <div class="container fw-lighter">
+          <!-- Search input -->
+          <div class="row">
+            <div class="col-3" style="margin-top: 1%">
+              <input
+                type="text"
+                class="form-control fw-lighter mb-2"
+                placeholder="Search..."
+                aria-label="search"
+                [(ngModel)]="search"
+              />
+            </div>
+            <br />
+            <div class="col"></div>
+          </div>
+
+          <br />
+          <!-- Table -->
+          <table
+            class="table table-bordered table-striped fw-lighter"
+            *ngIf="medicineData.length > 0; else no_data_content"
+          >
+            <thead class="thead-dark">
+              <tr>
+                <th class="fw-lighter text-capitalize">#</th>
+                <th class="fw-lighter text-capitalize">Medicine Name</th>
+                <th class="fw-lighter text-capitalize">Price (&#8377;)</th>
+                <th class="fw-lighter text-capitalize">Quantity</th>
+                <th class="fw-lighter text-capitalize">Expiry Date</th>
+                <th class="fw-lighter text-capitalize">Status</th>
+                <th class="fw-lighter text-capitalize">batch</th>
+                <th class="fw-lighter">HSN_code</th>
+
+                <th colspan="2" class="fw-lighter text-capitalize">edit</th>
+                <th class="fw-lighter text-capitalize">delete</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr
+                *ngFor="
+                  let medicine of medicineData
+                    | search : search
+                    | paginate : { itemsPerPage: 10, currentPage: p };
+                  let i = index
+                "
+              >
+                <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
+                <td class="fw-lighter text-capitalize">
+                  {{ medicine.medicineName }}
+                </td>
+                <td class="fw-lighter text-capitalize">
+                  {{ medicine.price }}
+                </td>
+                <td class="fw-lighter text-capitalize">
+                  {{ medicine.quantity }}
+                </td>
+
+                <td class="fw-lighter text-capitalize">
+                  {{
+                    this.reminderService.parseDate(medicine.expiryDate)
+                      | date : "dd-MM-yyyy"
+                  }}
+                </td>
+                <td class="fw-lighter text-capitalize">
+                  {{ getStatus(medicine.expiryDate) }}
+                </td>
+                <td class="fw-lighter text-capitalize">{{ medicine.batch }}</td>
+                <td class="fw-lighter text-capitalize">
+                  {{ medicine.hsn_code }}
+                </td>
+
+                <td class="fw-lighter text-capitalize" colspan="2">
+                  <button
+                    class="btn btn-sm btn-success text-capitalize fw-lighter"
+                    (click)="editMedicineById(medicine._id)"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editModal"
+                  >
+                    edit
+                  </button>
+                </td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                    (click)="deleteMedicineById(medicine._id)"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteModal"
+                  >
+                    delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #no_data_content class="fw-bolder"
+            >No Medicine data available</ng-template
+          >
+          <pagination-controls
+            (pageChange)="p = $event"
+            *ngIf="medicineData.length > 0"
+          ></pagination-controls>
+        </div>
       </div>
-      <div class="modal-body">
-        <!-- edit -->
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title"></h5>
-            <div class="container">
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="flush-headingTwoM">
+      <button
+        class="accordion-button collapsed"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#flush-collapseTwoM"
+        aria-expanded="false"
+        aria-controls="flush-collapseTwoM"
+      >
+        Search by Specific Criteria
+      </button>
+    </h2>
+    <div
+      id="flush-collapseTwoM"
+      class="accordion-collapse collapse"
+      aria-labelledby="flush-headingTwoM"
+      data-bs-parent="#accordionFlushExample"
+    >
+      <div class="accordion-body">
+        <div class="container">
+          <form id="searchForm" class="form-inline" [formGroup]="searchForm">
+            <div class="row">
+              <div class="col-5">
+                <div class="form-group">
+                  <label for="medicineName" class="mr-2">Medicine Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="medicineName"
+                    formControlName="medicineName"
+                    name="medicineName"
+                    placeholder="Enter medicine name"
+                  />
+                </div>
+              </div>
+
+              <div class="col-3">
+                <div class="form-group mx-sm-3 mb-2">
+                  <label for="hsn_code" class="mr-2">HSN Code</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="hsn_code"
+                    name="hsn_code"
+                    formControlName="hsn_code"
+                    placeholder="Enter HSN code"
+                  />
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group mx-sm-3 mb-2">
+                  <label for="batch" class="mr-2">Batch</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="batch"
+                    name="batch"
+                    formControlName="batch"
+                    placeholder="Enter batch"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary mb-2"
+              (click)="searchBySpecific()"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+        <br />
+        <!--  -->
+        <table
+          class="table table-bordered table-striped fw-lighter"
+          *ngIf="
+            totalNumberOfEntriesForSpecificSearch > 0;
+            else no_data_content
+          "
+        >
+          <thead class="thead-dark">
+            <tr>
+              <th class="fw-lighter text-capitalize">#</th>
+              <th class="fw-lighter text-capitalize">Medicine Name</th>
+              <th class="fw-lighter text-capitalize">Price (&#8377;)</th>
+              <th class="fw-lighter text-capitalize">Quantity</th>
+              <th class="fw-lighter text-capitalize">Expiry Date</th>
+              <th class="fw-lighter text-capitalize">Status</th>
+              <th class="fw-lighter text-capitalize">batch</th>
+              <th class="fw-lighter">HSN_code</th>
+
+              <th colspan="2" class="fw-lighter text-capitalize">edit</th>
+              <th class="fw-lighter text-capitalize">delete</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr
+              *ngFor="
+                let medicine of groupedInvoicesBySpecificSearch
+                  | search : search
+                  | paginate : { itemsPerPage: 10, currentPage: p };
+                let i = index
+              "
+            >
+              <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
+              <td class="fw-lighter text-capitalize">
+                {{ medicine.medicineName }}
+              </td>
+              <td class="fw-lighter text-capitalize">
+                {{ medicine.price }}
+              </td>
+              <td class="fw-lighter text-capitalize">
+                {{ medicine.quantity }}
+              </td>
+
+              <td class="fw-lighter text-capitalize">
+                {{
+                  this.reminderService.parseDate(medicine.expiryDate)
+                    | date : "dd-MM-yyyy"
+                }}
+              </td>
+              <td class="fw-lighter text-capitalize">
+                {{ getStatus(medicine.expiryDate) }}
+              </td>
+              <td class="fw-lighter text-capitalize">{{ medicine.batch }}</td>
+              <td class="fw-lighter text-capitalize">
+                {{ medicine.hsn_code }}
+              </td>
+
+              <td class="fw-lighter text-capitalize" colspan="2">
+                <button
+                  class="btn btn-sm btn-success text-capitalize fw-lighter"
+                  (click)="editMedicineById(medicine._id)"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editModal"
+                >
+                  edit
+                </button>
+              </td>
+              <td>
+                <button
+                  class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                  (click)="deleteMedicineById(medicine._id)"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteModal"
+                >
+                  delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #no_data_content class="fw-bolder"
+          >No Medicine data available</ng-template
+        >
+        <pagination-controls
+          (pageChange)="p = $event"
+          *ngIf="totalNumberOfEntriesForSpecificSearch > 0"
+        ></pagination-controls>
+      </div>
+    </div>
+  </div>
+
+  <!-- edit  -->
+  <div
+    class="modal fade"
+    id="editModal"
+    tabindex="-1"
+    aria-labelledby="editModal"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog" style="width: 200%">
+      <div class="modal-content" style="width: 130%">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="editModal">Edit Medicine</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            (click)="editSessionByID()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- edit -->
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title"></h5>
               <form [formGroup]="pharmacyForm">
                 <div class="container">
                   <div class="row">
                     <!-- Medicine Name -->
-                    <div class="col">
+                    <div class="col-6">
                       <div class="form-group">
                         <label
                           for="medicineName"
@@ -138,6 +352,44 @@
                         </div>
                       </div>
                     </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label for="batch" class="fw-lighter text-capitalize"
+                          >Batch</label
+                        >
+                        <input
+                          id="batch"
+                          formControlName="batch"
+                          class="form-control fw-lighter text-capitalize"
+                          placeholder="Enter batch"
+                        />
+                        <div
+                          *ngIf="pharmacyForm.get('batch')?.invalid"
+                          style="color: red; font-size: small"
+                        >
+                          Required
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label for="hsn_code" class="fw-lighter text-capitalize"
+                          >HSN code</label
+                        >
+                        <input
+                          id="batch"
+                          formControlName="hsn_code"
+                          class="form-control fw-lighter text-capitalize"
+                          placeholder="Enter batch"
+                        />
+                        <div
+                          *ngIf="pharmacyForm.get('hsn_code')?.invalid"
+                          style="color: red; font-size: small"
+                        >
+                          Required
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="row">
@@ -149,6 +401,7 @@
                         >
                         <input
                           id="quantity"
+                          type="number"
                           formControlName="quantity"
                           class="form-control fw-lighter text-capitalize"
                           placeholder="Enter quantity"
@@ -166,13 +419,15 @@
                     <div class="col-md-3">
                       <div class="form-group">
                         <label for="price" class="fw-lighter text-capitalize"
-                          >Price &#8377;</label
+                          >Price/Rate &#8377;</label
                         >
                         <input
                           id="price"
                           formControlName="price"
                           class="form-control fw-lighter text-capitalize"
-                          placeholder="Enter price &#8377;"
+                          placeholder="Enter price/rate &#8377;"
+                          (ngModelChange)="calculatePerQun()"
+                          (change)="onPriceChange($event)"
                         />
                         <div
                           *ngIf="pharmacyForm.get('price')?.invalid"
@@ -182,6 +437,7 @@
                         </div>
                       </div>
                     </div>
+
                     <!-- expiry date -->
                     <div class="col-md-4">
                       <div class="form-group">
@@ -201,6 +457,42 @@
                         style="color: red; font-size: small"
                       >
                         Required
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="price" class="fw-lighter">SGST %</label>
+                        <input
+                          id="expiryDate"
+                          formControlName="sgst"
+                          class="form-control fw-lighter"
+                          placeholder="Enter sgst %"
+                          type="number"
+                        />
+                      </div>
+                      <div
+                        *ngIf="pharmacyForm.get('sgst')?.invalid"
+                        style="color: red; font-size: small"
+                      >
+                        Required
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label for="quantity" class="fw-lighter">MID</label>
+                        <input
+                          id="mid"
+                          formControlName="mid"
+                          class="form-control fw-lighter text-capitalize"
+                          placeholder="mid"
+                          readonly
+                        />
+                        <div
+                          *ngIf="pharmacyForm.get('mid')?.invalid"
+                          style="color: red; font-size: small"
+                        >
+                          Required
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -225,86 +517,84 @@
                 </div>
               </form>
             </div>
-          </div>
-          <div class="container">
-            <div
-              class="alert alert-success fw-lighter text-capitalize"
-              role="alert"
-              *ngIf="showAlert"
-            >
-              <p class="alert-heading fw-lighter">
-                Success! Medicine details has been updated
-              </p>
+            <div class="container">
+              <div
+                class="alert alert-success fw-lighter"
+                role="alert"
+                *ngIf="showAlertForUpdate"
+              >
+                Medicine Updated!!
+              </div>
             </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+              (click)="editSessionByID()"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          data-bs-dismiss="modal"
-          (click)="editSessionByID()"
-        >
-          Close
-        </button>
-      </div>
     </div>
   </div>
-</div>
 
-<!-- modal dialog to delete patient -->
-<div
-  class="modal fade"
-  id="deleteModal"
-  tabindex="-1"
-  aria-labelledby="deleteModal"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1
-          class="modal-title fs-5 fw-lighter text-capitalize"
-          id="deleteModal"
-        >
-          Delete Medicine
-        </h1>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-          (click)="deleteSessionByID()"
-        ></button>
-      </div>
-      <div class="modal-body fw-lighter">
-        Are you sure, you want to delete the Medicine entry?
-      </div>
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-danger btn-sm fw-lighter text-capitalize"
-          (click)="deleteMedicine()"
-        >
-          <span *ngIf="!showDeleteProgressBar">yes</span>
-          <div
-            class="spinner-border text-light"
-            role="status"
-            *ngIf="showDeleteProgressBar"
+  <!-- modal dialog to delete patient -->
+  <div
+    class="modal fade"
+    id="deleteModal"
+    tabindex="-1"
+    aria-labelledby="deleteModal"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1
+            class="modal-title fs-5 fw-lighter text-capitalize"
+            id="deleteModal"
           >
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </button>
-        <button
-          type="button"
-          class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
-          data-bs-dismiss="modal"
-          #closeModal
-          (click)="deleteSessionByID()"
-        >
-          no
-        </button>
+            Delete Medicine
+          </h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            (click)="deleteSessionByID()"
+          ></button>
+        </div>
+        <div class="modal-body fw-lighter">
+          Are you sure, you want to delete the Medicine entry?
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-danger btn-sm fw-lighter text-capitalize"
+            (click)="deleteMedicine()"
+          >
+            <span *ngIf="!showDeleteProgressBar">yes</span>
+            <div
+              class="spinner-border text-light"
+              role="status"
+              *ngIf="showDeleteProgressBar"
+            >
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
+            data-bs-dismiss="modal"
+            #closeModal
+            (click)="deleteSessionByID()"
+          >
+            no
+          </button>
+        </div>
       </div>
     </div>
   </div>

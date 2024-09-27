@@ -1,10 +1,10 @@
 <div class="container" style="margin-left: 20%; width: 80%; padding: 2%">
-  <form [formGroup]="doctorForm">
+  <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">New Doctor Registration</h5>
         <div class="row">
-          <div class="col">
+          <div class="col-3">
             <label for="title" class="fw-lighter">Title</label>
             <select
               id="title"
@@ -27,10 +27,10 @@
             </div>
           </div>
 
-          <div class="col">
+          <div class="col-5">
             <label for="ConsultantName" class="fw-lighter text-capitalize"
-              >Consultant Name</label
-            >
+              >Consultant Name, eg: SenthilRaja
+            </label>
             <input
               type="text"
               class="form-control fw-lighter text-capitalize"
@@ -44,8 +44,6 @@
               Required
             </div>
           </div>
-        </div>
-        <div class="row">
           <div class="col">
             <label for="consultantSpecialty" class="fw-lighter text-capitalize"
               >Speciality</label
@@ -57,7 +55,6 @@
               placeholder="speciality"
               formControlName="speciality"
             />
-
             <div
               *ngIf="
                 doctorForm.get('speciality')?.invalid ||
@@ -68,44 +65,46 @@
               Required
             </div>
           </div>
-          <div class="col">
-            <label for="phoneNumber" class="fw-lighter">Phone</label>
+          <div class="row">
+            <div class="col-4">
+              <label for="phoneNumber" class="fw-lighter">Phone</label>
 
-            <input
-              type="text"
-              class="form-control fw-lighter text-capitalize"
-              placeholder="Phone"
-              formControlName="phone"
-            />
-            <div *ngIf="doctorForm.get('phone')?.invalid" style="color: red">
-              <small
-                *ngIf="doctorForm.get('phone')?.errors?.['required']"
-                style="color: red"
-                >Required</small
-              >
-              <small
-                *ngIf="doctorForm.get('phone')?.errors?.['pattern']"
-                style="color: red"
-                >Phone number must be 10 digits.</small
-              >
+              <input
+                type="text"
+                class="form-control fw-lighter text-capitalize"
+                placeholder="Phone"
+                formControlName="phone"
+              />
+              <div *ngIf="doctorForm.get('phone')?.invalid" style="color: red">
+                <small
+                  *ngIf="doctorForm.get('phone')?.errors?.['required']"
+                  style="color: red"
+                  >Required</small
+                >
+                <small
+                  *ngIf="doctorForm.get('phone')?.errors?.['pattern']"
+                  style="color: red"
+                  >Phone number must be 10 digits.</small
+                >
+              </div>
             </div>
-          </div>
-          <div class="col">
-            <label for="Address" class="fw-lighter text-capitalize"
-              >Address</label
-            >
+            <div class="col">
+              <label for="Address" class="fw-lighter text-capitalize"
+                >Address</label
+              >
 
-            <input
-              type="text"
-              class="form-control fw-lighter text-capitalize"
-              placeholder="Address"
-              formControlName="address"
-            />
-            <div
-              *ngIf="doctorForm.get('address')?.invalid"
-              style="color: red; font-size: small"
-            >
-              Required
+              <input
+                type="text"
+                class="form-control fw-lighter text-capitalize"
+                placeholder="Address"
+                formControlName="address"
+              />
+              <div
+                *ngIf="doctorForm.get('address')?.invalid"
+                style="color: red; font-size: small"
+              >
+                Required
+              </div>
             </div>
           </div>
         </div>
@@ -113,7 +112,6 @@
           <button
             class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
             [disabled]="doctorForm.invalid"
-            (click)="onSubmit()"
           >
             <mat-icon *ngIf="!showProgressBar">save</mat-icon>
             <span *ngIf="!showProgressBar">Save</span>
@@ -129,10 +127,40 @@
       </div>
     </div>
   </form>
+  <button
+    style="margin-top: 1%"
+    (click)="refresh()"
+    class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center fw-lighter"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
   <br />
   <div class="container">
     <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
-      <h6 class="alert-heading fw-lighter">Doctor added!</h6>
+      <h6 class="alert-heading fw-lighter">
+        Doctor added!
+        <button
+          type="button"
+          class="btn btn-link fw-lighter"
+          [routerLink]="['/manage-doctor']"
+        >
+          View Doctors
+        </button>
+      </h6>
+    </div>
+    <div
+      class="alert alert-danger fw-lighter"
+      role="alert"
+      *ngIf="showExistAlert"
+    >
+      Doctor entry exist!
+      <button
+        type="button"
+        class="btn btn-link fw-lighter text-capitalize"
+        [routerLink]="['/manage-doctor']"
+      >
+        go to manage Doctor
+      </button>
     </div>
   </div>
 </div>

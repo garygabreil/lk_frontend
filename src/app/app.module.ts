@@ -33,6 +33,10 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ManageInvoicesComponent } from './pharmacy/manage-invoices/manage-invoices.component';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
+import { ViewIndividualInvoicesComponent } from './pharmacy/view-individual-invoices/view-individual-invoices.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +57,7 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
     ManageMedicineComponent,
     CreateBillComponent,
     ManageInvoicesComponent,
+    ViewIndividualInvoicesComponent,
   ],
   imports: [
     BrowserModule,
@@ -66,6 +71,9 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
     MatAutocompleteModule,
     MatFormFieldModule,
     NgxDatatableModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
   ],
   providers: [
     provideClientHydration(),

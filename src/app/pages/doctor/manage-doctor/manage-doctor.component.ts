@@ -151,14 +151,14 @@ export class ManageDoctorComponent {
               this.showAlert = true;
               setTimeout(() => (this.showAlert = false), 3000);
               this.showProgressBar = false;
-              sessionStorage.removeItem('editDoctorById');
+              //sessionStorage.removeItem('editDoctorById');
               this.loadData();
             },
             (err) => {
               console.log(err);
             }
           ),
-      3000
+      1000
     );
   }
 
@@ -185,7 +185,7 @@ export class ManageDoctorComponent {
             console.log(err.message);
           }
         );
-    }, 3000);
+    }, 1000);
   }
 
   deleteSessionByID() {

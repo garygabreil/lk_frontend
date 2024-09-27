@@ -1,0 +1,56 @@
+<div class="container mt-3" id="invoice">
+  <div class="row">
+    <div class="col-12 text-center">
+      <h2>PUGAZH PHARMACY</h2>
+      <p>
+        Address: 52B/23A, Thiruvaragam Nagar, Dhurugam Road, Kallakurichi-606202
+      </p>
+      <p>PH NO: 9385421300 & 04151-227100</p>
+      <p>DL.NO: TRS/2934/20-21 | GSTIN: 33BPVP5381H1ZI</p>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-6">
+      <p><strong>Dr Name:</strong></p>
+      <p><strong>Patient Name:</strong></p>
+      <p><strong>Father's Name:</strong></p>
+    </div>
+    <div class="col-6 text-right">
+      <p><strong>Bill No:</strong></p>
+      <p><strong>Bill Date:</strong></p>
+      <p><strong>Consultant:</strong></p>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Slno</th>
+            <th>Description & Packing</th>
+            <th>Qty</th>
+            <th>Batch</th>
+            <th>Exp</th>
+            <th>MRP</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>mrp</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12 text-right">
+      <p><strong>Total:</strong></p>
+      <p><strong>GST Added:</strong></p>
+      <p><strong>Grand Total (with GST):</strong></p>
+    </div>
+  </div>
+</div>

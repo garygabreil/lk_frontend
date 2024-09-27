@@ -1,7 +1,7 @@
-<div class="container" style="margin-left: 20%; width: 80%; padding: 2%">
+<div class="container" style="margin-left: 20%; width: 80%">
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">New Appointment</h5>
+      <h5 class="card-title">New Patient</h5>
       <form [formGroup]="patientForm">
         <div class="row">
           <!-- title -->
@@ -189,6 +189,7 @@
               id="pincode"
               placeholder="PatientID"
               formControlName="pid"
+              style="background-color: lightgray"
               readonly
             />
             <div
@@ -252,6 +253,12 @@
               formControlName="symptoms"
               rows="2"
             ></textarea>
+            <div
+              *ngIf="patientForm.get('symptoms')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
           </div>
           <div class="col-md-2 mb-3">
             <label class="form-label fw-lighter">BP</label>
@@ -308,16 +315,50 @@
       </form>
     </div>
   </div>
-  <br />
+  <button
+    style="margin-top: 1%"
+    (click)="refresh()"
+    class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center fw-lighter"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
 
   <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
     Patient entry has been completed
+    <button
+      type="button"
+      class="btn btn-link fw-lighter"
+      [routerLink]="['/create-bill']"
+    >
+      go to create bill
+    </button>
+    <button
+      type="button"
+      class="btn btn-link fw-lighter"
+      [routerLink]="['/manage-patient']"
+    >
+      view patients
+    </button>
   </div>
   <div
     class="alert alert-danger fw-lighter"
     role="alert"
     *ngIf="showExistAlert"
   >
-    Patient entry exist! <a href="">go to appointment page</a>
+    Patient entry exist!
+    <button
+      type="button"
+      class="btn btn-link fw-lighter"
+      [routerLink]="['/create-bill']"
+    >
+      go to create bill
+    </button>
+    <button
+      type="button"
+      class="btn btn-link fw-lighter"
+      [routerLink]="['/manage-patient']"
+    >
+      view patients
+    </button>
   </div>
 </div>

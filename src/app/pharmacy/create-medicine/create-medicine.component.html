@@ -1,11 +1,11 @@
 <div class="card" style="width: 60%; margin-left: 20%">
-  <div class="card-body fw-lighter text-capitalize">
+  <div class="card-body fw-lighter">
     <h3 class="fw-lighter text-capitalize">Add new medicine</h3>
     <form [formGroup]="pharmacyForm">
       <div class="container">
         <div class="row">
           <!-- Medicine Name -->
-          <div class="col">
+          <div class="col-6">
             <div class="form-group">
               <label for="medicineName" class="fw-lighter text-capitalize"
                 >Medicine Name</label
@@ -24,6 +24,44 @@
               </div>
             </div>
           </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label for="batch" class="fw-lighter text-capitalize"
+                >Batch</label
+              >
+              <input
+                id="batch"
+                formControlName="batch"
+                class="form-control fw-lighter text-capitalize"
+                placeholder="Enter batch"
+              />
+              <div
+                *ngIf="pharmacyForm.get('batch')?.invalid"
+                style="color: red; font-size: small"
+              >
+                Required
+              </div>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-group">
+              <label for="hsn_code" class="fw-lighter text-capitalize"
+                >HSN code</label
+              >
+              <input
+                id="batch"
+                formControlName="hsn_code"
+                class="form-control fw-lighter text-capitalize"
+                placeholder="Enter batch"
+              />
+              <div
+                *ngIf="pharmacyForm.get('hsn_code')?.invalid"
+                style="color: red; font-size: small"
+              >
+                Required
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="row">
@@ -35,6 +73,7 @@
               >
               <input
                 id="quantity"
+                type="number"
                 formControlName="quantity"
                 class="form-control fw-lighter text-capitalize"
                 placeholder="Enter quantity"
@@ -52,13 +91,15 @@
           <div class="col-md-3">
             <div class="form-group">
               <label for="price" class="fw-lighter text-capitalize"
-                >Price &#8377;</label
+                >Price/Rate &#8377;</label
               >
               <input
                 id="price"
                 formControlName="price"
                 class="form-control fw-lighter text-capitalize"
-                placeholder="Enter price &#8377;"
+                placeholder="Enter price/rate &#8377;"
+                (ngModelChange)="calculatePerQun()"
+                (change)="onPriceChange($event)"
               />
               <div
                 *ngIf="pharmacyForm.get('price')?.invalid"
@@ -68,8 +109,9 @@
               </div>
             </div>
           </div>
+
           <!-- expiry date -->
-          <div class="col-md-3">
+          <div class="col-md-4">
             <div class="form-group">
               <label for="price" class="fw-lighter">Expiry Date</label>
               <input
@@ -85,6 +127,42 @@
               style="color: red; font-size: small"
             >
               Required
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label for="price" class="fw-lighter">SGST %</label>
+              <input
+                id="expiryDate"
+                formControlName="sgst"
+                class="form-control fw-lighter"
+                placeholder="Enter sgst %"
+                type="number"
+              />
+            </div>
+            <div
+              *ngIf="pharmacyForm.get('sgst')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label for="quantity" class="fw-lighter">MID</label>
+              <input
+                id="mid"
+                formControlName="mid"
+                class="form-control fw-lighter text-capitalize"
+                placeholder="mid"
+                readonly
+              />
+              <div
+                *ngIf="pharmacyForm.get('mid')?.invalid"
+                style="color: red; font-size: small"
+              >
+                Required
+              </div>
             </div>
           </div>
         </div>
@@ -109,10 +187,23 @@
       </div>
     </form>
   </div>
-  <br />
   <div class="container">
     <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
       Medicine entry has been completed
+      <button
+        type="button"
+        class="btn btn-link fw-lighter"
+        [routerLink]="['/create-bill']"
+      >
+        go to create bill
+      </button>
+      <button
+        type="button"
+        class="btn btn-link fw-lighter"
+        [routerLink]="['/manage-medicine']"
+      >
+        view medicines
+      </button>
     </div>
     <div
       class="alert alert-danger fw-lighter"

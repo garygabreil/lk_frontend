@@ -1,403 +1,505 @@
-<div class="card" style="margin-left: 17%; width: 90%" id="noshow">
-  <div class="container fw-lighter">
-    <h5 class="mb-4 fw-bolder"></h5>
-    <!-- Search input -->
-    <div class="row">
-      <div class="col-3">
-        <input
-          type="text"
-          class="form-control fw-lighter mb-2"
-          placeholder="Search..."
-          aria-label="search"
-          [(ngModel)]="search"
-        />
-      </div>
-      <div class="col"></div>
-    </div>
-
-    <div class="fw-bolder text-capitalize">
-      <u>Medicine</u> : {{ totalNumberOfEntries }}
-    </div>
-    <br />
-    <!-- Table -->
-    <table
-      class="table table-bordered table-striped fw-lighter"
-      *ngIf="invoiceData.length > 0; else no_data_content"
-    >
-      <thead class="thead-dark">
-        <tr>
-          <th class="fw-lighter text-capitalize">#</th>
-          <th class="fw-lighter text-capitalize">Invoice ID</th>
-          <th class="fw-lighter text-capitalize">Patient ID</th>
-          <th class="fw-lighter text-capitalize">Patient Name</th>
-          <th class="fw-lighter text-capitalize">Price (&#8377;)</th>
-          <th class="fw-lighter text-capitalize">Payment Type</th>
-          <th class="fw-lighter text-capitalize">Payment Status</th>
-          <th class="fw-lighter text-capitalize">view</th>
-          <th class="fw-lighter text-capitalize">delete</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr
-          *ngFor="
-            let medicine of invoiceData
-              | search : search
-              | paginate : { itemsPerPage: 10, currentPage: p };
-            let i = index
-          "
-        >
-          <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-          <td class="fw-lighter text-capitalize">
-            {{ medicine.invoiceID }}
-          </td>
-          <td class="fw-lighter text-capitalize">
-            {{ medicine.patientName }}
-          </td>
-          <td class="fw-lighter text-capitalize">
-            {{ medicine.pid }}
-          </td>
-          <td class="fw-lighter text-capitalize">{{ medicine.total }}</td>
-
-          <td class="fw-lighter text-capitalize">
-            {{ medicine.paymentType }}
-          </td>
-          <td class="fw-lighter text-capitalize">
-            {{ medicine.paymentStatus }}
-          </td>
-          <td class="fw-lighter text-capitalize">
-            <button
-              class="btn btn-sm btn-success text-capitalize fw-lighter"
-              data-bs-toggle="modal"
-              data-bs-target="#editModal"
-              (click)="viewInvoice(medicine._id)"
-            >
-              view
-            </button>
-          </td>
-          <td>
-            <button
-              class="btn btn-sm btn-danger text-capitalize fw-lighter"
-              data-bs-toggle="modal"
-              data-bs-target="#deleteModal"
-            >
-              delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <ng-template #no_data_content class="fw-bolder">No Invoices</ng-template>
-    <pagination-controls
-      (pageChange)="p = $event"
-      *ngIf="invoiceData.length > 0"
-    ></pagination-controls>
-  </div>
-</div>
-
+<!-- delete -->
+<!-- modal dialog to delete patient -->
 <div
   class="modal fade"
-  id="editModal"
+  id="deleteModal"
   tabindex="-1"
-  aria-labelledby="editModal"
+  aria-labelledby="deleteModal"
   aria-hidden="true"
 >
-  <div class="modal-dialog" id="invoice" style="margin-right: 50%">
-    <div class="modal-content" style="width: 200%">
-      <div class="modal-header" id="noshow">
-        <h1 class="modal-title fs-5" id="editModal">Edit Medicine</h1>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1
+          class="modal-title fs-5 fw-lighter text-capitalize"
+          id="deleteModal"
+        >
+          Delete Invoice
+        </h1>
         <button
           type="button"
           class="btn-close"
           data-bs-dismiss="modal"
           aria-label="Close"
-          (click)="editSessionByID()"
+          (click)="deleteSessionByID()"
         ></button>
       </div>
+      <div class="modal-body fw-lighter">
+        Are you sure, you want to delete the invoice entry?
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-danger btn-sm fw-lighter text-capitalize"
+          (click)="deleteInvoice()"
+        >
+          <span *ngIf="!showDeleteProgressBar">yes</span>
+          <div
+            class="spinner-border text-light"
+            role="status"
+            *ngIf="showDeleteProgressBar"
+          >
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </button>
+        <button
+          type="button"
+          class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
+          data-bs-dismiss="modal"
+          #closeModal
+          (click)="deleteSessionByID()"
+        >
+          no
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-      <div class="modal-body">
-        <!-- edit -->
-        <div id="hospitalDetails" class="d-none d-print-block">
-          <h3 class="text-center fw-bolder">Lakshmi Hosptial</h3>
-          <h4 class="text-center fw-lighter">
-            Chekku mettu street, Kallakurichi
-          </h4>
-          <p class="text-center fw-lighter">Phone: (123) 456-7890</p>
-        </div>
-
-        <div class="card" id="invoice">
-          <div class="card-body">
-            <div class="container">
-              <form [formGroup]="invoiceForm">
-                <div class="row mb-3">
-                  <div class="col-md-3">
-                    <label for="customerName" class="fw-lighter text-capitalize"
-                      >Patient Name</label
-                    >
-                    <input
-                      type="text"
-                      formControlName="patientName"
-                      (keyup)="onSearchName($any($event.target).value)"
-                      placeholder="Search for Patient"
-                      class="form-control fw-lighter"
-                    />
-                    <ul *ngIf="suggestionsName && suggestionsName.length > 0">
-                      <option
-                        *ngFor="let suggestionsName of suggestionsName"
-                        (click)="onSelectPatientName(suggestionsName)"
-                      >
-                        {{ suggestionsName.patientName }},
-                        {{ suggestionsName.patientAddress }}
-                      </option>
-                    </ul>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="invoiceDate" class="fw-lighter"
-                      >Patient Address</label
-                    >
-                    <input
-                      formControlName="patientAddress"
-                      type="text"
-                      class="form-control fw-lighter"
-                      id="patientAddress"
-                    />
-                  </div>
-                  <div class="col-md-2">
-                    <label for="invoiceDate" class="fw-lighter">PID</label>
-                    <input
-                      formControlName="pid"
-                      type="text"
-                      class="form-control fw-lighter"
-                      id="pid"
-                      readonly
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label for="invoiceDate" class="fw-lighter"
-                      >Invoice Date</label
-                    >
-                    <input
-                      formControlName="invoiceDate"
-                      type="date"
-                      class="form-control fw-lighter"
-                      id="invoiceDate"
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label for="invoiceID" class="fw-lighter">Invoice ID</label>
-                    <input
-                      formControlName="invoiceID"
-                      type="text"
-                      class="form-control fw-lighter"
-                      id="invoiceID"
-                      readonly
-                    />
-                  </div>
-                  <div class="col-md-3">
-                    <label for="paymentType" class="fw-lighter"
-                      >Payment Type</label
-                    >
-                    <select
-                      class="form-select fw-lighter"
-                      formControlName="paymentType"
-                    >
-                      <option value="null">select payment type</option>
-                      <option value="UPI">UPI</option>
-                      <option value="CASH">CASH</option>
-                      <option value="NETBANKING">NETBANKING</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label for="paymentStatus" class="fw-lighter"
-                      >Payment Status</label
-                    >
-                    <select
-                      class="form-select fw-lighter"
-                      formControlName="paymentStatus"
-                    >
-                      <option value="null">select payment status</option>
-                      <option value="PAID">PAID</option>
-                      <option value="NOT_PAID">NOT PAID</option>
-                      <option value="PENDING">PENDING</option>
-                    </select>
-                  </div>
-                </div>
-                <hr />
-                <div formArrayName="items">
-                  <div
-                    *ngFor="let item of items.controls; let i = index"
-                    [formGroupName]="i"
-                  >
-                    <div class="row fw-lighter" style="margin-top: 1%">
-                      {{ i + 1 }})
-                      <div class="col">
-                        <input
-                          type="text"
-                          formControlName="medicineName"
-                          placeholder="Search for medicine"
-                          class="form-control fw-lighter"
-                          (keyup)="onSearch($any($event.target).value, i)"
-                        />
-                        <ul *ngIf="suggestions[i] && suggestions[i].length > 0">
-                          <option
-                            *ngFor="let suggestion of suggestions[i]"
-                            (click)="onSelectMedicine(suggestion, i)"
-                          >
-                            {{ suggestion.medicineName }}
-                          </option>
-                        </ul>
-                      </div>
-                      <!-- col -->
-                      <div class="col">
-                        <input
-                          formControlName="price"
-                          placeholder="Price &#8377;"
-                          class="form-control fw-lighter"
-                        />
-                      </div>
-
-                      <div class="col">
-                        <input
-                          formControlName="quantity"
-                          placeholder="Quantity"
-                          type="text"
-                          class="form-control fw-lighter"
-                          (ngModelChange)="calculateItemTotal(i)"
-                          (ngModelChange)="calculateTotals()"
-                        />
-                      </div>
-
-                      <div class="col">
-                        <input
-                          formControlName="total"
-                          placeholder="Total &#8377; "
-                          type="text"
-                          class="form-control fw-lighter"
-                          (keydown.Tab)="addItem1()"
-                          (ngModelChange)="calculateItemTotal(i)"
-                          (ngModelChange)="calculateTotals()"
-                        />
-                      </div>
-                      <div class="col">
-                        <button
-                          class="btn btn-sm btn-danger fw-lighter"
-                          type="button"
-                          id="noshow"
-                          (click)="deleteItem(i)"
-                        >
-                          <mat-icon>restore_from_trash</mat-icon>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <hr />
-
-                <div class="fw-lighter" style="margin-bottom: 1%">
-                  <label for="">Total: &#8377;</label>
-                  <input type="text" formControlName="total" />
-                </div>
-                <!-- without GST -->
-                <div class="fw-lighter" style="margin-bottom: 1%">
-                  <label for="">Grand Total: &#8377;</label
-                  ><input
-                    type="text"
-                    formControlName="grandTotalWithOutGST"
-                    *ngIf="showWithoutGST == false"
-                  />
-
-                  <br />
-                  <a
-                    class="fw-lighter"
-                    href="javascript:void(0);"
-                    (click)="addGST()"
-                    *ngIf="showWithoutGST == false"
-                    id="noshow"
-                    >add gst</a
-                  >
-                </div>
-                <!-- with GST -->
-                <div class="fw-lighter">
-                  <input
-                    type="text"
-                    formControlName="grandTotalWithGST"
-                    *ngIf="showWithoutGST"
-                    id="noshow"
-                  />
-                  <br />
-
-                  <a
-                    class="fw-lighter"
-                    href="javascript:void(0);"
-                    *ngIf="showWithoutGST"
-                    (click)="removeGST()"
-                    id="noshow"
-                    >remove gst</a
-                  >
-                </div>
-                <hr />
-                <div
-                  class="align-items-center align-text-center mt-1"
-                  id="noshow"
-                >
-                  <button
-                    class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter text-capitalize"
-                    [disabled]="invoiceForm.invalid"
-                    (click)="updateInvoice()"
-                    id="noshow"
-                  >
-                    <mat-icon *ngIf="!showProgressBar" id="noshow"
-                      >save</mat-icon
-                    >
-                    <span *ngIf="!showProgressBar" id="noshow">update</span>
-                    <div
-                      class="spinner-border text-light"
-                      role="status"
-                      *ngIf="showProgressBar"
-                      id="noshow"
-                    >
-                      <span class="visually-hidden" id="noshow"
-                        >Loading...</span
-                      >
-                    </div>
-                  </button>
-                  <br />
-
-                  <button
-                    class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
-                    (click)="onPrint()"
-                    id="noshow"
-                  >
-                    <mat-icon id="noshow">print</mat-icon>
-                    <span id="noshow">print</span>
-                  </button>
-                  <!-- *ngIf="!showProgressBar" -->
-                </div>
-                <br id="noshow" />
-                <div
-                  class="alert alert-success fw-lighter"
-                  role="alert"
-                  id="noshow"
-                  *ngIf="showAlert"
-                >
-                  Invoice updated!!
-                </div>
-
-                <br id="noshow" />
-              </form>
+<!-- report -->
+<div class="accordion" id="accordionExample" style="margin-left: 25%">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button
+        class="accordion-button fw-lighter"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseOne"
+        aria-expanded="true"
+        aria-controls="collapseOne"
+      >
+        Total Invoices Created Today : {{ totalNumberOfEntries }}
+      </button>
+    </h2>
+    <div
+      id="collapseOne"
+      class="accordion-collapse collapse fw-lighter"
+      aria-labelledby="headingOne"
+      data-bs-parent="#accordionExample"
+    >
+      <div class="accordion-body fw-lighter">
+        <!--  -->
+        <div class="card" id="noshow">
+          <br />
+          <div class="container fw-lighter">
+            <div class="row">
+              <div class="col-3">
+                <input
+                  type="text"
+                  class="form-control fw-lighter mb-2"
+                  placeholder="Search..."
+                  aria-label="search"
+                  [(ngModel)]="search"
+                />
+              </div>
+              <div class="col"></div>
             </div>
+
+            <div class="fw-bolder text-capitalize">
+              <u>Invoices</u> : {{ totalNumberOfEntries }}
+            </div>
+            <br />
+            <!-- Table -->
+            <table
+              class="table table-bordered table-striped fw-lighter"
+              *ngIf="invoiceData.length > 0; else no_data_content"
+            >
+              <thead class="thead-dark">
+                <tr>
+                  <th class="fw-lighter text-capitalize">#</th>
+                  <th class="fw-lighter text-capitalize">Invoice ID</th>
+                  <th class="fw-lighter text-capitalize">Created Date</th>
+                  <th class="fw-lighter text-capitalize">Patient Name</th>
+                  <th class="fw-lighter text-capitalize">Payment Type</th>
+                  <th class="fw-lighter text-capitalize">Payment Status</th>
+                  <th class="fw-lighter text-capitalize">view</th>
+                  <th class="fw-lighter text-capitalize">delete</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr
+                  *ngFor="
+                    let medicine of invoiceData
+                      | search : search
+                      | paginate : { itemsPerPage: 10, currentPage: p };
+                    let i = index
+                  "
+                >
+                  <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.invoiceID }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.invoiceDate }}
+                  </td>
+
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.patientName }}
+                  </td>
+
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.paymentType }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.paymentStatus }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    <button
+                      class="btn btn-sm btn-success text-capitalize fw-lighter"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editModal"
+                      (click)="viewInvoice(medicine._id)"
+                    >
+                      view
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                      (click)="deleteMedicineById(medicine._id)"
+                    >
+                      delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #no_data_content class="fw-bolder"
+              >No Invoices</ng-template
+            >
+            <pagination-controls
+              (pageChange)="p = $event"
+              *ngIf="invoiceData.length > 0"
+            ></pagination-controls>
           </div>
         </div>
       </div>
-      <div class="modal-footer" id="noshow">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          data-bs-dismiss="modal"
-          (click)="editSessionByID()"
-          id="noshow"
-        >
-          Close
-        </button>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTwo">
+      <button
+        class="accordion-button collapsed fw-lighter"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseTwo"
+        aria-expanded="false"
+        aria-controls="collapseTwo"
+      >
+        Search by specific critiera
+      </button>
+    </h2>
+    <div
+      id="collapseTwo"
+      class="accordion-collapse collapse"
+      aria-labelledby="headingTwo"
+      data-bs-parent="#accordionExample"
+    >
+      <div class="accordion-body fw-lighter">
+        <form (ngSubmit)="searchInvoices()" [formGroup]="searchForm">
+          <div class="container">
+            <div class="row">
+              <div class="col-4">
+                <label for="paymentType">Payment Type</label>
+                <select
+                  id="paymentStatus"
+                  class="form-control"
+                  formControlName="paymentType"
+                  name="paymentStatus"
+                >
+                  <option value="" disabled>Select Payment Status</option>
+                  <option *ngFor="let status of paymentTypes" [value]="status">
+                    {{ status }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-4">
+                <label for="paymentStatus">Payment Status</label>
+                <select
+                  id="paymentStatus"
+                  class="form-control"
+                  formControlName="paymentStatus"
+                  name="paymentStatus"
+                >
+                  <option value="" disabled>Select Payment Status</option>
+                  <option
+                    *ngFor="let status of paymentStatuses"
+                    [value]="status"
+                  >
+                    {{ status }}
+                  </option>
+                </select>
+              </div>
+              <div class="col-4">
+                <label for="patientName">Patient Name</label>
+                <input
+                  type="text"
+                  formControlName="patientName"
+                  (keyup)="onSearchName($any($event.target).value)"
+                  placeholder="Search for Patient"
+                  class="form-control fw-lighter"
+                  name="patientName"
+                />
+                <ul *ngIf="suggestionsName && suggestionsName.length > 0">
+                  <option
+                    *ngFor="let suggestionsName of suggestionsName"
+                    (click)="onSelectPatientName(suggestionsName)"
+                  >
+                    {{ suggestionsName.patientName }},
+                    {{ suggestionsName.patientAddress }}
+                  </option>
+                </ul>
+                <button
+                  type="button"
+                  class="btn btn-link"
+                  [routerLink]="['/create-patient']"
+                  *ngIf="showCreateNewPatientLink"
+                >
+                  Patient not found, created it
+                </button>
+              </div>
+            </div>
+          </div>
+          <br />
+
+          <div class="col-4">
+            <label for="invoiceDate">Invoice Date (MM-dd-yyyy)</label>
+            <mat-form-field>
+              <input
+                matInput
+                [matDatepicker]="picker"
+                placeholder="Choose a date"
+                name="date"
+                formControlName="invoiceDate"
+              />
+              <mat-datepicker-toggle
+                matSuffix
+                [for]="picker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <button type="submit" class="btn btn-success">
+              Search Invoices
+            </button>
+
+            <hr />
+          </div>
+        </form>
+
+        <div class="card" id="noshow">
+          <div class="container fw-lighter">
+            <h5 class="mb-4 fw-bolder"></h5>
+            <!-- Search input -->
+            <div class="row">
+              <div class="col-3">
+                <input
+                  type="text"
+                  class="form-control fw-lighter mb-2"
+                  placeholder="Search..."
+                  aria-label="search"
+                  [(ngModel)]="search"
+                />
+              </div>
+              <div class="col"></div>
+            </div>
+
+            <div class="fw-bolder text-capitalize">
+              <u>Invoices</u> : {{ totalNumberOfEntriesForSpecific }}
+            </div>
+            <br />
+            <!-- Table -->
+            <table
+              class="table table-bordered table-striped fw-lighter"
+              *ngIf="totalNumberOfEntriesForSpecific > 0; else no_data_content"
+            >
+              <thead class="thead-dark">
+                <tr>
+                  <th class="fw-lighter text-capitalize">#</th>
+                  <th class="fw-lighter text-capitalize">Invoice ID</th>
+                  <th class="fw-lighter text-capitalize">Created Date</th>
+                  <th class="fw-lighter text-capitalize">Patient Name</th>
+                  <th class="fw-lighter text-capitalize">Payment Type</th>
+                  <th class="fw-lighter text-capitalize">Payment Status</th>
+                  <th class="fw-lighter text-capitalize">view</th>
+                  <th class="fw-lighter text-capitalize">delete</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr
+                  *ngFor="
+                    let medicine of groupedInvoicesBySpecificDate
+                      | search : search
+                      | paginate : { itemsPerPage: 10, currentPage: p };
+                    let i = index
+                  "
+                >
+                  <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.invoiceID }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.invoiceDate }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.patientName }}
+                  </td>
+
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.paymentType }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.paymentStatus }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    <button
+                      class="btn btn-sm btn-success text-capitalize fw-lighter"
+                      (click)="viewInvoice(medicine._id)"
+                    >
+                      view
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                      (click)="deleteMedicineById(medicine._id)"
+                    >
+                      delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #no_data_content class="fw-bolder"
+              >No Invoices</ng-template
+            >
+            <pagination-controls
+              (pageChange)="p = $event"
+              *ngIf="groupedInvoicesBySpecificDate.length > 0"
+            ></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingThree">
+      <button
+        class="accordion-button collapsed fw-lighter"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseThree"
+        aria-expanded="false"
+        aria-controls="collapseThree"
+      >
+        All Invoices
+      </button>
+    </h2>
+    <div
+      id="collapseThree"
+      class="accordion-collapse collapse"
+      aria-labelledby="headingThree"
+      data-bs-parent="#accordionExampleThree"
+    >
+      <div class="accordion-body fw-lighter">
+        <div class="card" id="noshow">
+          <div class="container fw-lighter">
+            <h5 class="mb-4 fw-bolder"></h5>
+            <!-- Search input -->
+            <div class="row">
+              <div class="col-3">
+                <input
+                  type="text"
+                  class="form-control fw-lighter mb-2"
+                  placeholder="Search..."
+                  aria-label="search"
+                  [(ngModel)]="search"
+                />
+              </div>
+              <div class="col"></div>
+            </div>
+
+            <div class="fw-bolder text-capitalize">
+              <u>Invoices</u> : {{ totalNumberOfEntriesAll }}
+            </div>
+            <br />
+            <!-- Table -->
+            <table
+              class="table table-bordered table-striped fw-lighter"
+              *ngIf="invoiceDataAll?.length > 0; else no_data_content"
+            >
+              <thead class="thead-dark">
+                <tr>
+                  <th class="fw-lighter text-capitalize">#</th>
+                  <th class="fw-lighter text-capitalize">Invoice ID</th>
+                  <th class="fw-lighter text-capitalize">Created Date</th>
+                  <th class="fw-lighter text-capitalize">Patient Name</th>
+                  <th class="fw-lighter text-capitalize">Payment Type</th>
+                  <th class="fw-lighter text-capitalize">Payment Status</th>
+                  <th class="fw-lighter text-capitalize">view</th>
+                  <th class="fw-lighter text-capitalize">delete</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr
+                  *ngFor="
+                    let medicine of invoiceDataAll
+                      | search : search
+                      | paginate : { itemsPerPage: 10, currentPage: p };
+                    let i = index
+                  "
+                >
+                  <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.invoiceID }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.invoiceDate }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.patientName }}
+                  </td>
+
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.paymentType }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    {{ medicine.paymentStatus }}
+                  </td>
+                  <td class="fw-lighter text-capitalize">
+                    <button
+                      class="btn btn-sm btn-success text-capitalize fw-lighter"
+                      (click)="viewInvoice(medicine._id)"
+                    >
+                      view
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteModal"
+                      (click)="deleteMedicineById(medicine._id)"
+                    >
+                      delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #no_data_content class="fw-bolder"
+              >No Invoices</ng-template
+            >
+            <pagination-controls
+              (pageChange)="p = $event"
+              *ngIf="groupedInvoicesBySpecificDate.length > 0"
+            ></pagination-controls>
+          </div>
+        </div>
       </div>
     </div>
   </div>

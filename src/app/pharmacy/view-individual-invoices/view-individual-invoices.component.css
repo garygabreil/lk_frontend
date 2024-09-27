@@ -2,10 +2,29 @@
 
 /* Hide elements during print */
 @media print {
+  * {
+    font-size: 8px;
+    line-height: 1;
+  }
+
+  @page {
+    margin: 0; /* Remove default page margins */
+  }
+
   .row {
     display: flex;
     flex-wrap: wrap;
     page-break-inside: avoid;
+  }
+
+  half-a4-page {
+    width: 21cm; /* A4 width */
+    height: 14.85cm; /* Half of A4 height */
+    margin: 0; /* No margin */
+    padding: 0;
+    page-break-after: always; /* Ensure each section is printed on separate pages */
+    transform: scale(0.9); /* Scale down content if necessary */
+    transform-origin: top left;
   }
 
   .col-md-3,
@@ -35,7 +54,6 @@
     white-space: nowrap;
     word-wrap: break-word;
     word-break: normal;
-    font-size: 10px;
   }
 
   /* Hide other elements if needed */
@@ -51,65 +69,8 @@
   }
 
   /* Additional print-specific adjustments */
-  @page {
-    size: A4;
-    margin: 20mm;
-  }
+
   #noshow {
     display: none;
   }
-}
-
-/* In your component's CSS file (e.g., invoice-dashboard.component.css) */
-
-@media print {
-  .sidemenu {
-    display: none;
-  }
-
-  input,
-  select,
-  textarea {
-    border: none;
-    box-shadow: none;
-    border: none;
-    box-shadow: none;
-    white-space: nowrap;
-    word-wrap: break-word;
-    word-break: normal;
-    font-size: 10px;
-  }
-
-  .modal-body {
-    margin: 0;
-    padding: 0;
-  }
-
-  label {
-    font-size: 10px;
-  }
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse; /* Ensures there are no gaps between cells */
-}
-
-th,
-td {
-  padding: 4px 8px; /* Reduce padding */
-  font-size: 12px; /* Reduce font size */
-}
-
-th {
-  text-align: left;
-  background-color: #f2f2f2;
-}
-
-td {
-  border: 1px solid #ddd; /* Optional: add border to distinguish cells */
-}
-
-table {
-  max-width: 100%; /* Ensure the table does not exceed the parent container */
 }

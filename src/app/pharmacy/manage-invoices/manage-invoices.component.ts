@@ -4,6 +4,9 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { error } from 'console';
 
 @Component({
   selector: 'app-manage-invoices',
@@ -15,13 +18,16 @@ export class ManageInvoicesComponent {
   totalUnPaid: any;
   totalPending: any;
   totalNumberOfEntries: any;
+  totalNumberOfEntriesForSpecific: any;
   invoiceForm: FormGroup;
+  searchForm: FormGroup;
+
   suggestions: any[][] = []; // Array to store autocomplete suggestions for each row
   total: any;
   grandTotalWithGst: any;
-  grandTotalWithoutGst: any;
   currentDate: any;
   suggestionsName: any[] = [];
+  showCreateNewPatientLink: any;
 
   gstRate: any = 18;
   gstAmount: any;
@@ -30,6 +36,7 @@ export class ManageInvoicesComponent {
   invoiceUniqueID = Math.floor(100000 + Math.random() * 900000);
   showProgressBar: any;
   showAlert: any;
+  GSTLinkClickedOrNot: boolean = false;
 
   itemsData: any[] = []; // Data for DataTable
 
@@ -46,13 +53,24 @@ export class ManageInvoicesComponent {
   p: number = 1;
   // alert
 
+  paymentType: string = '';
+  paymentStatus: string = '';
+  patientName: string = '';
+  invoiceDate: string = '';
+
   @ViewChild('closeModal')
   closeModal!: ElementRef;
 
+  showDeleteProgressBar: any;
+  showDeleteAlert: any;
+  selectedDate?: Date; // This holds the date from the user input
+  formattedDate: any;
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private router: Router,
+    private httpClient: HttpClient
   ) {
     this.currentDate = this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '';
 
@@ -69,13 +87,59 @@ export class ManageInvoicesComponent {
       invoiceID: [],
       invoiceDate: [],
       grandTotalWithGST: [''],
-      grandTotalWithOutGST: [''],
       total: [''],
       items: this.fb.array([]), // FormArray for invoice items
+      gstAdded: [''],
+    });
+    this.searchForm = this.fb.group({
+      patientName: [''],
+      paymentType: [''],
+      paymentStatus: [''],
+      invoiceDate: [''],
     });
 
-    this.loadData();
     this.items.valueChanges.subscribe(() => this.calculateTotals());
+    this.getAllInvoicesForToday();
+    this.formattedDate = this.selectedDate?.toISOString(); // Convert date to ISO string format
+    this.loadData();
+  }
+
+  groupedInvoicesByToday: any = [];
+  groupedInvoicesBySpecificDate: any = [];
+  invoiceDataForSpecificDate: any = [];
+
+  // getAllInvoices
+  getAllInvoicesForToday() {
+    const todayDate = this.getTodayDate();
+    this.http.getInvoicesSpecificDate(todayDate).subscribe(
+      (res) => {
+        if (res) {
+          this.invoiceData = res as any;
+          this.totalNumberOfEntries = this.invoiceData.length;
+        } else {
+          this.invoiceData = [];
+          this.totalNumberOfEntries = 0;
+        }
+      },
+      (err) => {
+        if (err.error.message == 'No_invoices') {
+          this.invoiceData = [];
+          this.totalNumberOfEntries = 0;
+        }
+      }
+    );
+  }
+
+  getTodayDate(): string {
+    const today = new Date();
+    return this.datePipe.transform(today, 'dd-MM-yyyy') || '';
+  }
+
+  datePickerDateConversion(date: Date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   // Getter for the items FormArray
@@ -83,11 +147,12 @@ export class ManageInvoicesComponent {
     return this.invoiceForm.get('items') as FormArray;
   }
 
+  invoiceDataAll: any;
+  totalNumberOfEntriesAll: any;
   loadData() {
     this.http.getAllInvoices().subscribe((res) => {
-      this.invoiceData = res as any;
-      this.itemsData = res as any;
-      this.totalNumberOfEntries = this.invoiceData.length;
+      this.invoiceDataAll = res as any;
+      this.totalNumberOfEntriesAll = this.invoiceDataAll.length;
     });
   }
 
@@ -95,8 +160,13 @@ export class ManageInvoicesComponent {
     const itemForm = this.fb.group({
       medicineName: ['', Validators.required],
       price: ['', Validators.required],
-      quantity: ['', Validators.required],
+      batch: [''],
+      quantity: [''],
+      expiryDate: [''],
+      mid: [''],
       total: ['', Validators.required],
+      mrp: ['', Validators.required],
+      sgst: ['', Validators.required],
     });
 
     // Listen to changes in price or quantity to update the total for the item
@@ -142,8 +212,11 @@ export class ManageInvoicesComponent {
   updateTotal(itemForm: FormGroup) {
     const price = itemForm.get('price')?.value || 0;
     const quantity = itemForm.get('quantity')?.value || 0;
+    const sgst = itemForm.get('sgst')?.value || 0;
     const total = price * quantity;
-    itemForm.get('total')?.patchValue(total);
+    const gst = (total * sgst) / 100;
+    const totalAddingSgst = total + gst;
+    itemForm.get('total')?.patchValue(totalAddingSgst);
     this.calculateTotal();
   }
 
@@ -152,10 +225,31 @@ export class ManageInvoicesComponent {
     itemFormGroup.patchValue({
       medicineName: medicine.medicineName,
       price: medicine.price,
+      mid: medicine.mid,
+      batch: medicine.batch,
+      quantity: medicine.quantity,
+      expiryDate: this.parseDateToMMYYYY(medicine.expiryDate),
+      mrp: medicine.price,
+      sgst: medicine.sgst,
     });
     this.suggestions[index] = [];
   }
 
+  parseDateToMMYYYY(dateString: string): string | null {
+    const regex = /^(\d{2})-(\d{2})-(\d{4})$/; // Matches dd-mm-yyyy
+    const match = dateString.match(regex);
+
+    if (match) {
+      const month = match[2]; // mm
+      const year = match[3]; // yyyy
+      const shortYear = year.slice(-2); // Get last two digits of the year
+
+      // Return the formatted string as mm/yy
+      return `${month}/${shortYear}`;
+    }
+    // Return null if the input format is invalid
+    return null;
+  }
   calculateTotal() {
     this.total = this.items.controls.reduce((acc, item) => {
       const total = item.get('total')?.value || 0;
@@ -163,20 +257,7 @@ export class ManageInvoicesComponent {
     }, 0);
     this.gstAmount = (this.total * this.gstRate) / 100;
     this.grandTotalWithGst = this.total + this.gstAmount;
-    this.grandTotalWithoutGst = this.total;
   }
-
-  // downloadPDF() {
-  //   const element = document.getElementById('invoice')!;
-  //   html2canvas(element).then((canvas) => {
-  //     const imgData = canvas.toDataURL('image/png');
-  //     const pdf = new jsPDF('p', 'mm', 'a4');
-  //     const imgWidth = 210;
-  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  //     pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-  //     pdf.save('invoice.pdf');
-  //   });
-  // }
 
   deleteItem(index: number) {
     if (this.items.length > 1) {
@@ -187,29 +268,20 @@ export class ManageInvoicesComponent {
 
   addGST() {
     this.showWithoutGST = true;
-    this.invoiceForm
-      .get('grandTotalWithGST')
-      ?.patchValue(this.grandTotalWithGst);
+    this.GSTLinkClickedOrNot = true;
+    this.invoiceForm.patchValue({
+      gstAdded: this.GSTLinkClickedOrNot,
+    });
+    this.calculateTotal();
   }
 
   removeGST() {
     this.showWithoutGST = false;
-  }
-
-  onSearchName(query: string) {
-    if (query.length > 2) {
-      this.http.getPatientByName(query).subscribe(
-        (res) => {
-          this.suggestionsName = res as any;
-          console.log(res);
-        },
-        (error) => {
-          console.error('Search error:', error);
-        }
-      );
-    } else {
-      this.suggestionsName = [];
-    }
+    this.GSTLinkClickedOrNot = false;
+    this.invoiceForm.patchValue({
+      gstAdded: this.GSTLinkClickedOrNot,
+      grandTotalWithGST: this.invoiceForm.value.total,
+    });
   }
 
   generateUniqueNumber() {
@@ -233,68 +305,44 @@ export class ManageInvoicesComponent {
 
   calculateItemTotal(index: number) {
     const item = this.items.at(index) as FormGroup;
-    const quantity = item.get('quantity')?.value || 0;
-    const price = item.get('price')?.value || 0;
+    const quantity = item.get('quantity')?.value;
+    const price = item.get('price')?.value;
     const total = quantity * price;
-    item.get('total')?.setValue(total, { emitEvent: false });
+    this.setItemTotal(item, total);
+    this.GSTLinkClickedOrNot = false;
+  }
+
+  setItemTotal(i: any, total: any) {
+    i.patchValue({ total: total });
   }
 
   calculateTotals() {
-    let totalWithoutGST = 0;
-    let totalWithGST = 0;
-
+    let totalWithoutGST: number = 0;
+    let totalWithGST: number = 0;
     this.items.controls.forEach((itemFormGroup) => {
-      const totalPrice = itemFormGroup.get('total')?.value || 0;
+      const totalPrice = itemFormGroup.get('total')?.value | 0;
       totalWithoutGST += totalPrice;
       this.total = totalPrice;
     });
     const gstRate = 0.18; // Example GST rate of 18%
     totalWithGST = totalWithoutGST * (1 + gstRate);
-    this.grandTotalWithGst = totalWithGST;
-    this.grandTotalWithoutGst = totalWithoutGST;
-    this.invoiceForm.get('grandTotalWithOutGST')?.patchValue(totalWithoutGST);
-    this.invoiceForm.get('grandTotalWithGST')?.patchValue(totalWithGST);
-    this.invoiceForm.get('total')?.patchValue(totalWithoutGST);
+    this.grandTotalWithGst = +totalWithGST.toFixed(2); // Round to 2 decimal places
+    this.invoiceForm
+      .get('grandTotalWithGST')
+      ?.patchValue(this.grandTotalWithGst);
+    this.invoiceForm.get('total')?.patchValue(this.total);
   }
 
   onSelectPatientName(res: any) {
-    this.invoiceForm.patchValue({
-      patientName: res.title + res.patientName,
-      patientAddress: res.patientAddress,
-      pid: res.pid,
-      title: res.title,
-      gender: res.gender,
-      fatherName: res.fatherName,
-      consultantName: res.consultantName,
+    this.searchForm.patchValue({
+      patientName: res.patientName,
     });
+
     this.suggestionsName = [];
   }
 
   viewInvoice(id: any) {
-    this.http.getInvoiceById(id).subscribe((res: any) => {
-      this.invoiceForm = this.fb.group({
-        patientName: res['patientName'],
-        patientAddress: res['patientAddress'],
-        pid: res['pid'],
-        title: res['title'],
-        gender: ['gender'],
-        fatherName: ['fatherName'],
-        consultantName: ['consultantName'],
-        paymentType: res['paymentType'],
-        paymentStatus: res['paymentStatus'],
-        invoiceID: res['invoiceID'],
-        invoiceDate: this.convertToISODate(res['invoiceDate']),
-        grandTotalWithGST: res['grandTotalWithGST'],
-        grandTotalWithOutGST: res['grandTotalWithOutGST'],
-        total: res['total'],
-        items: this.fb.array([]), // FormArray for invoice items
-      });
-      sessionStorage.setItem('editInvoiceyId', id);
-      this.grandTotalWithGst = res['grandTotalWithGST'];
-      this.grandTotalWithoutGst = res['grandTotalWithGST'];
-      this.total = res['total'];
-      this.initializeItems(res['items']);
-    });
+    this.router.navigate(['/view-invoice', id]);
   }
 
   //date formatter
@@ -331,8 +379,19 @@ export class ManageInvoicesComponent {
   onPrint() {
     window.print();
   }
+  formatDate(date: string): string {
+    let dateObj = new Date(date);
+    let day = String(dateObj.getDate()).padStart(2, '0');
+    let month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    let year = dateObj.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
 
   updateInvoice() {
+    this.invoiceForm.patchValue({
+      invoiceID: this.invoiceUniqueID,
+      invoiceDate: this.invoiceForm.value.invoiceDate,
+    });
     this.showProgressBar = true;
     let id = sessionStorage.getItem('editInvoiceyId');
 
@@ -346,6 +405,7 @@ export class ManageInvoicesComponent {
             this.showProgressBar = false;
             sessionStorage.removeItem('editInvoiceyId');
             this.loadData();
+            this.getAllInvoicesForToday();
           },
           (err) => {
             console.log(err);
@@ -353,5 +413,99 @@ export class ManageInvoicesComponent {
         ),
       3000
     );
+  }
+
+  //delete patient by id
+  deleteMedicineById(id: any) {
+    sessionStorage.setItem('deleteInvoiceById', id);
+  }
+
+  //delete
+  deleteInvoice() {
+    this.showDeleteProgressBar = true;
+    setTimeout(() => {
+      this.showDeleteAlert = true;
+      this.http
+        .deleteInvoiceById(sessionStorage.getItem('deleteInvoiceById'))
+        .subscribe(
+          (res) => {
+            this.closeModal.nativeElement.click();
+            this.showDeleteProgressBar = false;
+            this.loadData();
+            this.getAllInvoicesForToday();
+            sessionStorage.removeItem('deleteInvoiceById');
+          },
+          (err) => {
+            console.log(err.message);
+          }
+        );
+    }, 1000);
+  }
+
+  paymentStatuses: string[] = ['PAID', 'NOT_PAID', 'PENDING'];
+  paymentTypes: string[] = [
+    'UPI',
+    'CASH',
+    'NETBANKING',
+    'CARD_DEBIT',
+    'CARD_CREDIT',
+  ];
+
+  searchInvoices() {
+    this.formattedDate = this.selectedDate?.toISOString();
+    const datePicker = this.datePipe.transform(
+      this.searchForm.value.invoiceDate,
+      'dd-MM-yyyy'
+    );
+
+    const searchCriteria = {
+      paymentType: this.searchForm.value.paymentType,
+      paymentStatus: this.searchForm.value.paymentStatus,
+      patientName: this.searchForm.value.patientName,
+      invoiceDate: datePicker, // Ensure correct format
+    };
+
+    this.httpClient
+      .post('http://localhost:3000/api/invoices/searchInvoice', searchCriteria)
+      .subscribe(
+        (res: any) => {
+          this.groupedInvoicesBySpecificDate = res;
+          this.totalNumberOfEntriesForSpecific =
+            this.groupedInvoicesBySpecificDate.length;
+        },
+        (err) => {
+          this.groupedInvoicesBySpecificDate = [];
+          this.totalNumberOfEntriesForSpecific = 0;
+        }
+      );
+    this.searchForm.reset();
+  }
+
+  resetSearch() {
+    this.paymentType = '';
+    this.paymentStatus = '';
+    this.patientName = '';
+    this.invoiceDate = '';
+  }
+
+  onSearchName(query: string) {
+    if (query.length > 2) {
+      this.http.getPatientByName(query).subscribe(
+        (res) => {
+          this.suggestionsName = res as any;
+          if (this.suggestionsName.length == 0) {
+            this.showCreateNewPatientLink = true;
+          }
+          if (this.suggestionsName.length > 0) {
+            this.showCreateNewPatientLink = false;
+          }
+        },
+        (error) => {
+          console.error('Search error:', error);
+        }
+      );
+    } else {
+      this.suggestionsName = [];
+    }
   }
 }

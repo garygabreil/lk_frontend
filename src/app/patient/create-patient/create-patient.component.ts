@@ -21,6 +21,7 @@ export class CreatePatientComponent {
 
   doctorData: any;
   appointmentId = Math.floor(100000 + Math.random() * 900000);
+  backRouterURL: any;
 
   constructor(
     private router: Router,
@@ -62,6 +63,12 @@ export class CreatePatientComponent {
       appointmentId: [this.appointmentId, [Validators.required]],
     });
     this.getAllDoctor();
+  }
+
+  getLocations() {
+    if (sessionStorage.getItem('locations') == 'pharmarcy') {
+      this.backRouterURL = 'create-bill';
+    }
   }
 
   //date formatter
@@ -118,19 +125,29 @@ export class CreatePatientComponent {
             (res) => {
               this.showProgressBar = true;
               this.showAlert = true;
-              setTimeout(() => (this.showAlert = false), 3000);
               this.showProgressBar = false;
+              this.patientForm.patchValue({
+                pid: this.uniquePid,
+              });
+
               this.patientForm.reset();
             },
             (err) => {
               this.showProgressBar = true;
               this.showExistAlert = true;
+              this.patientForm.patchValue({
+                pid: this.uniquePid,
+              });
+
               this.patientForm.reset();
               this.showExistAlert = err.status;
               this.showProgressBar = false;
             }
           ),
-      3000
+      1000
     );
+  }
+  refresh() {
+    window.location.reload();
   }
 }

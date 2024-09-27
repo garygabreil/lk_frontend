@@ -2,3 +2,26 @@ input[readonly] {
   background-color: #b2b2b2;
   /* any other styles */
 }
+table {
+  width: 100%;
+  border-collapse: collapse; /* Ensures there are no gaps between cells */
+}
+
+th,
+td {
+  padding: 4px 8px; /* Reduce padding */
+  font-size: 14px; /* Reduce font size */
+}
+
+th {
+  text-align: left;
+  background-color: #f2f2f2;
+}
+
+td {
+  border: 1px solid #ddd; /* Optional: add border to distinguish cells */
+}
+
+table {
+  max-width: 100%; /* Ensure the table does not exceed the parent container */
+}

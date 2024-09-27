@@ -1,0 +1,464 @@
+<div id="hospitalDetails" class="d-none d-print-block" id="half-a4-page">
+  <form [formGroup]="invoiceForm">
+    <div class="container mt-3">
+      <div class="row">
+        <div class="col-12 text-center">
+          <h4>LAKSHMI PHARMACY</h4>
+          <p>Chekku Mettu St, Kallakurichi</p>
+        </div>
+      </div>
+
+      <!-- Invoice Details -->
+      <div class="row">
+        <div class="col-6">
+          <p>
+            <strong>Patient Name:</strong> {{ invoiceForm.value.patientName }}
+          </p>
+          <p><strong>PID:</strong> {{ invoiceForm.value.pid }}</p>
+          <p>
+            <strong>Consultant Name:</strong>
+            Dr.{{ invoiceForm.value.consultantName }}
+          </p>
+        </div>
+        <div class="col-6 text-right">
+          <p><strong>Invoice ID:</strong> {{ invoiceForm.value.invoiceID }}</p>
+          <p>
+            <strong>Invoice Date:</strong>
+            {{ invoiceForm.value.invoiceDate }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Table for Invoice Items -->
+      <table class="table table-bordered table-sm">
+        <thead>
+          <tr>
+            <th>SNo</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Batch</th>
+            <th>Exp</th>
+            <th>MRP</th>
+            <th>SGST</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody formArrayName="items">
+          <tr
+            *ngFor="let item of items.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <td>{{ i + 1 }}</td>
+            <td>
+              {{ item.get("medicineName")?.value }}
+            </td>
+            <td>
+              {{ item.get("quantity")?.value }}
+            </td>
+            <td>
+              {{ item.get("batch")?.value }}
+            </td>
+            <td>
+              {{ item.get("expiryDate")?.value }}
+            </td>
+            <td>
+              {{
+                item.get("price")?.value | currency : "INR" : "symbol" : "1.2-2"
+              }}
+            </td>
+            <td>{{ item.get("sgst")?.value }}%</td>
+            <td>
+              {{
+                item.get("total")?.value | currency : "INR" : "symbol" : "1.2-2"
+              }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-left: 70%">
+        <br />
+        <div>
+          Total:
+          {{ invoiceForm.value.total | currency : "INR" : "symbol" : "1.2-2" }}
+        </div>
+        <div *ngIf="this.clickedGSTlink == false">
+          Grant Total:
+          {{ invoiceForm.value.total | currency : "INR" : "symbol" : "1.2-2" }}
+        </div>
+        <div *ngIf="this.clickedGSTlink == true">
+          <div *ngIf="this.clickedGSTlink == true">
+            gstAmount:
+            {{ this.gstAmount | currency : "INR" : "symbol" : "1.2-2" }}
+          </div>
+          Grant Total:
+          {{
+            invoiceForm.value.grandTotalWithGST
+              | currency : "INR" : "symbol" : "1.2-2"
+          }}
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- formarray -->
+
+<div class="card" id="noshow" style="margin-left: 15%">
+  <div class="card-body">
+    <button
+      class="btn btn-primary"
+      style="margin-bottom: 1%"
+      id="noshow"
+      routerLink="/view-bill"
+      (click)="removeSessionID()"
+    >
+      back
+    </button>
+    <br />
+
+    <div class="container">
+      <form [formGroup]="invoiceForm">
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <label for="customerName" class="fw-lighter text-capitalize"
+              >Patient Name</label
+            >
+            <input
+              type="text"
+              formControlName="patientName"
+              (keyup)="onSearchName($any($event.target).value)"
+              placeholder="Search for Patient"
+              class="form-control fw-lighter"
+            />
+            <ul *ngIf="suggestionsName && suggestionsName.length > 0">
+              <option
+                *ngFor="let suggestionsName of suggestionsName"
+                (click)="onSelectPatientName(suggestionsName)"
+              >
+                {{ suggestionsName.patientName }},
+                {{ suggestionsName.patientAddress }}
+              </option>
+            </ul>
+            <div
+              *ngIf="invoiceForm.get('patientName')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+            <button
+              type="button"
+              class="btn btn-link"
+              [routerLink]="['/create-patient']"
+              *ngIf="showCreateNewPatientLink"
+            >
+              Patient not found, created it
+            </button>
+          </div>
+          <div class="col-md-3">
+            <label for="invoiceDate" class="fw-lighter">Patient Address</label>
+            <input
+              formControlName="patientAddress"
+              type="text"
+              class="form-control fw-lighter"
+              id="patientAddress"
+              style="background-color: lightgray"
+            />
+            <div
+              *ngIf="invoiceForm.get('patientAddress')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-2">
+            <label for="invoiceDate" class="fw-lighter">PID</label>
+            <input
+              formControlName="pid"
+              type="text"
+              class="form-control fw-lighter"
+              id="pid"
+              readonly
+              style="background-color: lightgray"
+            />
+            <div
+              *ngIf="invoiceForm.get('pid')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="consultantName" class="fw-lighter"
+              >Consultant Name</label
+            >
+            <select
+              formControlName="consultantName"
+              class="form-control fw-lighter dropdown-toggle text-capitalize"
+            >
+              <option value="null">Select Consultant</option>
+              <option
+                *ngFor="let doctor of doctorData"
+                [value]="doctor.consultantName"
+                selected
+              >
+                Dr.{{ doctor.consultantName }}
+              </option>
+            </select>
+            <div
+              *ngIf="invoiceForm.get('consultantName')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="invoiceDate" class="fw-lighter">Invoice Date</label>
+            <input
+              formControlName="invoiceDate"
+              type="date"
+              class="form-control fw-lighter"
+              id="invoiceDate"
+            />
+            <div
+              *ngIf="invoiceForm.get('invoiceDate')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="invoiceID" class="fw-lighter">Invoice ID</label>
+            <input
+              formControlName="invoiceID"
+              type="text"
+              class="form-control fw-lighter"
+              id="invoiceID"
+              readonly
+              style="background-color: lightgray"
+            />
+            <div
+              *ngIf="invoiceForm.get('invoiceID')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="paymentType" class="fw-lighter">Payment Type</label>
+            <select
+              class="form-select fw-lighter"
+              formControlName="paymentType"
+            >
+              <option value="null">select payment type</option>
+              <option value="UPI">UPI</option>
+              <option value="CASH">CASH</option>
+              <option value="NETBANKING">NETBANKING</option>
+              <option value="CARD_DEBIT">CARD_DEBIT</option>
+              <option value="CARD_CREDIT">CARD_CREDIT</option>
+            </select>
+            <div
+              *ngIf="invoiceForm.get('paymentType')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="paymentStatus" class="fw-lighter">Payment Status</label>
+            <select
+              class="form-select fw-lighter"
+              formControlName="paymentStatus"
+            >
+              <option value="null">select payment status</option>
+              <option value="PAID">PAID</option>
+              <option value="NOT_PAID">NOT PAID</option>
+              <option value="PENDING">PENDING</option>
+            </select>
+            <div
+              *ngIf="invoiceForm.get('paymentStatus')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+        </div>
+        <hr />
+        <div class="col fw-lighter" style="margin-left: 3%">
+          Medicine
+          <span style="margin-left: 17%">price &#8377;</span>
+          <span style="margin-left: 8%">quantity</span>
+          <span style="margin-left: 5%">mrp &#8377;</span>
+          <span style="margin-left: 9%">sgst %</span>
+          <span style="margin-left: 8%">total &#8377;</span>
+        </div>
+        <div formArrayName="items">
+          <div
+            *ngFor="let item of items.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <div class="row fw-lighter" style="margin-top: 1%">
+              {{ i + 1 }})
+              <div class="col-3">
+                <input
+                  type="text"
+                  formControlName="medicineName"
+                  placeholder="Search for medicine"
+                  class="form-control fw-lighter"
+                  (keyup)="onSearch($any($event.target).value, i)"
+                />
+                <ul *ngIf="suggestions[i] && suggestions[i].length > 0">
+                  <option
+                    *ngFor="let suggestion of suggestions[i]"
+                    (click)="onSelectMedicine(suggestion, i)"
+                  >
+                    {{ suggestion.medicineName }}
+                  </option>
+                </ul>
+                <div style="color: red" *ngIf="no_stock_alert">
+                  no stock available
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-link"
+                  [routerLink]="['/create-medicine']"
+                  *ngIf="showCreateNewMedicineLink"
+                >
+                  Medicine not found, created it
+                </button>
+              </div>
+              <!-- col -->
+              <div class="col">
+                <input
+                  formControlName="price"
+                  placeholder="Price &#8377;"
+                  class="form-control fw-lighter"
+                />
+              </div>
+
+              <div class="col">
+                <input
+                  formControlName="quantity"
+                  placeholder="Quantity"
+                  type="text"
+                  class="form-control fw-lighter"
+                  (ngModelChange)="calculateItemTotal(i)"
+                  (ngModelChange)="calculateTotal()"
+                />
+              </div>
+              <div class="col">
+                <input
+                  formControlName="mrp"
+                  placeholder="mrp"
+                  type="text"
+                  class="form-control fw-lighter"
+                  readonly
+                />
+              </div>
+              <div class="col">
+                <input
+                  formControlName="sgst"
+                  placeholder="sgst"
+                  type="text"
+                  class="form-control fw-lighter"
+                  readonly
+                />
+              </div>
+
+              <div class="col">
+                <input
+                  formControlName="total"
+                  placeholder="Total &#8377; "
+                  type="text"
+                  class="form-control fw-lighter"
+                  (keydown.Tab)="addItem1()"
+                  (ngModelChange)="calculateTotals()"
+                />
+              </div>
+              <div class="col">
+                <button
+                  class="btn btn-sm btn-danger fw-lighter"
+                  type="button"
+                  id="noshow"
+                  (click)="deleteItem(i)"
+                >
+                  <mat-icon>restore_from_trash</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr />
+
+        <div class="fw-lighter" style="margin-bottom: 1%">
+          <label for="">Total: &#8377;</label> <br />
+          <input type="text" formControlName="total" />
+        </div>
+        <!-- without GST -->
+        <div class="fw-lighter">
+          <label for="">Grand Total: &#8377;</label>
+          <br />
+          <input type="text" formControlName="grandTotalWithGST" />
+        </div>
+        <!-- with GST -->
+        <button
+          class="fw-lighter"
+          (click)="addGST()"
+          id="noshow"
+          *ngIf="clickedGSTlink == false"
+        >
+          add gst
+        </button>
+        <button
+          class="fw-lighter"
+          *ngIf="clickedGSTlink == true"
+          (click)="removeGST()"
+          id="noshow"
+        >
+          remove gst
+        </button>
+        <hr />
+        <div class="align-items-center align-text-center mt-1" id="noshow">
+          <button
+            class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter text-capitalize"
+            [disabled]="invoiceForm.invalid"
+            (click)="updateInvoice()"
+            id="noshow"
+          >
+            <mat-icon *ngIf="!showProgressBar" id="noshow">save</mat-icon>
+            <span *ngIf="!showProgressBar" id="noshow">update</span>
+            <div
+              class="spinner-border text-light"
+              role="status"
+              *ngIf="showProgressBar"
+              id="noshow"
+            >
+              <span class="visually-hidden" id="noshow">Loading...</span>
+            </div>
+          </button>
+          <br />
+
+          <button
+            class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
+            (click)="onPrint()"
+            id="noshow"
+          >
+            <mat-icon id="noshow">print</mat-icon>
+            <span id="noshow">print</span>
+          </button>
+          <!-- *ngIf="!showProgressBar" -->
+        </div>
+        <br id="noshow" />
+        <div
+          class="alert alert-success fw-lighter"
+          role="alert"
+          id="noshow"
+          *ngIf="showAlert"
+        >
+          Invoice updated!!
+        </div>
+
+        <br id="noshow" />
+      </form>
+    </div>
+  </div>
+</div>
