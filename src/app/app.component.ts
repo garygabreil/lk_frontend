@@ -22,6 +22,6 @@ export class AppComponent {
       this.router.navigate(['/login']);
       sessionStorage.removeItem('user');
       sessionStorage.removeItem('role');
-    }, 2000);
+    }, 1000);
   }
 }

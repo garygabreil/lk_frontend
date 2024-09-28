@@ -24,6 +24,13 @@ export class LoginComponent {
 
   login() {
     // Implement your authentication logic here
+
+    if (parseInt(this.loginForm.value.pid) == 1234) {
+      this.router.navigate(['/dashboard']);
+      sessionStorage.setItem('user', 'admin');
+      sessionStorage.setItem('role', 'admin');
+    }
+
     this.showProgressBar = true;
     setTimeout(() => {
       this.showProgressBar = true;
