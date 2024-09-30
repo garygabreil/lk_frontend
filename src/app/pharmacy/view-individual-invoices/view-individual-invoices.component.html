@@ -126,18 +126,25 @@
             <input
               type="text"
               formControlName="patientName"
-              (keyup)="onSearchName($any($event.target).value)"
+              (input)="onInputChange($event)"
+              (keydown)="handlePatientNameKeyDown($event)"
               placeholder="Search for Patient"
               class="form-control fw-lighter"
             />
-            <ul *ngIf="suggestionsName && suggestionsName.length > 0">
-              <option
-                *ngFor="let suggestionsName of suggestionsName"
-                (click)="onSelectPatientName(suggestionsName)"
+
+            <ul
+              *ngIf="
+                suggestionsPatientName && suggestionsPatientName.length > 0
+              "
+            >
+              <li
+                *ngFor="let suggestion of suggestionsPatientName; let i = index"
+                (click)="onSelectPatientName(suggestion)"
+                [class.selected]="i === selectedPatientIndex"
               >
-                {{ suggestionsName.patientName }},
-                {{ suggestionsName.patientAddress }}
-              </option>
+                {{ suggestion.patientName }},
+                {{ suggestion.patientAddress }}
+              </li>
             </ul>
             <div
               *ngIf="invoiceForm.get('patientName')?.invalid"
@@ -145,6 +152,7 @@
             >
               Required
             </div>
+
             <button
               type="button"
               class="btn btn-link"
@@ -302,28 +310,37 @@
                 <input
                   type="text"
                   formControlName="medicineName"
+                  (keyup)="onSearch($event, i)"
+                  (keydown)="handleKeyDown($event, i)"
                   placeholder="Search for medicine"
                   class="form-control fw-lighter"
-                  (keyup)="onSearch($any($event.target).value, i)"
                 />
-                <ul *ngIf="suggestions[i] && suggestions[i].length > 0">
-                  <option
-                    *ngFor="let suggestion of suggestions[i]"
-                    (click)="onSelectMedicine(suggestion, i)"
-                  >
-                    {{ suggestion.medicineName }}
-                  </option>
-                </ul>
-                <div style="color: red" *ngIf="no_stock_alert">
+                <div style="color: red" *ngIf="noStockAlert[i]">
                   no stock available
+                </div>
+
+                <!-- Check if suggestions exist and if they have length greater than 0 -->
+                <div
+                  *ngIf="suggestions[i] && suggestions[i].length > 0"
+                  class="suggestion-list"
+                >
+                  <ul class="list-unstyled">
+                    <li
+                      *ngFor="let suggestion of suggestions[i]; let j = index"
+                      (click)="onSelectMedicine(suggestion, i)"
+                      [ngClass]="{ highlighted: selectedSuggestionIndex === j }"
+                    >
+                      {{ suggestion.medicineName }}
+                    </li>
+                  </ul>
                 </div>
                 <button
                   type="button"
                   class="btn btn-link"
                   [routerLink]="['/create-medicine']"
-                  *ngIf="showCreateNewMedicineLink"
+                  *ngIf="showCreateNewMedicineLink[i]"
                 >
-                  Medicine not found, created it
+                  Not found, Check Medicine list
                 </button>
               </div>
               <!-- col -->
@@ -332,6 +349,8 @@
                   formControlName="price"
                   placeholder="Price &#8377;"
                   class="form-control fw-lighter"
+                  readonly
+                  style="background-color: lightgray"
                 />
               </div>
 
@@ -352,6 +371,7 @@
                   type="text"
                   class="form-control fw-lighter"
                   readonly
+                  style="background-color: lightgray"
                 />
               </div>
               <div class="col">
@@ -361,6 +381,7 @@
                   type="text"
                   class="form-control fw-lighter"
                   readonly
+                  style="background-color: lightgray"
                 />
               </div>
 
@@ -372,6 +393,8 @@
                   class="form-control fw-lighter"
                   (keydown.Tab)="addItem1()"
                   (ngModelChange)="calculateTotals()"
+                  readonly
+                  style="background-color: lightgray"
                 />
               </div>
               <div class="col">
@@ -389,64 +412,74 @@
         </div>
         <hr />
 
-        <div class="fw-lighter" style="margin-bottom: 1%">
-          <label for="">Total: &#8377;</label> <br />
-          <input type="text" formControlName="total" />
+        <div class="fw-lighter">
+          <label for="">Total:</label>
+          {{
+            this.invoiceForm.value.total | currency : "INR" : "symbol" : "1.2-2"
+          }}
+        </div>
+        <div class="fw-lighter">
+          <label for=""
+            >GST Amount:
+            {{ this.gstAmount | currency : "INR" : "symbol" : "1.2-2" }}</label
+          >
         </div>
         <!-- without GST -->
         <div class="fw-lighter">
-          <label for="">Grand Total: &#8377;</label>
-          <br />
-          <input type="text" formControlName="grandTotalWithGST" />
+          <label for="">Grand Total:</label>
+          {{
+            this.invoiceForm.value.grandTotalWithGST
+              | currency : "INR" : "symbol" : "1.2-2"
+          }}
         </div>
         <!-- with GST -->
         <button
-          class="fw-lighter"
+          class="btn btn-sm btn-secondary fw-lighter"
           (click)="addGST()"
           id="noshow"
           *ngIf="clickedGSTlink == false"
+          type="button"
         >
           add gst
         </button>
         <button
-          class="fw-lighter"
+          class="btn btn-sm btn-secondary fw-lighter"
           *ngIf="clickedGSTlink == true"
           (click)="removeGST()"
           id="noshow"
+          type="button"
         >
           remove gst
         </button>
         <hr />
-        <div class="align-items-center align-text-center mt-1" id="noshow">
+        <div class="d-flex align-items-center justify-content-center mt-1">
           <button
-            class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter text-capitalize"
+            class="btn btn-success btn-sm fw-lighter text-capitalize me-2"
             [disabled]="invoiceForm.invalid"
             (click)="updateInvoice()"
-            id="noshow"
+            type="button"
           >
-            <mat-icon *ngIf="!showProgressBar" id="noshow">save</mat-icon>
-            <span *ngIf="!showProgressBar" id="noshow">update</span>
+            <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+            <span *ngIf="!showProgressBar">update</span>
             <div
               class="spinner-border text-light"
               role="status"
               *ngIf="showProgressBar"
-              id="noshow"
             >
-              <span class="visually-hidden" id="noshow">Loading...</span>
+              <span class="visually-hidden">Loading...</span>
             </div>
           </button>
-          <br />
 
           <button
-            class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
-            (click)="onPrint()"
-            id="noshow"
+            class="btn btn-success btn-sm fw-lighter"
+            (click)="printInvoice()"
+            type="button"
           >
-            <mat-icon id="noshow">print</mat-icon>
-            <span id="noshow">print</span>
+            <mat-icon>print</mat-icon>
+            <span>print</span>
           </button>
-          <!-- *ngIf="!showProgressBar" -->
         </div>
+
         <br id="noshow" />
         <div
           class="alert alert-success fw-lighter"

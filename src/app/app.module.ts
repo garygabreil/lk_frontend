@@ -37,6 +37,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { ViewIndividualInvoicesComponent } from './pharmacy/view-individual-invoices/view-individual-invoices.component';
+import { CreatePoComponent } from './pharmacy/create-po/create-po.component';
 
 @NgModule({
   declarations: [
@@ -58,6 +59,7 @@ import { ViewIndividualInvoicesComponent } from './pharmacy/view-individual-invo
     CreateBillComponent,
     ManageInvoicesComponent,
     ViewIndividualInvoicesComponent,
+    CreatePoComponent,
   ],
   imports: [
     BrowserModule,

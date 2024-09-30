@@ -15,6 +15,7 @@ import { ManageMedicineComponent } from './pharmacy/manage-medicine/manage-medic
 import { CreateBillComponent } from './pharmacy/create-bill/create-bill.component';
 import { ManageInvoicesComponent } from './pharmacy/manage-invoices/manage-invoices.component';
 import { ViewIndividualInvoicesComponent } from './pharmacy/view-individual-invoices/view-individual-invoices.component';
+import { CreatePoComponent } from './pharmacy/create-po/create-po.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -33,6 +34,7 @@ const routes: Routes = [
   { path: 'create-bill', component: CreateBillComponent },
   { path: 'view-bill', component: ManageInvoicesComponent },
   { path: 'view-invoice/:id', component: ViewIndividualInvoicesComponent },
+  { path: 'create-po', component: CreatePoComponent },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

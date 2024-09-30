@@ -21,9 +21,9 @@ export class HttpService {
 
   //getAllProducts
   getProductByName(mde: any) {
-    return this.http.get(
-      'http://localhost:3000/api/product/getMedicine/' + mde
-    );
+    return this.http.post('http://localhost:3000/api/product/getMedicine', {
+      medicineName: mde,
+    });
   }
 
   //getProductById

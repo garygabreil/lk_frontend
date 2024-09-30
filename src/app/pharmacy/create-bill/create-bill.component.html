@@ -5,35 +5,32 @@
       <input
         type="text"
         formControlName="patientName"
-        (keyup)="onSearchName($any($event.target).value)"
+        (input)="onInputChange($event)"
+        (keydown)="handlePatientNameKeyDown($event)"
         placeholder="Search for Patient"
         class="form-control fw-lighter"
       />
-      <ul *ngIf="suggestionsName && suggestionsName.length > 0">
-        <option
-          *ngFor="let suggestionsName of suggestionsName"
-          (click)="onSelectPatientName(suggestionsName)"
+      <ul *ngIf="suggestionsPatientName.length > 0">
+        <li
+          *ngFor="let suggestion of suggestionsPatientName; let i = index"
+          (click)="onSelectPatientName(suggestion)"
+          [class.highlighted]="i === selectedPatientIndex"
         >
-          {{ suggestionsName.patientName }},
-          {{ suggestionsName.patientAddress }}
-        </option>
+          {{ suggestion.patientName }}, {{ suggestion.patientAddress }}
+        </li>
       </ul>
+      <div
+        *ngIf="showCreateNewPatientLink == true"
+        style="color: red; font-size: small"
+      >
+        Create a new patient
+      </div>
       <div
         *ngIf="invoiceForm.get('patientName')?.invalid"
         style="color: red; font-size: small"
       >
         Required
       </div>
-
-      <button
-        type="button"
-        class="btn btn-link"
-        [routerLink]="['/create-patient']"
-        *ngIf="showCreateNewPatientLink"
-        (click)="pharmaPatientCreation()"
-      >
-        Patient not found, created it
-      </button>
     </div>
     <div class="col-md-3">
       <label for="invoiceDate" class="fw-lighter">Patient Address</label>
@@ -99,6 +96,7 @@
         type="date"
         class="form-control fw-lighter"
         id="invoiceDate"
+        (keydown)="onKeyDown($event)"
       />
       <div
         *ngIf="invoiceForm.get('invoiceDate')?.invalid"
@@ -117,16 +115,22 @@
         readonly
         style="background-color: lightgray"
       />
-      <a
+      <!-- <a
         href="javascript:void(0);"
         class="fw-lighter"
         (click)="generateUniqueNumber()"
         >Generate</a
-      >
+      > -->
     </div>
     <div class="col-md-2">
       <label for="paymentType" class="fw-lighter">Payment Type</label>
-      <select class="form-select fw-lighter" formControlName="paymentType">
+      <select
+        class="form-select fw-lighter"
+        formControlName="paymentType"
+        (keyup)="onKeyUp($event)"
+        (focus)="showOptions = true"
+        (blur)="showOptions = false"
+      >
         <option value="null">select payment type</option>
         <option value="UPI">UPI</option>
         <option value="CASH">CASH</option>
@@ -175,27 +179,35 @@
           <input
             type="text"
             formControlName="medicineName"
-            (keyup)="onSearch($any($event.target).value, i)"
+            (keyup)="onSearch($event, i)"
+            (keydown)="handleKeyDown($event, i)"
             placeholder="Search for medicine"
             class="form-control fw-lighter"
           />
-          <div style="color: red" *ngIf="no_stock_alert">
+          <div style="color: red" *ngIf="noStockAlert[i]">
             no stock available
           </div>
 
-          <ul *ngIf="suggestions[i] && suggestions[i].length > 0">
-            <option
-              *ngFor="let suggestion of suggestions[i]"
-              (click)="onSelectMedicine(suggestion, i)"
-            >
-              {{ suggestion.medicineName }}
-            </option>
-          </ul>
+          <!-- Check if suggestions exist and if they have length greater than 0 -->
+          <div
+            *ngIf="suggestions[i] && suggestions[i].length > 0"
+            class="suggestion-list"
+          >
+            <ul class="list-unstyled">
+              <li
+                *ngFor="let suggestion of suggestions[i]; let j = index"
+                (click)="onSelectMedicine(suggestion, i)"
+                [ngClass]="{ highlighted: selectedSuggestionIndex === j }"
+              >
+                {{ suggestion.medicineName }}
+              </li>
+            </ul>
+          </div>
           <button
             type="button"
             class="btn btn-link"
             [routerLink]="['/create-medicine']"
-            *ngIf="showCreateNewMedicineLink"
+            *ngIf="showCreateNewMedicineLink[i]"
           >
             Not found, Check Medicine list
           </button>
@@ -207,6 +219,7 @@
             placeholder="Price &#8377;"
             class="form-control fw-lighter"
             readonly
+            style="background-color: lightgray"
           />
         </div>
 
@@ -217,6 +230,10 @@
             type="text"
             class="form-control fw-lighter"
             (ngModelChange)="calculateTotal()"
+            [readonly]="noStockAlert[i]"
+            [ngStyle]="{
+              'background-color': noStockAlert[i] ? 'lightgray' : 'white'
+            }"
           />
         </div>
         <div class="col">
@@ -226,6 +243,7 @@
             type="text"
             class="form-control fw-lighter"
             readonly
+            style="background-color: lightgray"
           />
         </div>
         <div class="col">
@@ -235,6 +253,7 @@
             type="text"
             class="form-control fw-lighter"
             readonly
+            style="background-color: lightgray"
           />
         </div>
 
@@ -245,6 +264,7 @@
             type="text"
             class="form-control fw-lighter"
             (keydown.Tab)="addItem()"
+            style="background-color: lightgray"
           />
         </div>
         <div class="col">
@@ -262,8 +282,13 @@
   <hr />
 
   <div class="fw-lighter" style="margin-bottom: 1%">
-    Total : &#8377; {{ total }}
+    Total : {{ total | currency : "INR" : "symbol" : "1.2-2" }}
   </div>
+
+  <div class="fw-lighter" style="margin-bottom: 1%">
+    GST Amount : {{ this.gstAmount | currency : "INR" : "symbol" : "1.2-2" }}
+  </div>
+
   <!-- without GST -->
   <div
     class="fw-lighter"
@@ -273,13 +298,14 @@
     Grand Total:
     {{ grandTotalWithOutGst | currency : "INR" : "symbol" : "1.2-2" }}
     <br />
+
     <button
-      class="fw-lighter"
-      href="javascript:void(0);"
+      class="btn btn-sm btn-secondary fw-lighter"
       (click)="addGST()"
       *ngIf="showAddGSTButton == true"
+      type="button"
     >
-      add gst
+      Add gst
     </button>
   </div>
   <!-- with GST -->
@@ -289,45 +315,63 @@
     <br />
 
     <button
-      class="fw-lighter"
-      href="javascript:void(0);"
+      class="btn btn-sm btn-secondary fw-lighter"
       (click)="removeGST()"
       *ngIf="showAddGSTButton == false"
+      type="button"
     >
       remove gst
     </button>
   </div>
   <hr />
   <div class="align-items-center align-text-center mt-1">
-    <button
-      class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
-      [disabled]="invoiceForm.invalid"
-      (click)="createInvoice()"
-      *ngIf="disableSaveButton == false"
-    >
-      <mat-icon *ngIf="!showProgressBar">save</mat-icon>
-      <span *ngIf="!showProgressBar">Save</span>
-      <div
-        class="spinner-border text-light"
-        role="status"
-        *ngIf="showProgressBar"
+    <div class="d-flex align-items-center">
+      <button
+        class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter me-2"
+        [disabled]="invoiceForm.invalid"
+        (click)="createInvoice()"
+        *ngIf="!disableSaveButton"
+        type="button"
       >
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </button>
-    <br />
-    <button
-      class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
-      (click)="newInvoice()"
-    >
-      New Invoice
-    </button>
+        <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+        <span *ngIf="!showProgressBar">Save</span>
+        <div
+          class="spinner-border text-light"
+          role="status"
+          *ngIf="showProgressBar"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </button>
+
+      <button
+        class="btn btn-primary btn-sm d-flex align-items-center justify-content-center fw-lighter me-2"
+        type="button"
+      >
+        <mat-icon>print</mat-icon>
+        <span>Print</span>
+      </button>
+
+      <button
+        class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
+        (click)="newInvoice()"
+        type="button"
+      >
+        New Invoice
+      </button>
+    </div>
   </div>
   <br />
   <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
     Invoice created!!
   </div>
-  <br />
+  <div
+    class="alert alert-danger fw-lighter"
+    role="alert"
+    *ngIf="AlreadyInvoiceExist"
+  >
+    Invoice ID already exist!!!
+  </div>
 </form>
 
 <!-- edit -->
@@ -336,7 +380,7 @@
     <div class="container mt-3">
       <div class="row">
         <div class="col-12 text-center">
-          <h4>LAKSHMI PHARMACY</h4>
+          <h4>SRI LAKSHMI MEDICALS</h4>
           <p>Chekku Mettu St, Kallakurichi</p>
         </div>
       </div>

@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../services/http.service';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID, Inject } from '@angular/core';
 
 @Component({
   selector: 'app-view-individual-invoices',
   templateUrl: './view-individual-invoices.component.html',
   styleUrl: './view-individual-invoices.component.css',
 })
-export class ViewIndividualInvoicesComponent {
+export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
   totalPaid: any;
   totalUnPaid: any;
   totalPending: any;
@@ -33,6 +36,7 @@ export class ViewIndividualInvoicesComponent {
   itemsData: any[] = []; // Data for DataTable
   grandTotalWithOutGst: any;
   doctorData: any;
+  printTriggered: boolean = false; // Flag to track print state
 
   //progressbar
 
@@ -54,14 +58,63 @@ export class ViewIndividualInvoicesComponent {
   formattedDate: any;
   invoiceNumber: any;
   clickedGSTlink: boolean = false;
-  no_stock_alert: any;
+  noStockAlert: boolean[] = [];
+  currentInputIndex: number = 0; // Index of the current input
+  selectedSuggestionIndex: number = -1; // Initialize to -1 for no selection
+  selectedPatientIndex: number = -1;
+  suggestionsPatientName: any[] = []; // Ensure this is initialized properly
+
+  private printDialogOpen: boolean = false;
+
+  ngOnInit() {
+    // Add keydown event listener
+    if (isPlatformBrowser(this.platformId)) {
+      // Add keydown event listener
+      document.addEventListener('keydown', this.handleKeyboardEvent.bind(this));
+    }
+  }
+
+  ngOnDestroy() {
+    // Clean up the event listener when the component is destroyed
+    if (isPlatformBrowser(this.platformId)) {
+      document.removeEventListener(
+        'keydown',
+        this.handleKeyboardEvent.bind(this)
+      );
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's') {
+      event.preventDefault(); // Prevent the default save dialog
+      this.updateInvoice(); // Call the method to save
+    } else if (event.ctrlKey && event.key === 'p') {
+      event.preventDefault(); // Prevent the default print action
+      this.triggerPrint();
+    }
+  }
+  triggerPrint() {
+    if (!this.printTriggered) {
+      this.printTriggered = true; // Set the flag to prevent multiple print dialogs
+      this.printInvoice(); // Call print function
+    }
+  }
+
+  printInvoice() {
+    window.print(); // Trigger the print dialog
+  }
 
   constructor(
     private fb: FormBuilder,
     private http: HttpService,
     private datePipe: DatePipe,
-    private router: ActivatedRoute
+    private router: ActivatedRoute,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
+    this.suggestions = [];
+    this.noStockAlert = [];
+    this.showCreateNewMedicineLink = [];
     this.invoiceNumber = this.router.snapshot.paramMap.get('id');
 
     this.http.getInvoiceById(this.invoiceNumber).subscribe((res: any) => {
@@ -137,7 +190,10 @@ export class ViewIndividualInvoicesComponent {
     this.items.valueChanges.subscribe(() => this.calculateTotals());
     this.getAllInvoicesForToday();
     this.formattedDate = this.selectedDate?.toISOString(); // Convert date to ISO string format
-    sessionStorage.setItem('editInvoiceyId', this.invoiceNumber);
+
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      sessionStorage.setItem('editInvoiceyId', this.invoiceNumber);
+    }
   }
 
   groupedInvoicesByToday: any = [];
@@ -156,14 +212,6 @@ export class ViewIndividualInvoicesComponent {
     this.http.getAllDoctors().subscribe((res) => {
       this.doctorData = res as any;
     });
-  }
-
-  checkQuantity(medicinPrice: any, index: any) {
-    if (medicinPrice <= 0) {
-      this.no_stock_alert = true;
-    } else {
-      this.no_stock_alert = false;
-    }
   }
 
   searchByDate() {
@@ -210,6 +258,7 @@ export class ViewIndividualInvoicesComponent {
     });
     this.items.push(itemForm);
     this.suggestions.push([]); // Add an empty array for suggestions for the new row
+    this.addGST();
   }
 
   addItem(item: any) {
@@ -228,30 +277,76 @@ export class ViewIndividualInvoicesComponent {
     this.calculateTotals(); // Recalculate totals whenever an item is added
   }
 
+  handleKeyDown(event: KeyboardEvent, index: number): void {
+    // Ensure suggestions[index] is always an array
+    if (!this.suggestions[index] || !Array.isArray(this.suggestions[index])) {
+      this.suggestions[index] = []; // Initialize as an empty array if it's not
+    }
+    const suggestions = this.suggestions[index];
+
+    if (suggestions && suggestions.length > 0) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.selectedSuggestionIndex =
+          (this.selectedSuggestionIndex + 1) % suggestions.length; // Move down
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.selectedSuggestionIndex =
+          (this.selectedSuggestionIndex - 1 + suggestions.length) %
+          suggestions.length; // Move up
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        const selectedMedicine =
+          this.selectedSuggestionIndex >= 0
+            ? suggestions[this.selectedSuggestionIndex]
+            : suggestions[0]; // Default to the first suggestion if none is highlighted
+
+        if (selectedMedicine) {
+          this.onSelectMedicine(selectedMedicine, index); // Select the suggestion
+
+          // Clear suggestions and reset index after selection
+          this.suggestions[index] = [];
+          this.selectedSuggestionIndex = -1; // Reset selected suggestion index
+        }
+
+        // Clear the input field if needed
+        (event.target as HTMLInputElement).blur(); // Blur input to prevent re-triggering
+      }
+    }
+  }
   // Handle the search (Autocomplete) for a specific row
-  onSearch(query: string, index: number) {
+  onSearch(event: KeyboardEvent, index: number) {
+    const query = (event.target as HTMLInputElement).value;
+
+    // Ensure suggestions[index] is initialized as an array
+    if (!this.suggestions[index] || !Array.isArray(this.suggestions[index])) {
+      this.suggestions[index] = [];
+    }
+
     if (query.length > 2) {
-      // Call backend API to get the search suggestions
       this.http.getProductByName(query).subscribe(
         (res) => {
-          this.suggestions[index] = res as any; // Store suggestions for the specific row
-          if (this.suggestions[index].length == 0) {
-            this.showCreateNewMedicineLink = true;
-          }
-          if (this.suggestions[index].length > 0) {
-            this.showCreateNewMedicineLink = false;
-          }
+          this.suggestions[index] = res as any;
+          // Manage create link visibility
+          this.showCreateNewMedicineLink[index] =
+            this.suggestions[index].length === 0;
         },
         (error) => {
           console.error('Search error:', error);
+          this.showCreateNewMedicineLink[index] =
+            this.suggestions[index].length === 0;
         }
       );
     } else {
-      this.suggestions[index] = []; // Clear suggestions if the query is too short
+      this.suggestions[index] = []; // Clear suggestions if query is too short
     }
   }
 
   onSelectMedicine(medicine: any, index: number) {
+    if (!Array.isArray(this.suggestions[index])) {
+      this.suggestions[index] = [];
+    }
+
     const itemFormGroup = this.items.at(index) as FormGroup;
     itemFormGroup.patchValue({
       medicineName: medicine.medicineName,
@@ -263,8 +358,16 @@ export class ViewIndividualInvoicesComponent {
       mrp: medicine.price,
       sgst: medicine.sgst,
     });
-    this.suggestions[index] = [];
+
     this.checkQuantity(medicine.quantity, index);
+
+    // Clear suggestions after selecting the medicine
+    this.suggestions[index] = [];
+    this.showCreateNewMedicineLink[index] = false;
+    this.selectedSuggestionIndex = -1;
+  }
+  checkQuantity(medicineQuantity: any, index: any) {
+    this.noStockAlert[index] = medicineQuantity <= 0; // Set alert for the current row
   }
 
   deleteItem(index: number) {
@@ -272,27 +375,6 @@ export class ViewIndividualInvoicesComponent {
       this.items.removeAt(index);
     }
     // this.calculateTotal();
-  }
-
-  onSearchName(query: string) {
-    if (query.length > 2) {
-      this.http.getPatientByName(query).subscribe(
-        (res) => {
-          this.suggestionsName = res as any;
-          if (this.suggestionsName.length == 0) {
-            this.showCreateNewPatientLink = true;
-          }
-          if (this.suggestionsName.length > 0) {
-            this.showCreateNewPatientLink = false;
-          }
-        },
-        (error) => {
-          console.error('Search error:', error);
-        }
-      );
-    } else {
-      this.suggestionsName = [];
-    }
   }
 
   generateUniqueNumber() {
@@ -362,6 +444,62 @@ export class ViewIndividualInvoicesComponent {
     }
   }
 
+  onSearchPatientName(query: string) {
+    if (query.length > 2) {
+      this.http.getPatientByName(query).subscribe(
+        (res) => {
+          this.suggestionsPatientName = res as any;
+
+          // Update link visibility based on response length
+          this.updateCreateNewPatientLink();
+        },
+        (error) => {
+          console.error('Search error:', error);
+          this.suggestionsPatientName = []; // Clear suggestions on error
+          this.updateCreateNewPatientLink(); // Ensure link is updated
+        }
+      );
+    } else {
+      // Clear suggestions if the query is too short
+      this.suggestionsPatientName = [];
+      this.updateCreateNewPatientLink(); // Ensure link is hidden
+    }
+  }
+  private updateCreateNewPatientLink() {
+    this.showCreateNewPatientLink = this.suggestionsPatientName.length === 0;
+  }
+  onInputChange(event: Event) {
+    const input = event.target as HTMLInputElement; // Cast event.target to HTMLInputElement
+    this.onSearchPatientName(input.value); //
+  }
+  handlePatientNameKeyDown(event: KeyboardEvent) {
+    if (this.suggestionsPatientName.length > 0) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.selectedPatientIndex =
+          (this.selectedPatientIndex + 1) % this.suggestionsPatientName.length;
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.selectedPatientIndex =
+          (this.selectedPatientIndex - 1 + this.suggestionsPatientName.length) %
+          this.suggestionsPatientName.length;
+      } else if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent default form submission
+        if (this.selectedPatientIndex >= 0) {
+          const selectedPatient =
+            this.suggestionsPatientName[this.selectedPatientIndex];
+          this.onSelectPatientName(selectedPatient);
+        } else if (this.suggestionsPatientName.length > 0) {
+          // If no specific selection, select the first suggestion
+          this.onSelectPatientName(this.suggestionsPatientName[0]);
+        }
+      }
+    } else if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent default form submission if no suggestions
+      this.showCreateNewPatientLink = false; // Hide the link if no suggestions are available
+    }
+  }
+
   onSelectPatientName(res: any) {
     this.invoiceForm.patchValue({
       patientName: res.title + res.patientName,
@@ -369,10 +507,16 @@ export class ViewIndividualInvoicesComponent {
       pid: res.pid,
       title: res.title,
       gender: res.gender,
-      fatherName: res.fatherName,
       consultantName: res.consultantName,
+      fatherName: res.fatherName,
     });
-    this.suggestionsName = [];
+
+    // Clear the suggestions array after selection
+    this.suggestionsPatientName = [];
+    this.selectedPatientIndex = -1; // Reset index after selection
+
+    // Hide the "Create New Patient" link
+    this.showCreateNewPatientLink = false;
   }
 
   //date formatter
@@ -411,9 +555,6 @@ export class ViewIndividualInvoicesComponent {
     sessionStorage.removeItem('deleteInvoiceById');
   }
 
-  onPrint() {
-    window.print();
-  }
   formatDate(date: string): string {
     let dateObj = new Date(date);
     let day = String(dateObj.getDate()).padStart(2, '0');
@@ -528,6 +669,7 @@ export class ViewIndividualInvoicesComponent {
     this.gstAmount = (this.total * this.gstRate) / 100;
     this.grandTotalWithGst = this.total + this.gstAmount;
     this.grandTotalWithOutGst = this.total;
+    this.addGST();
   }
 
   updateTotal(itemForm: FormGroup) {

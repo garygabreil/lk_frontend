@@ -2,7 +2,6 @@
   width: 250px; /* Adjust the width of the sidemenu */
   height: 100vh; /* Full-height */
   position: fixed; /* Make it fixed on the left */
-  top: 8.2%;
   left: 0;
   background-color: #343a40; /* Background color */
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
