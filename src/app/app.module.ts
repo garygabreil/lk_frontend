@@ -38,6 +38,10 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { ViewIndividualInvoicesComponent } from './pharmacy/view-individual-invoices/view-individual-invoices.component';
 import { CreatePoComponent } from './pharmacy/create-po/create-po.component';
+import { InvoiceHomeComponent } from './pages/invoice-home/invoice-home.component';
+import { MatButtonModule } from '@angular/material/button';
+import { ManagePoInvoicesComponent } from './pharmacy/manage-po-invoices/manage-po-invoices.component';
+import { ViewIndividualPoInvoicesComponent } from './pharmacy/view-individual-po-invoices/view-individual-po-invoices.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +64,9 @@ import { CreatePoComponent } from './pharmacy/create-po/create-po.component';
     ManageInvoicesComponent,
     ViewIndividualInvoicesComponent,
     CreatePoComponent,
+    InvoiceHomeComponent,
+    ManagePoInvoicesComponent,
+    ViewIndividualPoInvoicesComponent,
   ],
   imports: [
     BrowserModule,
@@ -76,6 +83,7 @@ import { CreatePoComponent } from './pharmacy/create-po/create-po.component';
     MatDatepickerModule,
     MatNativeDateModule,
     MatInputModule,
+    MatButtonModule,
   ],
   providers: [
     provideClientHydration(),

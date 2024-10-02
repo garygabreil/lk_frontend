@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../services/http.service';
 
@@ -17,6 +17,8 @@ export class CreateMedicineComponent {
   midUniqueID: any;
   totalPrice: number = 0;
   totalQuantity: number = 0;
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
+  private isCtrlNPressed = false;
 
   constructor(
     private fb: FormBuilder,
@@ -37,10 +39,38 @@ export class CreateMedicineComponent {
       createdBy: [''],
       updatedBy: [''],
       updatedOn: [''],
+      supplierName: ['', Validators.required],
+      supplierAddress: ['', Validators.required],
+      supplierPhone: [
+        '',
+        [Validators.required, Validators.pattern('^[0-9]{10}$')],
+      ],
       mid: [''],
     });
   }
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.createMedicine(); // Call your save method
+    }
+    if (event.ctrlKey && event.key === 'n' && !this.isCtrlNPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlNPressed = true; // Set the flag to true
+      this.refresh(); // Call your save method
+    }
+  }
 
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
+    if (event.key === 'Control' || event.key === 'n') {
+      this.isCtrlNPressed = false; // Reset the flag when either key is released
+    }
+  }
   price: number = 0; // Default price value
 
   get formattedPrice(): string {
@@ -74,9 +104,10 @@ export class CreateMedicineComponent {
           sgst: this.pharmacyForm.value.sgst,
           createdAt: this.currentDate,
           createdBy: sessionStorage.getItem('user'),
-          updatedBy: '',
-          updatedOn: '',
           mid: this.pharmacyForm.value.mid,
+          supplierName: this.pharmacyForm.value.supplierName,
+          supplierAddress: this.pharmacyForm.value.supplierAddress,
+          supplierPhone: this.pharmacyForm.value.supplierPhone,
         })
         .subscribe(
           (res) => {
@@ -117,5 +148,9 @@ export class CreateMedicineComponent {
   monthYearValidator(control: any) {
     const validFormat = /^(0[1-9]|1[0-2])\/\d{4}$/; // MM/YYYY format
     return validFormat.test(control.value) ? null : { invalidFormat: true };
+  }
+
+  refresh() {
+    window.location.reload();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
@@ -47,10 +47,18 @@ export class ManageMedicineComponent {
 
   @ViewChild('closeModal')
   closeModal!: ElementRef;
+  groupedInvoicesBySpecificSearch: any;
+  totalNumberOfEntriesForSpecificSearch: any;
+  groupedInvoicesBySpecificDateSearch: any;
 
   medicineReminders: { name: string; expiryDate: string; reminder: string }[] =
     [];
   reminderMessages: string[] = []; // Store reminder messages for scrolling
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
+
+  suggestions: any = []; // Array of suggestions for each input
+  selectedSuggestionIndex: number = -1; // Initialize to -1 for no selection
+  showCreateNewMedicineLink: any;
 
   constructor(
     private router: Router,
@@ -66,6 +74,7 @@ export class ManageMedicineComponent {
       medicineName: [''],
       batch: [''],
       hsn_code: [''],
+      supplierName: [''],
     });
 
     this.pharmacyForm = this.fb.group({
@@ -81,6 +90,12 @@ export class ManageMedicineComponent {
       updatedBy: [''],
       updatedOn: [''],
       mid: [''],
+      supplierName: ['', Validators.required],
+      supplierAddress: ['', Validators.required],
+      supplierPhone: [
+        '',
+        [Validators.required, Validators.pattern('^[0-9]{10}$')],
+      ],
     });
     this.loadData();
   }
@@ -109,8 +124,9 @@ export class ManageMedicineComponent {
         createdAt: this.convertToISODate(res['createdAt']),
         createdBy: res['createdBy'],
         sgst: [res['sgst'], Validators.required],
-        updatedBy: [''],
-        updatedOn: [''],
+        supplierName: [res['supplierName'], Validators.required],
+        supplierAddress: [res['supplierAddress'], Validators.required],
+        supplierPhone: [res['supplierPhone'], Validators.required],
       });
       sessionStorage.setItem('editMedicineById', id);
     });
@@ -147,10 +163,12 @@ export class ManageMedicineComponent {
             hsn_code: this.pharmacyForm.value.hsn_code,
             batch: this.pharmacyForm.value.batch,
             priceOfOne: this.pharmacyForm.value.priceOfOne,
-            createdBy: this.pharmacyForm.value.createdBy,
             updatedBy: sessionStorage.getItem('user'),
             updatedOn: this.convertToISODate(this.currentDate),
             mid: this.pharmacyForm.value.mid,
+            supplierName: this.pharmacyForm.value.supplierName,
+            supplierAddress: this.pharmacyForm.value.supplierAddress,
+            supplierPhone: this.pharmacyForm.value.supplierPhone,
           })
           .subscribe(
             (res) => {
@@ -174,6 +192,64 @@ export class ManageMedicineComponent {
           ),
       1000
     );
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.updateChanges(); // Call your save method
+    }
+  }
+
+  handlePKeyDown(event: KeyboardEvent): void {
+    if (!this.suggestions || !Array.isArray(this.suggestions)) {
+      this.suggestions = []; // Initialize as an empty array if it's not
+    }
+
+    const suggestions = this.suggestions;
+
+    if (suggestions && suggestions.length > 0) {
+      // Handle Arrow navigation and Enter key for suggestions
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.selectedSuggestionIndex =
+          (this.selectedSuggestionIndex + 1) % suggestions.length; // Move down
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.selectedSuggestionIndex =
+          (this.selectedSuggestionIndex - 1 + suggestions.length) %
+          suggestions.length; // Move up
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        const selectedMedicine =
+          this.selectedSuggestionIndex >= 0
+            ? suggestions[this.selectedSuggestionIndex]
+            : suggestions[0]; // Default to the first suggestion if none is highlighted
+
+        if (selectedMedicine) {
+          this.onSelectMedicine(selectedMedicine); // Select the suggestion
+
+          // Clear suggestions and reset index after selection
+          this.suggestions = [];
+          this.selectedSuggestionIndex = -1; // Reset selected suggestion index
+        }
+        // Clear the input field if needed
+        (event.target as HTMLInputElement).blur(); // Blur input to prevent re-triggering
+      }
+    } else if (event.key === 'Enter' && this.showCreateNewMedicineLink) {
+      // If there are no suggestions and the Enter key is pressed, navigate to "Create Medicine"
+      event.preventDefault();
+    }
+  }
+
+  // Listen for the keyup event to reset the flag when keys are released
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
   }
   //delete patient by id
   deleteMedicineById(id: any) {
@@ -267,15 +343,128 @@ export class ManageMedicineComponent {
       return 'Valid';
     }
   }
-  groupedInvoicesBySpecificSearch: any;
-  totalNumberOfEntriesForSpecificSearch: any;
-  groupedInvoicesBySpecificDateSearch: any;
+
+  handlMedKeyDown(event: KeyboardEvent, index: number): void {
+    if (!this.suggestions[index] || !Array.isArray(this.suggestions[index])) {
+      this.suggestions[index] = []; // Initialize as an empty array if it's not
+    }
+
+    const suggestions = this.suggestions[index];
+
+    if (suggestions && suggestions.length > 0) {
+      // Handle Arrow navigation and Enter key for suggestions
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.selectedSuggestionIndex =
+          (this.selectedSuggestionIndex + 1) % suggestions.length; // Move down
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.selectedSuggestionIndex =
+          (this.selectedSuggestionIndex - 1 + suggestions.length) %
+          suggestions.length; // Move up
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        const selectedMedicine =
+          this.selectedSuggestionIndex >= 0
+            ? suggestions[this.selectedSuggestionIndex]
+            : suggestions[0]; // Default to the first suggestion if none is highlighted
+
+        if (selectedMedicine) {
+          this.onSelectMedicine(selectedMedicine); // Select the suggestion
+
+          // Clear suggestions and reset index after selection
+          this.suggestions[index] = [];
+          this.selectedSuggestionIndex = -1; // Reset selected suggestion index
+        }
+        // Clear the input field if needed
+        (event.target as HTMLInputElement).blur(); // Blur input to prevent re-triggering
+      }
+    } else if (event.key === 'Enter' && this.showCreateNewMedicineLink[index]) {
+      // If there are no suggestions and the Enter key is pressed, navigate to "Create Medicine"
+      event.preventDefault();
+      this.router.navigate(['/create-medicine']); // Navigate to the medicine creation page
+    }
+  }
+
+  onSearch(event: KeyboardEvent) {
+    const query = (event.target as HTMLInputElement).value.trim();
+
+    // Ensure suggestions[index] is initialized as an array
+    if (!this.suggestions || !Array.isArray(this.suggestions)) {
+      this.suggestions = [];
+    }
+
+    if (query.length > 2) {
+      this.http.getProductByName(query).subscribe(
+        (res: any) => {
+          // Filter suggestions to include only those starting with or closely matching the query
+          this.suggestions = res.filter((medicine: any) =>
+            medicine.medicineName.toLowerCase().startsWith(query.toLowerCase())
+          );
+
+          // Manage "Create New Medicine" link visibility based on suggestions
+          this.showCreateNewMedicineLink = this.suggestions.length === 0;
+        },
+        (error) => {
+          console.error('Search error:', error);
+          this.suggestions = [];
+          this.showCreateNewMedicineLink = true; // Show "Create Medicine" if there's an error
+        }
+      );
+    } else {
+      this.suggestions = []; // Clear suggestions if the query is too short
+      this.showCreateNewMedicineLink = false; // Hide "Create Medicine" if query is too short
+    }
+  }
+  onSelectMedicine(medicine: any): void {
+    this.searchForm.patchValue({
+      medicineName: medicine.medicineName,
+    });
+
+    // Clear suggestions after selecting the medicine
+    this.suggestions = [];
+    this.showCreateNewMedicineLink = false;
+    this.selectedSuggestionIndex = -1;
+  }
+  patientNameQuery: any;
+  suggestionsPatientName: any[] = []; // Ensure this is initialized properly
+  selectedPatientIndex: number = -1;
+  showCreateNewPatientLink: any;
+
+  onSearchPatientName() {
+    this.patientNameQuery = this.searchForm.value.supplierName;
+    if (this.patientNameQuery.length > 2) {
+      // Ensure minimum 3 characters for search
+      this.http.getProductBySupplierName(this.patientNameQuery).subscribe(
+        (res) => {
+          this.suggestionsPatientName = res as any;
+          this.updateCreateNewPatientLink(this.patientNameQuery); // Check if we need to show the "Create New Patient" link
+        },
+        (error) => {
+          console.error('Search error:', error);
+          this.suggestionsPatientName = []; // Clear suggestions on error
+          this.updateCreateNewPatientLink(this.patientNameQuery); // Ensure link is updated on error
+        }
+      );
+    } else {
+      // Clear suggestions and hide the "Create New Patient" link if less than 3 characters
+      this.suggestionsPatientName = [];
+      this.showCreateNewPatientLink = false; // Ensure the link is hidden when query is too short
+    }
+  }
+
+  private updateCreateNewPatientLink(query: any) {
+    this.showCreateNewPatientLink =
+      this.suggestionsPatientName.length === 0 &&
+      this.patientNameQuery.length > 2;
+  }
 
   searchBySpecific() {
     const searchCriteria = {
       medicineName: this.searchForm.value.medicineName,
       batch: this.searchForm.value.batch,
       hsn_code: this.searchForm.value.hsn_code,
+      supplierName: this.searchForm.value.supplierName,
     };
 
     this.httpClient

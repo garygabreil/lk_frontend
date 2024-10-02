@@ -6,11 +6,11 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-manage-invoices',
-  templateUrl: './manage-invoices.component.html',
-  styleUrl: './manage-invoices.component.css',
+  selector: 'app-manage-po-invoices',
+  templateUrl: './manage-po-invoices.component.html',
+  styleUrl: './manage-po-invoices.component.css',
 })
-export class ManageInvoicesComponent {
+export class ManagePoInvoicesComponent {
   totalPaid: any;
   totalUnPaid: any;
   totalPending: any;
@@ -58,6 +58,10 @@ export class ManageInvoicesComponent {
   @ViewChild('closeModal')
   closeModal!: ElementRef;
 
+  selectedSuggestionIndex: number = -1; // Initialize to -1 for no selection
+  selectedPatientIndex: number = -1;
+  suggestionsPatientName: any[] = []; // Ensure this is initialized properly
+
   showDeleteProgressBar: any;
   showDeleteAlert: any;
   selectedDate?: Date; // This holds the date from the user input
@@ -89,7 +93,7 @@ export class ManageInvoicesComponent {
       gstAdded: [''],
     });
     this.searchForm = this.fb.group({
-      patientName: [''],
+      supplierName: [''],
       paymentType: [''],
       paymentStatus: [''],
       invoiceDate: [''],
@@ -108,7 +112,7 @@ export class ManageInvoicesComponent {
   // getAllInvoices
   getAllInvoicesForToday() {
     const todayDate = this.getTodayDate();
-    this.http.getInvoicesSpecificDate(todayDate).subscribe(
+    this.http.getInvoicesPoSpecificDate(todayDate).subscribe(
       (res) => {
         if (res) {
           this.invoiceData = res as any;
@@ -147,7 +151,7 @@ export class ManageInvoicesComponent {
   invoiceDataAll: any;
   totalNumberOfEntriesAll: any;
   loadData() {
-    this.http.getAllInvoices().subscribe((res) => {
+    this.http.getAllPoInvoices().subscribe((res) => {
       this.invoiceDataAll = res as any;
       this.totalNumberOfEntriesAll = this.invoiceDataAll.length;
     });
@@ -331,7 +335,7 @@ export class ManageInvoicesComponent {
   }
 
   viewInvoice(id: any) {
-    this.router.navigate(['/view-invoice', id]);
+    this.router.navigate(['/view-po-invoice', id]);
   }
 
   //date formatter
@@ -415,7 +419,7 @@ export class ManageInvoicesComponent {
     setTimeout(() => {
       this.showDeleteAlert = true;
       this.http
-        .deleteInvoiceById(sessionStorage.getItem('deleteInvoiceById'))
+        .deleteInvoiceByPoId(sessionStorage.getItem('deleteInvoiceById'))
         .subscribe(
           (res) => {
             this.closeModal.nativeElement.click();
@@ -429,6 +433,24 @@ export class ManageInvoicesComponent {
           }
         );
     }, 1000);
+  }
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.searchInvoices(); // Call your save method
+    }
+  }
+
+  // Listen for the keyup event to reset the flag when keys are released
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
   }
 
   paymentStatuses: string[] = ['PAID', 'NOT_PAID', 'PENDING'];
@@ -450,21 +472,21 @@ export class ManageInvoicesComponent {
     const searchCriteria = {
       paymentType: this.searchForm.value.paymentType,
       paymentStatus: this.searchForm.value.paymentStatus,
-      patientName: this.searchForm.value.patientName,
+      supplierName: this.searchForm.value.supplierName,
       invoiceDate: datePicker, // Ensure correct format
     };
 
     this.showProgressBar = true;
-
     setTimeout(() => {
       this.httpClient
         .post(
-          'http://localhost:3000/api/invoices/searchInvoice',
+          'http://localhost:3000/api/po/invoices/searchInvoice',
           searchCriteria
         )
         .subscribe(
           (res: any) => {
             this.groupedInvoicesBySpecificDate = res;
+            this.showProgressBar = true;
             this.totalNumberOfEntriesForSpecific =
               this.groupedInvoicesBySpecificDate.length;
             this.showProgressBar = false;
@@ -478,48 +500,12 @@ export class ManageInvoicesComponent {
     }, 1000);
   }
 
-  onSearchName(query: string) {
-    if (query.length > 2) {
-      this.http.getPatientByName(query).subscribe(
-        (res) => {
-          this.suggestionsName = res as any;
-          if (this.suggestionsName.length == 0) {
-            this.showCreateNewPatientLink = true;
-          }
-          if (this.suggestionsName.length > 0) {
-            this.showCreateNewPatientLink = false;
-          }
-        },
-        (error) => {
-          console.error('Search error:', error);
-        }
-      );
-    } else {
-      this.suggestionsName = [];
-    }
-  }
-
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    if (event.ctrlKey && event.key === 's') {
-      event.preventDefault(); // Prevent the default save dialog
-      this.searchInvoices(); // Call the method to save
-      return;
-    }
-  }
-
   patientNameQuery: any;
-  showCreateNewMedicineLink: any;
-  selectedSuggestionIndex: number = -1; // Initialize to -1 for no selection
-  selectedPatientIndex: number = -1;
-  suggestionsPatientName: any[] = []; // Ensure this is initialized properly
-  private isPrinting: boolean = false;
-
   onSearchPatientName(query: string) {
     this.patientNameQuery = query;
     if (this.patientNameQuery.length > 2) {
       // Ensure minimum 3 characters for search
-      this.http.getPatientByName(query).subscribe(
+      this.http.getProductBySupplierName(query).subscribe(
         (res) => {
           this.suggestionsPatientName = res as any;
           this.updateCreateNewPatientLink(this.patientNameQuery); // Check if we need to show the "Create New Patient" link
@@ -571,20 +557,22 @@ export class ManageInvoicesComponent {
       }
     } else if (event.key === 'Enter' && this.showCreateNewPatientLink) {
       event.preventDefault(); // Prevent default form submission
-      this.searchInvoices(); // Trigger the create new patient functionality
+      this.goToPatient(); // Trigger the create new patient functionality
     }
   }
 
   onSelectPatientName(res: any) {
     this.searchForm.patchValue({
-      patientName: res.patientName,
+      supplierName: res.supplierName,
     });
 
-    // Clear the suggestions array after selection
     this.suggestionsPatientName = [];
     this.selectedPatientIndex = -1; // Reset index after selection
 
     // Hide the "Create New Patient" link
     this.showCreateNewPatientLink = false;
+  }
+  goToPatient() {
+    this.router.navigateByUrl('/create-medicine');
   }
 }

@@ -5,8 +5,7 @@
 /* Hide elements during print */
 @media print {
   * {
-    font-size: 8px;
-    line-height: 1;
+    font-size: 10px;
   }
 
   @page {
@@ -90,4 +89,21 @@
 .selected {
   background-color: #007bff; /* Change this color as needed */
   color: white; /* Change this color for better contrast */
+}
+
+.logo {
+  width: 50px; /* Adjust the width as needed */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.scrolling-reminders {
+  background-color: lightgray; /* Light background for visibility */
+  padding: 1px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  margin-top: 0.7%;
+}
+
+marquee {
+  color: #dc3545; /* Bootstrap danger color for alerts */
 }

@@ -1,4 +1,14 @@
-<div class="container" style="margin-left: 20%; width: 80%">
+<div style="margin-left: 20%">
+  <button
+    class="btn btn-primary fw-lighter"
+    style="margin-bottom: 1%"
+    routerLink="/invoice-home"
+  >
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+</div>
+
+<div class="container" style="margin-left: 19%; width: 80%">
   <div class="card">
     <div class="card-body">
       <h5 class="card-title">New Patient</h5>
@@ -172,6 +182,7 @@
               class="form-control fw-lighter"
               id="visitDate"
               formControlName="visitDate"
+              (keydown)="onKeyDown($event)"
             />
             <div
               *ngIf="patientForm.get('visitDate')?.invalid"

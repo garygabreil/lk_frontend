@@ -8,11 +8,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID, Inject } from '@angular/core';
 
 @Component({
-  selector: 'app-view-individual-invoices',
-  templateUrl: './view-individual-invoices.component.html',
-  styleUrl: './view-individual-invoices.component.css',
+  selector: 'app-view-individual-po-invoices',
+  templateUrl: './view-individual-po-invoices.component.html',
+  styleUrl: './view-individual-po-invoices.component.css',
 })
-export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
+export class ViewIndividualPoInvoicesComponent {
   totalPaid: any;
   totalUnPaid: any;
   totalPending: any;
@@ -127,7 +127,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
     this.showCreateNewMedicineLink = [];
     this.invoiceNumber = this.router.snapshot.paramMap.get('id');
 
-    this.http.getInvoiceById(this.invoiceNumber).subscribe((res: any) => {
+    this.http.getInvoiceByPoId(this.invoiceNumber).subscribe((res: any) => {
       this.clickedGSTlink = res['gstAdded'];
       if (this.clickedGSTlink == null) {
         this.clickedGSTlink = false;
@@ -135,13 +135,12 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
       if (this.clickedGSTlink) {
         this.gstAmount = (res['total'] * this.gstRate) / 100;
         this.invoiceForm = this.fb.group({
-          patientName: [res['patientName'], Validators.required],
-          patientAddress: [res['patientAddress'], Validators.required],
-          pid: [res['pid'], Validators.required],
-          title: res['title'],
-          gender: res['gender'],
-          fatherName: res['fatherName'],
-          consultantName: [res['consultantName'], Validators.required],
+          supplierName: [res['supplierName'], Validators.required],
+          supplierPhoneNumber: [
+            res['supplierPhoneNumber'],
+            Validators.required,
+          ],
+          supplierAddress: [res['supplierAddress'], Validators.required],
           paymentType: [res['paymentType'], Validators.required],
           paymentStatus: [res['paymentStatus'], Validators.required],
           invoiceID: [res['invoiceID'], Validators.required],
@@ -150,18 +149,20 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
           total: res['total'],
           gstAdded: res['gstAdded'],
           items: this.fb.array([]), // FormArray for invoice items
+          createdBy: [res['createdBy']],
         });
         this.initializeItems(res['items']);
       } else {
         this.gstAmount = (res['total'] * this.gstRate) / 100;
         this.invoiceForm = this.fb.group({
+          supplierName: [res['supplierName'], Validators.required],
+          supplierPhoneNumber: [
+            res['supplierPhoneNumber'],
+            Validators.required,
+          ],
+          supplierAddress: [res['supplierAddress'], Validators.required],
           patientName: [res['patientName'], Validators.required],
           patientAddress: [res['patientAddress'], Validators.required],
-          pid: [res['pid'], Validators.required],
-          title: res['title'],
-          gender: res['gender'],
-          fatherName: res['fatherName'],
-          consultantName: [res['consultantName'], Validators.required],
           paymentType: [res['paymentType'], Validators.required],
           paymentStatus: [res['paymentStatus'], Validators.required],
           invoiceID: [res['invoiceID'], Validators.required],
@@ -170,6 +171,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
           total: res['total'],
           gstAdded: res['gstAdded'],
           items: this.fb.array([]), // FormArray for invoice items
+          createdBy: [res['createdBy']],
         });
         this.initializeItems(res['items']);
       }
@@ -178,24 +180,21 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
     this.currentDate = this.datePipe.transform(new Date(), 'dd-MM-yyyy') || '';
 
     this.invoiceForm = this.fb.group({
-      patientName: [''],
-      patientAddress: [''],
-      pid: [''],
-      title: [''],
-      gender: [''],
-      fatherName: [''],
-      consultantName: [''],
-      paymentType: [null],
-      paymentStatus: [null],
-      invoiceID: [],
-      invoiceDate: [],
+      supplierName: [''],
+      supplierPhoneNumber: [''],
+      supplierAddress: [''],
+      paymentType: [''],
+      paymentStatus: [''],
+      invoiceID: [''],
+      invoiceDate: [''],
       grandTotalWithGST: [''],
-      grandTotalWithOutGST: [''],
       total: [''],
-      items: this.fb.array([]),
       gstAdded: [''],
-      updatedBy: [''],
-      updatedOn: [''],
+      items: this.fb.array([]), // FormArray for invoice items
+      createdBy: [''],
+      grandTotalWithOutGST: [''],
+      updatedBy: [],
+      updatedOn: [],
     });
     this.loadData();
     this.getAllDoctor();
@@ -213,7 +212,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
 
   // getAllInvoices
   getAllInvoicesForToday() {
-    this.http.getAllInvoices().subscribe((res) => {
+    this.http.getAllPoInvoices().subscribe((res) => {
       this.invoiceData = res as any;
       this.itemsData = res as any;
       this.totalNumberOfEntries = this.invoiceData.length;
@@ -241,7 +240,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
   }
 
   loadData() {
-    this.http.getAllInvoices().subscribe((res) => {
+    this.http.getAllPoInvoices().subscribe((res) => {
       this.invoiceData = res as any;
       this.itemsData = res as any;
       this.totalNumberOfEntries = this.invoiceData.length;
@@ -470,7 +469,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
     this.patientNameQuery = query;
     if (this.patientNameQuery.length > 2) {
       // Ensure minimum 3 characters for search
-      this.http.getPatientByName(query).subscribe(
+      this.http.getProductBySupplierName(query).subscribe(
         (res) => {
           this.suggestionsPatientName = res as any;
           this.updateCreateNewPatientLink(this.patientNameQuery); // Check if we need to show the "Create New Patient" link
@@ -528,13 +527,9 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
 
   onSelectPatientName(res: any) {
     this.invoiceForm.patchValue({
-      patientName: res.title + res.patientName,
-      patientAddress: res.patientAddress,
-      pid: res.pid,
-      title: res.title,
-      gender: res.gender,
-      consultantName: res.consultantName,
-      fatherName: res.fatherName,
+      supplierName: res.supplierName,
+      supplierAddress: res.supplierAddress,
+      supplierPhoneNumber: res.supplierPhone,
     });
 
     // Clear the suggestions array after selection
@@ -596,7 +591,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
 
     this.invoiceForm.patchValue({
       updatedBy: sessionStorage.getItem('user'),
-      updatedOn: this.currentDate,
+      updatedOn: this.convertToISODate(this.currentDate),
     });
 
     this.invoiceForm.patchValue({
@@ -604,9 +599,10 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
     });
     this.showProgressBar = true;
     let id = sessionStorage.getItem('editInvoiceyId');
+    console.log(this.invoiceForm.value);
     setTimeout(
       () =>
-        this.http.updateInvoiceById(id, this.invoiceForm.value).subscribe(
+        this.http.updateInvoiceByPoId(id, this.invoiceForm.value).subscribe(
           (res) => {
             this.showProgressBar = true;
             this.showAlert = true;
@@ -640,7 +636,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.showDeleteAlert = true;
       this.http
-        .deleteInvoiceById(sessionStorage.getItem('deleteInvoiceById'))
+        .deleteInvoiceByPoId(sessionStorage.getItem('deleteInvoiceById'))
         .subscribe(
           (res) => {
             this.showDeleteProgressBar = false;
@@ -734,6 +730,6 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
     return null;
   }
   goToPatient() {
-    this.routerUrl.navigateByUrl('/create-patient');
+    this.routerUrl.navigateByUrl('/create-medicine');
   }
 }

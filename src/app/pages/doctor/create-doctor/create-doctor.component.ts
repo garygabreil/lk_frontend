@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../../services/http.service';
 import { DatePipe } from '@angular/common';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-create-doctor',
@@ -16,6 +17,8 @@ export class CreateDoctorComponent {
 
   currentDate: string;
   uniquePid = Math.floor(100000 + Math.random() * 900000);
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
+  private isCtrlNPressed = false;
 
   constructor(
     private fb: FormBuilder,
@@ -37,6 +40,31 @@ export class CreateDoctorComponent {
       updatedBy: [''],
     });
   }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.onSubmit(); // Call your save method
+    }
+    if (event.ctrlKey && event.key === 'n' && !this.isCtrlNPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlNPressed = true; // Set the flag to true
+      this.refresh(); // Call your save method
+    }
+  }
+
+  // Listen for the keyup event to reset the flag when keys are released
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
+    if (event.key === 'Control' || event.key === 'n') {
+      this.isCtrlNPressed = false; // Reset the flag when either key is released
+    }
+  }
   onSubmit() {
     this.showProgressBar = true;
 
@@ -51,9 +79,7 @@ export class CreateDoctorComponent {
             address: this.doctorForm.value.address,
             pid: this.doctorForm.value.pid,
             createdBy: sessionStorage.getItem('user'),
-            updatedBy: null,
             createdOn: this.currentDate,
-            updatedOn: null,
           })
           .subscribe(
             (res) => {

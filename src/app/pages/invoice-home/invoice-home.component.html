@@ -1,0 +1,240 @@
+<div class="container mt-5" style="margin-left: 15%; width: 90%">
+  <div class="row">
+    <!-- Section 1 -->
+    <div class="col-md-12 mb-4">
+      <div class="card text-center">
+        <h4 class="fw-lighter">Invoices</h4>
+        <div class="card-body">
+          <div class="d-flex justify-content-around mt-3">
+            <button
+              class="btn btn-success fw-lighter"
+              routerLink="/create-bill"
+            >
+              <i class="bi bi-currency-dollar"></i> Sales
+            </button>
+
+            <!-- Purchase Order Button -->
+            <button
+              class="btn btn-success fw-lighter"
+              style="color: white"
+              routerLink="/create-po"
+            >
+              <i class="bi bi-bag-fill"></i> Purchase Order
+            </button>
+            <button
+              class="btn btn-warning fw-lighter"
+              style="color: white"
+              routerLink="/view-bill"
+            >
+              <i class="bi bi-list-ul"></i> Manage Invoices
+            </button>
+            <button
+              class="btn btn-warning fw-lighter"
+              style="color: white"
+              routerLink="/view-po-bill"
+            >
+              <i class="bi bi-list-ul"></i> Manage PO
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="col-md-6 mb-4">
+      <div class="card text-center">
+        <h4 class="fw-lighter">Medicines</h4>
+
+        <div class="card-body">
+          <div class="d-flex justify-content-around mt-3">
+            <!-- Create Medicine Button -->
+            <button
+              class="btn btn-success fw-lighter"
+              routerLink="/create-medicine"
+            >
+              <i class="bi bi-plus-circle"></i> Create Medicine
+            </button>
+
+            <!-- Manage Medicine Button -->
+            <button
+              class="btn btn-warning fw-lighter"
+              routerLink="/manage-medicine"
+              style="color: white"
+            >
+              <i class="bi bi-list-ul"></i> Manage Medicines
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="col-md-6 mb-4">
+      <div class="card text-center">
+        <h4 class="fw-lighter">User Managements</h4>
+        <div class="card-body">
+          <div class="d-flex justify-content-around mt-3">
+            <button
+              type="button"
+              class="btn btn-success fw-lighter"
+              data-bs-toggle="modal"
+              data-bs-target="#userAccess"
+            >
+              <i class="bi bi-plus-circle"></i>
+              Create
+            </button>
+
+            <button
+              class="btn btn-warning fw-lighter"
+              style="color: white"
+              data-bs-toggle="modal"
+              data-bs-target="#userManagement"
+            >
+              <i class="bi bi-list-ul"></i> Manage
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- For User access control -->
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="userAccess"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 fw-lighter" id="userAccess">
+            Create Users
+          </h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            #closeModal
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Create Patient Button -->
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-6 text-center">
+              <!-- Create Patient Button -->
+              <button
+                class="btn btn-success fw-lighter mb-3"
+                style="color: white; width: 100%"
+                (click)="goToCreatePatient()"
+              >
+                <i class="bi bi-person-plus"></i>Patient
+              </button>
+
+              <!-- Create Doctor Button -->
+              <button
+                class="btn btn-success fw-lighter mb-3"
+                style="color: white; width: 100%"
+                (click)="goToCreateDoctor()"
+              >
+                <i class="bi bi-person-badge"></i>Doctor
+              </button>
+
+              <!-- Create Staff Button -->
+              <button
+                class="btn btn-success fw-lighter"
+                style="color: white; width: 100%"
+                (click)="goToCreateStaff()"
+              >
+                <i class="bi bi-person-workspace"></i> Access Control
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary fw-lighter"
+            data-bs-dismiss="modal"
+            #closeModal
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="userManagement"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 fw-lighter" id="userManagement">
+            Management
+          </h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            #closeModal1
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Create Patient Button -->
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-6 text-center">
+              <!-- Create Patient Button -->
+              <button
+                class="btn btn-warning fw-lighter mb-3"
+                style="color: white; width: 100%"
+                (click)="goToManagePatient()"
+              >
+                <i class="bi bi-person-plus"></i>Patient
+              </button>
+
+              <!-- Create Doctor Button -->
+              <button
+                class="btn btn-warning fw-lighter mb-3"
+                style="color: white; width: 100%"
+                (click)="goToManageDoctor()"
+              >
+                <i class="bi bi-person-badge"></i>Doctor
+              </button>
+
+              <!-- Create Staff Button -->
+              <button
+                class="btn btn-warning fw-lighter"
+                style="color: white; width: 100%"
+                (click)="goToManageStaff()"
+              >
+                <i class="bi bi-person-workspace"></i> Access Control
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary fw-lighter"
+            data-bs-dismiss="modal"
+            #closeModal
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

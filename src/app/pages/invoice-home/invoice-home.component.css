@@ -1,0 +1,13 @@
+.card {
+  padding: 15px;
+}
+
+.card-body {
+  display: flex;
+  justify-content: space-around;
+}
+
+button {
+  font-weight: lighter;
+  margin: 10px;
+}

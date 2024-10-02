@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
 import { DatePipe } from '@angular/common';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-manage-patient',
@@ -16,6 +17,7 @@ import { DatePipe } from '@angular/common';
 })
 export class ManagePatientComponent {
   patientForm: FormGroup;
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
 
   //progressbar
   showProgressBar: any;
@@ -111,7 +113,22 @@ export class ManagePatientComponent {
       this.doctorData = res as any;
     });
   }
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.updateChanges(); // Call your save method
+    }
+  }
 
+  // Listen for the keyup event to reset the flag when keys are released
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
+  }
   editPatientById(id: any) {
     this.http.getPatientById(id).subscribe((res: any) => {
       this.patientForm = this.fb.group({
@@ -127,10 +144,7 @@ export class ManagePatientComponent {
         ],
         pid: [res['pid'], Validators.required],
         consultantName: [res['consultantName'], Validators.required],
-        createdOn: this.currentDate,
-        updatedOn: null,
-        createdBy: sessionStorage.getItem('user'),
-        updatedBy: null,
+
         age: [res['age'], Validators.required],
         type: [res['type'], Validators.required],
         symptoms: [res['symptoms'], Validators.required],
@@ -170,7 +184,6 @@ export class ManagePatientComponent {
   updateChanges() {
     this.showProgressBar = true;
     let id = sessionStorage.getItem('editById');
-
     setTimeout(
       () =>
         this.http
@@ -192,9 +205,7 @@ export class ManagePatientComponent {
             pulse: this.patientForm.value.pulse,
             sugar: this.patientForm.value.sugar,
             updatedBy: sessionStorage.getItem('user'),
-            createdOn: this.patientForm.value.currentDate,
             updatedOn: this.currentDate,
-            createdBy: this.patientForm.value.createdBy,
           })
           .subscribe(
             (res) => {

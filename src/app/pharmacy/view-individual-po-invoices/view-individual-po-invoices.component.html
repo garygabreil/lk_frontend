@@ -3,29 +3,41 @@
     <div class="container mt-3">
       <div class="row">
         <div class="col-12 text-center">
-          <div>
-            <h4>SRI LAKSHMI MEDICAL</h4>
-            <p>26/1,Chekku Mettu St, Kallakurichi</p>
-          </div>
+          <h4>SRI LAKSHMI MEDICAL</h4>
+          <p>26/1, Chekku Mettu St, Kallakurichi</p>
         </div>
       </div>
 
       <!-- Invoice Details -->
       <div class="row">
-        <div class="col-6">
+        <div class="col-2" style="margin-left: 1%">
           <p>
-            <strong>Patient Name:</strong> {{ invoiceForm.value.patientName }}
-          </p>
-          <p><strong>PID:</strong> {{ invoiceForm.value.pid }}</p>
-          <p>
-            <strong>Consultant Name:</strong>
-            Dr. {{ invoiceForm.value.consultantName }}
+            From:
+            <br />
+            {{ invoiceForm.value.supplierName }}
+            <br />
+            {{ invoiceForm.value.supplierAddress }}
+            <br />
+
+            {{ invoiceForm.value.supplierPhone }}
+            <br />
           </p>
         </div>
-        <div class="col-3" style="margin-left: 20%">
-          <p><strong>Invoice ID:</strong> {{ invoiceForm.value.invoiceID }}</p>
+        <div class="col-3">
           <p>
-            <strong>Invoice Date:</strong>
+            To:
+            <br />
+            SRI LAKSHMI HOSPITAL
+            <br />
+            26/1, Chekku Mettu St, Kallakurichi - 606 202
+            <br />
+            <br />
+          </p>
+        </div>
+        <div class="col-3" style="margin-left: 30%">
+          <p>
+            Invoice ID: {{ invoiceForm.value.invoiceID }}<br />
+            Invoice Date:
             {{ invoiceForm.value.invoiceDate }}
           </p>
         </div>
@@ -63,30 +75,41 @@
             <td>
               {{ item.get("expiryDate")?.value }}
             </td>
-            <td>{{ item.get("mrp")?.value }}.00</td>
+            <td>
+              {{
+                item.get("price")?.value | currency : "INR" : "symbol" : "1.2-2"
+              }}
+            </td>
             <td>{{ item.get("sgst")?.value }}%</td>
-            <td>{{ item.get("total")?.value }}.00</td>
+            <td>
+              {{
+                item.get("total")?.value | currency : "INR" : "symbol" : "1.2-2"
+              }}
+            </td>
           </tr>
         </tbody>
       </table>
-      <div style="margin-left: 80%">
-        Total: {{ total | currency : "INR" : "symbol" : "1.2-2" }}
-        <div *ngIf="clickedGSTlink == false">
-          Grand Total:
-          {{ grandTotalWithOutGst | currency : "INR" : "symbol" : "1.2-2" }}
+      <div style="margin-left: 70%">
+        <br />
+        <div>
+          Total:
+          {{ invoiceForm.value.total | currency : "INR" : "symbol" : "1.2-2" }}
         </div>
-        <div *ngIf="clickedGSTlink == true">
-          gstAmount:
-          {{ this.gstAmount | currency : "INR" : "symbol" : "1.2-2" }}
-          <br />
-          Grand Total:
-          {{ grandTotalWithGst | currency : "INR" : "symbol" : "1.2-2" }}
+        <div *ngIf="this.clickedGSTlink == false">
+          Grant Total:
+          {{ invoiceForm.value.total | currency : "INR" : "symbol" : "1.2-2" }}
         </div>
-        <br />
-        <br />
-        <br />
-        <br />
-        Signature
+        <div *ngIf="this.clickedGSTlink == true">
+          <div *ngIf="this.clickedGSTlink == true">
+            gstAmount:
+            {{ this.gstAmount | currency : "INR" : "symbol" : "1.2-2" }}
+          </div>
+          Grant Total:
+          {{
+            invoiceForm.value.grandTotalWithGST
+              | currency : "INR" : "symbol" : "1.2-2"
+          }}
+        </div>
       </div>
     </div>
   </form>
@@ -100,7 +123,7 @@
       class="btn btn-primary"
       style="margin-bottom: 1%"
       id="noshow"
-      routerLink="/view-bill"
+      routerLink="/view-po-bill"
       (click)="removeSessionID()"
     >
       back
@@ -111,13 +134,13 @@
       <form [formGroup]="invoiceForm">
         <div class="row mb-3">
           <div class="col-md-3">
-            <label for="customerName" class="fw-lighter">Patient Name</label>
+            <label for="supplierName" class="fw-lighter">Supplie Name</label>
             <input
               type="text"
-              formControlName="patientName"
+              formControlName="supplierName"
               (input)="onInputChange($event)"
               (keydown)="handlePatientNameKeyDown($event)"
-              placeholder="Search for Patient"
+              placeholder="Search for SupplierName"
               class="form-control fw-lighter"
             />
             <ul *ngIf="suggestionsPatientName.length > 0">
@@ -126,7 +149,7 @@
                 (click)="onSelectPatientName(suggestion)"
                 [class.highlighted]="i === selectedPatientIndex"
               >
-                {{ suggestion.patientName }}, {{ suggestion.patientAddress }}
+                {{ suggestion.supplierName }}, {{ suggestion.supplierAddress }}
               </li>
             </ul>
             <div
@@ -135,72 +158,34 @@
               (click)="goToPatient()"
               class="fw-lighter"
             >
-              Create a new patient
+              Create a new supplier
             </div>
             <div
-              *ngIf="invoiceForm.get('patientName')?.invalid"
+              *ngIf="invoiceForm.get('supplierName')?.invalid"
               style="color: red; font-size: small"
             >
               Required
             </div>
           </div>
           <div class="col-md-3">
-            <label for="invoiceDate" class="fw-lighter">Patient Address</label>
+            <label for="supplierAddress" class="fw-lighter"
+              >Supplier Address</label
+            >
             <input
-              formControlName="patientAddress"
+              formControlName="supplierAddress"
               type="text"
               class="form-control fw-lighter"
-              id="patientAddress"
+              id="supplierAddress"
               style="background-color: lightgray"
             />
             <div
-              *ngIf="invoiceForm.get('patientAddress')?.invalid"
+              *ngIf="invoiceForm.get('supplierAddress')?.invalid"
               style="color: red; font-size: small"
             >
               Required
             </div>
           </div>
-          <div class="col-md-2">
-            <label for="invoiceDate" class="fw-lighter">PID</label>
-            <input
-              formControlName="pid"
-              type="text"
-              class="form-control fw-lighter"
-              id="pid"
-              readonly
-              style="background-color: lightgray"
-            />
-            <div
-              *ngIf="invoiceForm.get('pid')?.invalid"
-              style="color: red; font-size: small"
-            >
-              Required
-            </div>
-          </div>
-          <div class="col-md-3">
-            <label for="consultantName" class="fw-lighter"
-              >Consultant Name</label
-            >
-            <select
-              formControlName="consultantName"
-              class="form-control fw-lighter dropdown-toggle text-capitalize"
-            >
-              <option value="null">Select Consultant</option>
-              <option
-                *ngFor="let doctor of doctorData"
-                [value]="doctor.consultantName"
-                selected
-              >
-                Dr.{{ doctor.consultantName }}
-              </option>
-            </select>
-            <div
-              *ngIf="invoiceForm.get('consultantName')?.invalid"
-              style="color: red; font-size: small"
-            >
-              Required
-            </div>
-          </div>
+
           <div class="col-md-3">
             <label for="invoiceDate" class="fw-lighter">Invoice Date</label>
             <input

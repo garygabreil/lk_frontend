@@ -1,3 +1,12 @@
+<div style="margin-left: 17%; width: 90%">
+  <button
+    class="btn btn-primary fw-lighter"
+    style="margin-bottom: 1%"
+    routerLink="/invoice-home"
+  >
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+</div>
 <div class="card" style="margin-left: 17%; width: 90%">
   <div class="container fw-lighter">
     <h5 class="mb-4 fw-bolder"></h5>
@@ -218,6 +227,7 @@
                     class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter text-capitalize"
                     [disabled]="staffForm.invalid"
                     (click)="updateChanges()"
+                    (keydown)="handleKeyboardEvent($event)"
                   >
                     <mat-icon *ngIf="!showProgressBar">save</mat-icon>
                     <span *ngIf="!showProgressBar">Save</span>

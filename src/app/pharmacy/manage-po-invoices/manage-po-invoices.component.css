@@ -1,0 +1,15 @@
+.suggestion-list {
+  position: absolute; /* Ensure it overlaps correctly */
+  background: white; /* Background to make text readable */
+  z-index: 1000; /* Ensure it's above other elements */
+}
+
+.highlighted {
+  background-color: #007bff; /* Change to your preferred highlight color */
+  color: white; /* Change text color if needed */
+}
+
+.selected {
+  background-color: #007bff; /* Change this color as needed */
+  color: white; /* Change this color for better contrast */
+}

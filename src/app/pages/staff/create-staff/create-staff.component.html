@@ -1,4 +1,13 @@
 <div class="container" style="margin-left: 20%; width: 80%; padding: 2%">
+  <div>
+    <button
+      class="btn btn-primary fw-lighter"
+      style="margin-bottom: 1%"
+      routerLink="/invoice-home"
+    >
+      <i class="bi bi-arrow-left"></i> Back
+    </button>
+  </div>
   <form [formGroup]="staffForm">
     <div class="card">
       <div class="card-body">
@@ -174,6 +183,20 @@
             </div>
           </button>
         </div>
+      </div>
+      <div
+        class="alert alert-danger fw-lighter"
+        role="alert"
+        *ngIf="showExistAlert"
+      >
+        Staff entry exist!
+        <button
+          type="button"
+          class="btn btn-link fw-lighter text-capitalize"
+          [routerLink]="['/manage-staff']"
+        >
+          go to manage staff
+        </button>
       </div>
     </div>
   </form>

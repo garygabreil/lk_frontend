@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
 import { DatePipe } from '@angular/common';
+import { Component, HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-create-patient',
@@ -22,6 +22,8 @@ export class CreatePatientComponent {
   doctorData: any;
   appointmentId = Math.floor(100000 + Math.random() * 900000);
   backRouterURL: any;
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
+  private isCtrlNPressed = false;
 
   constructor(
     private router: Router,
@@ -85,6 +87,28 @@ export class CreatePatientComponent {
       this.doctorData = res as any;
     });
   }
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.onSubmit(); // Call your save method
+    }
+    if (event.ctrlKey && event.key === 'n' && !this.isCtrlNPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlNPressed = true; // Set the flag to true
+      this.refresh(); // Call your save method
+    }
+  }
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
+    if (event.key === 'Control' || event.key === 'n') {
+      this.isCtrlNPressed = false; // Reset the flag when either key is released
+    }
+  }
 
   onSubmit() {
     this.showProgressBar = true;
@@ -104,9 +128,7 @@ export class CreatePatientComponent {
             pid: this.patientForm.value.pid,
             consultantName: this.patientForm.value.consultantName,
             createdOn: this.currentDate,
-            updatedOn: null,
             createdBy: sessionStorage.getItem('user'),
-            updatedBy: null,
             age: this.patientForm.value.age,
             type: this.patientForm.value.type,
             symptoms: this.patientForm.value.symptoms,
@@ -149,5 +171,19 @@ export class CreatePatientComponent {
   }
   refresh() {
     window.location.reload();
+  }
+
+  onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent the default form submission if any
+      this.setCurrentDate();
+    }
+  }
+  setCurrentDate() {
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    this.patientForm.patchValue({
+      visitDate: formattedDate, // Set the current date to the input
+    });
   }
 }

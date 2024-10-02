@@ -1,3 +1,13 @@
+<div style="margin-left: 20%">
+  <button
+    class="btn btn-primary fw-lighter"
+    style="margin-bottom: 1%"
+    routerLink="/invoice-home"
+  >
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+</div>
+
 <div class="container" style="margin-left: 17%; width: 85%">
   <div class="scrolling-reminders" style="padding: 2%">
     <marquee *ngIf="reminderMessages.length > 0">
@@ -14,7 +24,7 @@
   <div class="accordion-item">
     <h2 class="accordion-header" id="flush-headingOneM">
       <button
-        class="accordion-button collapsed"
+        class="accordion-button collapsed fw-lighter"
         type="button"
         data-bs-toggle="collapse"
         data-bs-target="#flush-collapseOneM"
@@ -139,7 +149,7 @@
   <div class="accordion-item">
     <h2 class="accordion-header" id="flush-headingTwoM">
       <button
-        class="accordion-button collapsed"
+        class="accordion-button collapsed fw-lighter"
         type="button"
         data-bs-toggle="collapse"
         data-bs-target="#flush-collapseTwoM"
@@ -161,24 +171,67 @@
             <div class="row">
               <div class="col-5">
                 <div class="form-group">
-                  <label for="medicineName" class="mr-2">Medicine Name</label>
+                  <label for="medicineName" class="mr-2 fw-lighter"
+                    >Medicine Name</label
+                  >
                   <input
                     type="text"
-                    class="form-control"
-                    id="medicineName"
                     formControlName="medicineName"
-                    name="medicineName"
-                    placeholder="Enter medicine name"
+                    (keyup)="onSearch($event)"
+                    (keydown)="handlePKeyDown($event)"
+                    placeholder="Search for medicine"
+                    class="form-control fw-lighter"
+                  />
+
+                  <!-- Check if suggestions exist and if they have length greater than 0 -->
+                  <div
+                    *ngIf="suggestions && suggestions.length > 0"
+                    class="suggestion-list"
+                  >
+                    <ul class="list-unstyled">
+                      <li
+                        *ngFor="let suggestion of suggestions; let j = index"
+                        (click)="onSelectMedicine(suggestion)"
+                        [ngClass]="{
+                          highlighted: selectedSuggestionIndex === j
+                        }"
+                      >
+                        {{ suggestion.medicineName }}
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- If no suggestions and "Create Medicine" link is visible, pressing Enter should trigger it -->
+                  <div
+                    [routerLink]="['/create-medicine']"
+                    *ngIf="showCreateNewMedicineLink"
+                    [ngClass]="{ highlighted: selectedSuggestionIndex === -1 }"
+                    class="fw-lighter"
+                  >
+                    Not found
+                  </div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="form-group">
+                  <label for="supplierName" class="mr-2 fw-lighter"
+                    >Supplier Name</label
+                  >
+                  <input
+                    type="text"
+                    formControlName="supplierName"
+                    placeholder="Search for Supplier"
+                    class="form-control fw-lighter"
                   />
                 </div>
               </div>
 
               <div class="col-3">
                 <div class="form-group mx-sm-3 mb-2">
-                  <label for="hsn_code" class="mr-2">HSN Code</label>
+                  <label for="hsn_code" class="mr-2 fw-lighter">HSN Code</label>
                   <input
                     type="text"
-                    class="form-control"
+                    class="form-control fw-lighter"
                     id="hsn_code"
                     name="hsn_code"
                     formControlName="hsn_code"
@@ -187,11 +240,11 @@
                 </div>
               </div>
               <div class="col-3">
-                <div class="form-group mx-sm-3 mb-2">
-                  <label for="batch" class="mr-2">Batch</label>
+                <div class="form-group mb-2">
+                  <label for="batch" class="mr-2 fw-lighter">Batch</label>
                   <input
                     type="text"
-                    class="form-control"
+                    class="form-control fw-lighter"
                     id="batch"
                     name="batch"
                     formControlName="batch"
@@ -202,8 +255,8 @@
             </div>
 
             <button
-              type="submit"
-              class="btn btn-primary mb-2"
+              type="submit "
+              class="btn btn-primary mb-2 fw-lighter"
               (click)="searchBySpecific()"
             >
               Search
@@ -330,8 +383,77 @@
               <form [formGroup]="pharmacyForm">
                 <div class="container">
                   <div class="row">
+                    <div class="col-3">
+                      <label
+                        for="supplierName"
+                        class="fw-lighter text-capitalize"
+                        >Supplier Name</label
+                      >
+                      <input
+                        id="supplierName"
+                        formControlName="supplierName"
+                        class="form-control fw-lighter text-capitalize"
+                        placeholder="Enter supplier name"
+                      />
+                      <div
+                        *ngIf="pharmacyForm.get('supplierName')?.invalid"
+                        style="color: red; font-size: small"
+                      >
+                        Required
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <label
+                        for="supplierAddress"
+                        class="fw-lighter text-capitalize"
+                        >Supplier Address</label
+                      >
+                      <input
+                        id="supplierAddress"
+                        formControlName="supplierAddress"
+                        class="form-control fw-lighter text-capitalize"
+                        placeholder="Enter supplier address"
+                      />
+                      <div
+                        *ngIf="pharmacyForm.get('supplierAddress')?.invalid"
+                        style="color: red; font-size: small"
+                      >
+                        Required
+                      </div>
+                    </div>
+                    <div class="col-3">
+                      <label
+                        for="supplierPhone"
+                        class="fw-lighter text-capitalize"
+                        >Supplier Phone</label
+                      >
+                      <input
+                        id="supplierPhone"
+                        formControlName="supplierPhone"
+                        class="form-control fw-lighter text-capitalize"
+                        placeholder="Enter supplier phone"
+                      />
+                      <div
+                        *ngIf="pharmacyForm.get('supplierPhone')?.invalid"
+                        style="color: red"
+                      >
+                        <small
+                          *ngIf="pharmacyForm.get('supplierPhone')?.errors?.['required']"
+                          style="color: red"
+                          >Required</small
+                        >
+                        <small
+                          *ngIf="pharmacyForm.get('supplierPhone')?.errors?.['pattern']"
+                          style="color: red"
+                          >Phone number must be 10 digits.</small
+                        >
+                      </div>
+                    </div>
+                    <div class="col-3"></div>
+                  </div>
+                  <div class="row">
                     <!-- Medicine Name -->
-                    <div class="col-6">
+                    <div class="col-4">
                       <div class="form-group">
                         <label
                           for="medicineName"

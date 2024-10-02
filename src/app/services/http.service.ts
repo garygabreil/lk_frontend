@@ -26,6 +26,12 @@ export class HttpService {
     });
   }
 
+  //getAllProducts
+  getProductBySupplierName(mde: any) {
+    return this.http.post('http://localhost:3000/api/product/getSupplier', {
+      supplierName: mde,
+    });
+  }
   //getProductById
   getProductById(id: any) {
     return this.http.get(
@@ -89,9 +95,18 @@ export class HttpService {
   createInvoice(invoice: any) {
     return this.http.post('http://localhost:3000/api/invoices/create', invoice);
   }
+  createPoInvoice(invoice: any) {
+    return this.http.post(
+      'http://localhost:3000/api/po/invoices/create',
+      invoice
+    );
+  }
 
   getAllInvoices() {
     return this.http.get('http://localhost:3000/api/invoices/getAll');
+  }
+  getAllPoInvoices() {
+    return this.http.get('http://localhost:3000/api/po/invoices/getAll');
   }
 
   //getInvoiceById
@@ -100,10 +115,22 @@ export class HttpService {
       'http://localhost:3000/api/invoices/getInvoiceByID/' + id
     );
   }
+
+  getInvoiceByPoId(id: any) {
+    return this.http.get(
+      'http://localhost:3000/api/po/invoices/getInvoiceByID/' + id
+    );
+  }
   //updateInvoiceByd
   updateInvoiceById(id: any, invoice: any) {
     return this.http.put(
       'http://localhost:3000/api/invoices/updateInvoiceById/' + id,
+      invoice
+    );
+  }
+  updateInvoiceByPoId(id: any, invoice: any) {
+    return this.http.put(
+      'http://localhost:3000/api/po/invoices/updateInvoiceById/' + id,
       invoice
     );
   }
@@ -115,9 +142,22 @@ export class HttpService {
       }
     );
   }
+  getInvoicePoDate(formattedDate: any) {
+    return this.http.post(
+      'http://localhost:3000/api/po/invoices/groupedInvoicesByDate',
+      {
+        date: formattedDate,
+      }
+    );
+  }
   getInvoicesTodayInvoices() {
     return this.http.get(
       'http://localhost:3000/api/invoices/groupedInvoicesCreatedToday'
+    );
+  }
+  getInvoicesTodayPoInvoices() {
+    return this.http.get(
+      'http://localhost:3000/api/po/invoices/groupedInvoicesCreatedToday'
     );
   }
 
@@ -133,6 +173,11 @@ export class HttpService {
     return this.http.delete('http://localhost:3000/api/invoices/delete/' + id);
   }
 
+  deleteInvoiceByPoId(id: any) {
+    return this.http.delete(
+      'http://localhost:3000/api/po/invoices/delete/' + id
+    );
+  }
   //DOCTORS
   // create doctor
   createDoctor(doctor: any) {
@@ -228,5 +273,15 @@ export class HttpService {
         () => new Error('Something went wrong, please try again later.')
       );
     }
+  }
+
+  getInvoicesPoSpecificDate(todayInvoices: any) {
+    return this.http
+      .post('http://localhost:3000/api/po/invoices/getInvoiceByDate', {
+        invoiceDate: todayInvoices,
+      })
+      .pipe(
+        catchError(this.handleError) // Handle the error here
+      );
   }
 }

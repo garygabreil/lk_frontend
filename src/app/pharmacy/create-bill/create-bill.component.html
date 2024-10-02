@@ -1,4 +1,24 @@
 <form [formGroup]="invoiceForm" style="margin-left: 17%" id="noshow">
+  <div>
+    <button
+      class="btn btn-primary fw-lighter"
+      style="margin-bottom: 1%"
+      routerLink="/invoice-home"
+    >
+      <i class="bi bi-arrow-left"></i> Back
+    </button>
+    <div
+      class="scrolling-reminders"
+      style="width: 90%; margin-left: 1%; height: 15%"
+    >
+      <marquee *ngIf="reminderMessages.length > 0">
+        {{ reminderMessages.join(" | ") }}
+      </marquee>
+    </div>
+  </div>
+
+  <hr />
+
   <div class="row mb-3">
     <div class="col-md-3">
       <label for="customerName" class="fw-lighter">Patient Name</label>
@@ -21,7 +41,9 @@
       </ul>
       <div
         *ngIf="showCreateNewPatientLink == true"
-        style="color: red; font-size: small"
+        [class.highlighted]="selectedPatientIndex === -1"
+        (click)="goToPatient()"
+        class="fw-lighter"
       >
         Create a new patient
       </div>
@@ -165,9 +187,9 @@
   <div class="col fw-lighter" style="margin-left: 3%">
     Medicine
     <span style="margin-left: 17%">price &#8377;</span>
-    <span style="margin-left: 10%">quantity</span>
+    <span style="margin-left: 5%">quantity</span>
     <span style="margin-left: 6%">mrp &#8377;</span>
-    <span style="margin-left: 10%">sgst %</span>
+    <span style="margin-left: 8%">sgst %</span>
     <span style="margin-left: 6%">total &#8377;</span>
   </div>
 
@@ -203,14 +225,16 @@
               </li>
             </ul>
           </div>
-          <button
-            type="button"
-            class="btn btn-link"
+
+          <!-- If no suggestions and "Create Medicine" link is visible, pressing Enter should trigger it -->
+          <div
             [routerLink]="['/create-medicine']"
             *ngIf="showCreateNewMedicineLink[i]"
+            [ngClass]="{ highlighted: selectedSuggestionIndex === -1 }"
+            class="fw-lighter"
           >
-            Not found, Check Medicine list
-          </button>
+            Not found
+          </div>
         </div>
         <!-- col -->
         <div class="col">
@@ -357,7 +381,8 @@
         (click)="newInvoice()"
         type="button"
       >
-        New Invoice
+        <mat-icon>add</mat-icon>
+        <span>New</span>
       </button>
     </div>
   </div>
@@ -365,12 +390,8 @@
   <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
     Invoice created!!
   </div>
-  <div
-    class="alert alert-danger fw-lighter"
-    role="alert"
-    *ngIf="AlreadyInvoiceExist"
-  >
-    Invoice ID already exist!!!
+  <div class="alert alert-danger fw-lighter" role="alert" *ngIf="showAlertForm">
+    Form is invalid!!
   </div>
 </form>
 
@@ -380,8 +401,10 @@
     <div class="container mt-3">
       <div class="row">
         <div class="col-12 text-center">
-          <h4>SRI LAKSHMI MEDICALS</h4>
-          <p>Chekku Mettu St, Kallakurichi</p>
+          <div>
+            <h4>SRI LAKSHMI MEDICAL</h4>
+            <p>26/1,Chekku Mettu St, Kallakurichi</p>
+          </div>
         </div>
       </div>
 
@@ -397,7 +420,7 @@
             Dr. {{ invoiceForm.value.consultantName }}
           </p>
         </div>
-        <div class="col-6 text-right">
+        <div class="col-3" style="margin-left: 20%">
           <p><strong>Invoice ID:</strong> {{ invoiceForm.value.invoiceID }}</p>
           <p>
             <strong>Invoice Date:</strong>
@@ -444,7 +467,7 @@
           </tr>
         </tbody>
       </table>
-      <div style="margin-left: 80%">
+      <div style="margin-left: 70%">
         Total: {{ total | currency : "INR" : "symbol" : "1.2-2" }}
         <div *ngIf="clickedGSTlink == false">
           Grand Total:

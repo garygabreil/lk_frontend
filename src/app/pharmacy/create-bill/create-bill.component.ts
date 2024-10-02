@@ -11,12 +11,9 @@ import { HttpService } from '../../services/http.service';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-
-export interface Medicine {
-  medicineName: string;
-  price: number;
-  quantity: number;
-}
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ReminderService } from '../../services/reminder.service';
 
 @Component({
   selector: 'app-create-bill',
@@ -56,6 +53,14 @@ export class CreateBillComponent implements OnInit, OnDestroy {
   selectedSuggestionIndex: number = -1; // Initialize to -1 for no selection
   selectedPatientIndex: number = -1;
   suggestionsPatientName: any[] = []; // Ensure this is initialized properly
+  private isPrinting: boolean = false;
+  showAlertForm: any;
+  inventory: { [key: string]: number } = {}; // Store available quantities for each medicine
+  previousQuantities: { [key: string]: number } = {}; // Track previous quantities
+  medicineData: any[] = [];
+  medicineReminders: { name: string; expiryDate: string; reminder: string }[] =
+    [];
+  reminderMessages: string[] = []; // Store reminder messages for scrolling
 
   ngOnInit() {
     // Add keydown event listener
@@ -73,6 +78,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
         this.handleKeyboardEvent.bind(this)
       );
     }
+    this.isPrinting = false;
   }
 
   constructor(
@@ -80,7 +86,10 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     private http: HttpService,
     private datePipe: DatePipe,
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private matIconRegistry: MatIconRegistry,
+    private domSanitizer: DomSanitizer,
+    public reminderService: ReminderService
   ) {
     this.suggestions = [];
 
@@ -103,6 +112,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
       total: [''],
       items: this.fb.array([]), // FormArray for invoice items
       gstAdded: [],
+      createdBy: [sessionStorage.getItem('user')],
     });
     // Add one default item on load
     this.addItem();
@@ -112,12 +122,21 @@ export class CreateBillComponent implements OnInit, OnDestroy {
 
     this.getAllDoctor();
     this.initializeSuggestions();
+    this.isPrinting = false;
+    this.loadDataMedicalData();
   }
 
   initializeSuggestions() {
     this.suggestions = Array(this.items.length)
       .fill(null)
       .map(() => []); // Adjust to the number of items
+  }
+
+  loadDataMedicalData() {
+    this.http.getAllProducts().subscribe((res) => {
+      this.medicineData = res as any;
+      this.checkReminders();
+    });
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -128,26 +147,36 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     }
     if (event.ctrlKey && event.key === 's') {
       event.preventDefault(); // Prevent the default save dialog
-      this.saveInvoice(); // Call the method to save
-      return;
+      if (this.invoiceForm.valid) {
+        this.saveInvoice(); // Call the method to save
+        return;
+      } else {
+        this.showAlertForm = true;
+        setTimeout(() => {
+          this.showAlertForm = false;
+        }, 1000);
+      }
     } else if (event.ctrlKey && event.key === 'p') {
       event.preventDefault(); // Prevent the default print action
-      this.triggerPrint();
-    }
-  }
-  triggerPrint() {
-    if (!this.printTriggered) {
-      this.printTriggered = true; // Set the flag to prevent multiple print dialogs
-      this.printInvoice(); // Call print function
-      // Reset the flag after a short delay to allow future print actions
-      setTimeout(() => {
-        this.printTriggered = false;
-      }, 1000); // Adjust the delay if necessary
+      if (!this.isPrinting) {
+        this.isPrinting = true;
+        this.triggerPrint();
+      }
     }
   }
 
-  printInvoice() {
-    window.print(); // Trigger the print dialog
+  triggerPrint(): void {
+    setTimeout(() => {
+      window.print();
+      this.resetPrintFlag();
+    }, 500); // Slight delay to ensure page is fully rendered before print
+  }
+
+  // Reset the flag after printing is done
+  resetPrintFlag(): void {
+    setTimeout(() => {
+      this.isPrinting = false;
+    }, 1000); // Reset after 1 second to allow future prints
   }
 
   getAllDoctor() {
@@ -183,7 +212,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
       medicineName: ['', Validators.required],
       price: ['', Validators.required],
       batch: [''],
-      quantity: [''],
+      quantity: [0],
       expiryDate: [''],
       mid: [''],
       total: ['', Validators.required],
@@ -216,7 +245,6 @@ export class CreateBillComponent implements OnInit, OnDestroy {
   }
 
   handleKeyDown(event: KeyboardEvent, index: number): void {
-    // Ensure suggestions[index] is always an array
     if (!this.suggestions[index] || !Array.isArray(this.suggestions[index])) {
       this.suggestions[index] = []; // Initialize as an empty array if it's not
     }
@@ -224,6 +252,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     const suggestions = this.suggestions[index];
 
     if (suggestions && suggestions.length > 0) {
+      // Handle Arrow navigation and Enter key for suggestions
       if (event.key === 'ArrowDown') {
         event.preventDefault();
         this.selectedSuggestionIndex =
@@ -247,15 +276,18 @@ export class CreateBillComponent implements OnInit, OnDestroy {
           this.suggestions[index] = [];
           this.selectedSuggestionIndex = -1; // Reset selected suggestion index
         }
-
         // Clear the input field if needed
         (event.target as HTMLInputElement).blur(); // Blur input to prevent re-triggering
       }
+    } else if (event.key === 'Enter' && this.showCreateNewMedicineLink[index]) {
+      // If there are no suggestions and the Enter key is pressed, navigate to "Create Medicine"
+      event.preventDefault();
+      this.router.navigate(['/create-medicine']); // Navigate to the medicine creation page
     }
   }
 
   onSearch(event: KeyboardEvent, index: number) {
-    const query = (event.target as HTMLInputElement).value;
+    const query = (event.target as HTMLInputElement).value.trim();
 
     // Ensure suggestions[index] is initialized as an array
     if (!this.suggestions[index] || !Array.isArray(this.suggestions[index])) {
@@ -264,20 +296,25 @@ export class CreateBillComponent implements OnInit, OnDestroy {
 
     if (query.length > 2) {
       this.http.getProductByName(query).subscribe(
-        (res) => {
-          this.suggestions[index] = res as any;
-          // Manage create link visibility
+        (res: any) => {
+          // Filter suggestions to include only those starting with or closely matching the query
+          this.suggestions[index] = res.filter((medicine: any) =>
+            medicine.medicineName.toLowerCase().startsWith(query.toLowerCase())
+          );
+
+          // Manage "Create New Medicine" link visibility based on suggestions
           this.showCreateNewMedicineLink[index] =
             this.suggestions[index].length === 0;
         },
         (error) => {
           console.error('Search error:', error);
-          this.showCreateNewMedicineLink[index] =
-            this.suggestions[index].length === 0;
+          this.suggestions[index] = [];
+          this.showCreateNewMedicineLink[index] = true; // Show "Create Medicine" if there's an error
         }
       );
     } else {
-      this.suggestions[index] = []; // Clear suggestions if query is too short
+      this.suggestions[index] = []; // Clear suggestions if the query is too short
+      this.showCreateNewMedicineLink[index] = false; // Hide "Create Medicine" if query is too short
     }
   }
   onSelectMedicine(medicine: any, index: number): void {
@@ -382,34 +419,38 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     });
   }
 
+  patientNameQuery: any;
   onSearchPatientName(query: string) {
-    if (query.length > 2) {
+    this.patientNameQuery = query;
+    if (this.patientNameQuery.length > 2) {
+      // Ensure minimum 3 characters for search
       this.http.getPatientByName(query).subscribe(
         (res) => {
           this.suggestionsPatientName = res as any;
-
-          // Update link visibility based on response length
-          this.updateCreateNewPatientLink();
+          this.updateCreateNewPatientLink(this.patientNameQuery); // Check if we need to show the "Create New Patient" link
         },
         (error) => {
           console.error('Search error:', error);
           this.suggestionsPatientName = []; // Clear suggestions on error
-          this.updateCreateNewPatientLink(); // Ensure link is updated
+          this.updateCreateNewPatientLink(this.patientNameQuery); // Ensure link is updated on error
         }
       );
     } else {
-      // Clear suggestions if the query is too short
+      // Clear suggestions and hide the "Create New Patient" link if less than 3 characters
       this.suggestionsPatientName = [];
-      this.updateCreateNewPatientLink(); // Ensure link is hidden
+      this.showCreateNewPatientLink = false; // Ensure the link is hidden when query is too short
     }
   }
-  private updateCreateNewPatientLink() {
-    this.showCreateNewPatientLink = this.suggestionsPatientName.length === 0;
+  private updateCreateNewPatientLink(query: any) {
+    this.showCreateNewPatientLink =
+      this.suggestionsPatientName.length === 0 &&
+      this.patientNameQuery.length > 2;
   }
 
   onInputChange(event: Event) {
     const input = event.target as HTMLInputElement; // Cast event.target to HTMLInputElement
-    this.onSearchPatientName(input.value); //
+    this.patientNameQuery = input.value; // Store query in a class variable for further use
+    this.onSearchPatientName(input.value); // Trigger search based on input value
   }
   handlePatientNameKeyDown(event: KeyboardEvent) {
     if (this.suggestionsPatientName.length > 0) {
@@ -433,9 +474,9 @@ export class CreateBillComponent implements OnInit, OnDestroy {
           this.onSelectPatientName(this.suggestionsPatientName[0]);
         }
       }
-    } else if (event.key === 'Enter') {
-      event.preventDefault(); // Prevent default form submission if no suggestions
-      this.showCreateNewPatientLink = false; // Hide the link if no suggestions are available
+    } else if (event.key === 'Enter' && this.showCreateNewPatientLink) {
+      event.preventDefault(); // Prevent default form submission
+      this.goToPatient(); // Trigger the create new patient functionality
     }
   }
 
@@ -475,9 +516,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
   saveInvoice() {
     if (this.isSaving) return; // Exit if already saving
     this.isSaving = true; // Set flag to prevent further calls
-
     this.createInvoice(); // Call the method to create invoice
-
     // Reset the flag after a timeout or when the operation is complete
     setTimeout(() => {
       this.isSaving = false; // Reset the flag
@@ -492,6 +531,9 @@ export class CreateBillComponent implements OnInit, OnDestroy {
         total: this.total,
         grandTotalWithOutGst: this.grandTotalWithOutGst,
       });
+      this.invoiceForm.patchValue({
+        createdBy: sessionStorage.getItem('user'),
+      });
 
       this.invoiceForm.patchValue({
         invoiceID: this.invoiceUniqueID,
@@ -499,6 +541,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
       });
       this.showProgressBar = true;
 
+      console.log(this.invoiceForm.value);
       setTimeout(
         () =>
           this.http
@@ -564,6 +607,49 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     if (selectElement) {
       selectElement.focus(); // Ensure the select is focused
       selectElement.click(); // Simulate click to open the dropdown
+    }
+  }
+
+  goToPatient() {
+    this.router.navigateByUrl('/create-patient');
+  }
+
+  // reminder
+  public checkReminders(): void {
+    const now = new Date();
+
+    this.medicineData.forEach((medicine) => {
+      const expiryDateString = medicine.expiryDate; // Assuming expiryDate is in dd-mm-yyyy format
+      const expiryDate = this.reminderService.parseDate(expiryDateString); // Now accessible
+      const reminderDate = new Date(expiryDate);
+      reminderDate.setMonth(reminderDate.getMonth() - 1); // One month before
+
+      // Check if today is the reminder date
+      if (now.toDateString() === reminderDate.toDateString()) {
+        const reminderMessage = `Reminder: The expiry date for ${
+          medicine.medicineName
+        } is approaching on ${expiryDate.toLocaleDateString()}`;
+        this.reminderMessages.push(reminderMessage);
+      }
+      this.medicineReminders.push({
+        name: medicine.name,
+        expiryDate: expiryDate.toLocaleDateString(),
+        reminder: '',
+      });
+    });
+  }
+  getStatus(expiryDateString: string): string {
+    const expiryDate = this.reminderService.parseDate(expiryDateString);
+    const now = new Date();
+    const reminderDate = new Date(expiryDate);
+    reminderDate.setMonth(reminderDate.getMonth() - 1); // Reminder 1 month before
+
+    if (now > expiryDate) {
+      return 'Expired';
+    } else if (now > reminderDate) {
+      return 'Reminder Due';
+    } else {
+      return 'Valid';
     }
   }
 }

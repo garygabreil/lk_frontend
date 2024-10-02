@@ -2,6 +2,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  HostListener,
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -46,6 +47,7 @@ export class ManageStaffComponent {
 
   //currentDate
   currentDate: string;
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
 
   @ViewChild('closeModal')
   closeModal!: ElementRef;
@@ -73,6 +75,22 @@ export class ManageStaffComponent {
     });
 
     this.loadData();
+  }
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.updateChanges(); // Call your save method
+    }
+  }
+
+  // Listen for the keyup event to reset the flag when keys are released
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
   }
 
   loadData() {
@@ -127,7 +145,14 @@ export class ManageStaffComponent {
     }
     return age;
   }
-
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Check if Control + S is pressed
+    if (event.ctrlKey && event.key === 's') {
+      event.preventDefault(); // Prevent the default browser save action
+      this.updateChanges(); // Call your save method
+    }
+  }
   updateChanges() {
     this.showProgressBar = true;
     setTimeout(
@@ -140,9 +165,7 @@ export class ManageStaffComponent {
             type: this.staffForm.value.type,
             address: this.staffForm.value.address,
             pid: this.staffForm.value.pid,
-            createdOn: this.staffForm.value.currentDate,
             updatedOn: this.currentDate,
-            createdBy: this.staffForm.value.createdBy,
             updatedBy: sessionStorage.getItem('user'),
           })
           .subscribe(
@@ -158,7 +181,7 @@ export class ManageStaffComponent {
               console.log(err);
             }
           ),
-      3000
+      1000
     );
   }
 
@@ -185,7 +208,7 @@ export class ManageStaffComponent {
             console.log(err.message);
           }
         );
-    }, 3000);
+    }, 1000);
   }
 
   deleteSessionByID() {

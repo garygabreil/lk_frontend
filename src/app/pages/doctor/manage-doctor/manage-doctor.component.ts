@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../../services/http.service';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-manage-doctor',
@@ -50,6 +51,8 @@ export class ManageDoctorComponent {
   @ViewChild('closeModal')
   closeModal!: ElementRef;
 
+  private isCtrlSPressed = false; // Flag to prevent multiple triggers
+
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -74,6 +77,22 @@ export class ManageDoctorComponent {
 
     this.loadData();
   }
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === 's' && !this.isCtrlSPressed) {
+      event.preventDefault(); // Prevent the browser's default behavior
+      this.isCtrlSPressed = true; // Set the flag to true
+      this.updateChanges(); // Call your save method
+    }
+  }
+
+  // Listen for the keyup event to reset the flag when keys are released
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control' || event.key === 's') {
+      this.isCtrlSPressed = false; // Reset the flag when either key is released
+    }
+  }
 
   loadData() {
     this.http.getAllDoctors().subscribe((res) => {
@@ -94,10 +113,6 @@ export class ManageDoctorComponent {
         speciality: [res['speciality'], Validators.required],
         address: [res['address'], [Validators.required]],
         pid: [res['pid'], [Validators.required]],
-        createdOn: [res['createdOn']],
-        updatedOn: [res['updatedOn']],
-        createdBy: [res['createdBy']],
-        updatedBy: [res['updatedBy']],
       });
       sessionStorage.setItem('editDoctorById', id);
     });
@@ -140,9 +155,7 @@ export class ManageDoctorComponent {
             speciality: this.doctorForm.value.speciality,
             address: this.doctorForm.value.address,
             pid: this.doctorForm.value.pid,
-            createdOn: this.doctorForm.value.currentDate,
             updatedOn: this.currentDate,
-            createdBy: this.doctorForm.value.createdBy,
             updatedBy: sessionStorage.getItem('user'),
           })
           .subscribe(

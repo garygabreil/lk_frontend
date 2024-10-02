@@ -1,8 +1,81 @@
-<div class="card" style="width: 60%; margin-left: 20%">
+<div style="margin-left: 20%">
+  <button
+    class="btn btn-primary fw-lighter"
+    style="margin-bottom: 1%"
+    routerLink="/invoice-home"
+  >
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+</div>
+
+<div class="card" style="width: 80%; margin-left: 20%">
   <div class="card-body fw-lighter">
     <h3 class="fw-lighter text-capitalize">Add new medicine</h3>
     <form [formGroup]="pharmacyForm">
       <div class="container">
+        <div class="row">
+          <div class="col-3">
+            <label for="supplierName" class="fw-lighter text-capitalize"
+              >Supplier Name</label
+            >
+            <input
+              id="supplierName"
+              formControlName="supplierName"
+              class="form-control fw-lighter text-capitalize"
+              placeholder="Enter supplier name"
+            />
+            <div
+              *ngIf="pharmacyForm.get('supplierName')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-3">
+            <label for="supplierAddress" class="fw-lighter text-capitalize"
+              >Supplier Address</label
+            >
+            <input
+              id="supplierAddress"
+              formControlName="supplierAddress"
+              class="form-control fw-lighter text-capitalize"
+              placeholder="Enter supplier address"
+            />
+            <div
+              *ngIf="pharmacyForm.get('supplierAddress')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-3">
+            <label for="supplierPhone" class="fw-lighter text-capitalize"
+              >Supplier Phone</label
+            >
+            <input
+              id="supplierPhone"
+              formControlName="supplierPhone"
+              class="form-control fw-lighter text-capitalize"
+              placeholder="Enter supplier phone"
+            />
+            <div
+              *ngIf="pharmacyForm.get('supplierPhone')?.invalid"
+              style="color: red"
+            >
+              <small
+                *ngIf="pharmacyForm.get('supplierPhone')?.errors?.['required']"
+                style="color: red"
+                >Required</small
+              >
+              <small
+                *ngIf="pharmacyForm.get('supplierPhone')?.errors?.['pattern']"
+                style="color: red"
+                >Phone number must be 10 digits.</small
+              >
+            </div>
+          </div>
+          <div class="col-3"></div>
+        </div>
         <div class="row">
           <!-- Medicine Name -->
           <div class="col-6">

@@ -1,10 +1,19 @@
 <div class="container" style="margin-left: 20%; width: 80%; padding: 2%">
+  <div>
+    <button
+      class="btn btn-primary fw-lighter"
+      style="margin-bottom: 1%"
+      routerLink="/invoice-home"
+    >
+      <i class="bi bi-arrow-left"></i> Back
+    </button>
+  </div>
   <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">New Doctor Registration</h5>
         <div class="row">
-          <div class="col-3">
+          <div class="col-2">
             <label for="title" class="fw-lighter">Title</label>
             <select
               id="title"
@@ -27,7 +36,7 @@
             </div>
           </div>
 
-          <div class="col-5">
+          <div class="col-4">
             <label for="ConsultantName" class="fw-lighter text-capitalize"
               >Consultant Name, eg: SenthilRaja
             </label>
@@ -48,23 +57,37 @@
             <label for="consultantSpecialty" class="fw-lighter text-capitalize"
               >Speciality</label
             >
-
             <input
               type="text"
               class="form-control fw-lighter text-capitalize"
               placeholder="speciality"
               formControlName="speciality"
             />
-            <div
-              *ngIf="
-                doctorForm.get('speciality')?.invalid ||
-                !doctorForm.get('speciality')?.dirty
-              "
+            <small
+              *ngIf="doctorForm.get('speciality')?.invalid"
               style="color: red; font-size: small"
             >
               Required
-            </div>
+            </small>
           </div>
+          <div class="col-2">
+            <label for="PID" class="fw-lighter text-capitalize">PID</label>
+            <input
+              type="text"
+              class="form-control fw-lighter text-capitalize"
+              placeholder="speciality"
+              formControlName="pid"
+              readonly
+              style="background-color: lightgray"
+            />
+            <small
+              *ngIf="doctorForm.get('pid')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </small>
+          </div>
+
           <div class="row">
             <div class="col-4">
               <label for="phoneNumber" class="fw-lighter">Phone</label>
