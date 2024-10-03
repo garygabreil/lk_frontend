@@ -172,7 +172,7 @@
         <div class="container">
           <form id="searchForm" class="form-inline" [formGroup]="searchForm">
             <div class="row">
-              <div class="col-5">
+              <div class="col-4">
                 <div class="form-group">
                   <label for="medicineName" class="mr-2 fw-bolder"
                     >Medicine Name</label
@@ -215,7 +215,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-3">
+              <div class="col-4">
                 <div class="form-group">
                   <label for="supplierName" class="mr-2 fw-bolder"
                     >Supplier Name</label
@@ -386,26 +386,36 @@
               <form [formGroup]="pharmacyForm">
                 <div class="container">
                   <div class="row">
-                    <div class="col-3">
+                    <div class="col-4">
                       <label
                         for="supplierName"
                         class="fw-bolder text-capitalize"
                         >Supplier Name</label
                       >
+
                       <input
-                        id="supplierName"
+                        type="text"
                         formControlName="supplierName"
-                        class="form-control fw-bolder text-capitalize"
-                        placeholder="Enter supplier name"
+                        (input)="onInputSubChange($event)"
+                        (keydown)="handleSubNameKeyDown($event)"
+                        placeholder="Search for Supplier"
+                        class="form-control fw-bolder"
                       />
-                      <div
-                        *ngIf="pharmacyForm.get('supplierName')?.invalid"
-                        style="color: red; font-size: small"
-                      >
-                        Required
-                      </div>
+                      <ul *ngIf="suggestionsSubName.length > 0">
+                        <li
+                          *ngFor="
+                            let suggestion of suggestionsSubName;
+                            let i = index
+                          "
+                          (click)="onSelectSubName(suggestion)"
+                          [class.highlighted]="i === selectedSubIndex"
+                        >
+                          {{ suggestion.supplierName }},
+                          {{ suggestion.supplierAddress }}
+                        </li>
+                      </ul>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                       <label
                         for="supplierAddress"
                         class="fw-bolder text-capitalize"
@@ -456,7 +466,7 @@
                   </div>
                   <div class="row">
                     <!-- Medicine Name -->
-                    <div class="col-3">
+                    <div class="col-4">
                       <div class="form-group">
                         <label
                           for="medicineName"
@@ -464,17 +474,25 @@
                           >Medicine Name</label
                         >
                         <input
-                          id="medicineName"
+                          type="text"
                           formControlName="medicineName"
-                          class="form-control fw-bolder text-capitalize"
-                          placeholder="Enter medicine name"
+                          (input)="onInputMediChange($event)"
+                          (keydown)="handleMediNameKeyDown($event)"
+                          placeholder="Search for Supplier"
+                          class="form-control fw-bolder"
                         />
-                        <div
-                          *ngIf="pharmacyForm.get('medicineName')?.invalid"
-                          style="color: red; font-size: small"
-                        >
-                          Required
-                        </div>
+                        <ul *ngIf="suggestionsMediName.length > 0">
+                          <li
+                            *ngFor="
+                              let suggestion of suggestionsMediName;
+                              let i = index
+                            "
+                            (click)="onSelectMediName(suggestion)"
+                            [class.highlighted]="i === selectedMediIndex"
+                          >
+                            {{ suggestion.medicineName }}
+                          </li>
+                        </ul>
                       </div>
                     </div>
                     <div class="col-3">

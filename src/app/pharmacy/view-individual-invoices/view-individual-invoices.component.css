@@ -3,7 +3,7 @@
 /* Hide elements during print */
 @media print {
   * {
-    font-size: 10px;
+    font-size: 14px;
   }
 
   @page {

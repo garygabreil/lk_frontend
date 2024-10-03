@@ -60,6 +60,14 @@ export class ManageMedicineComponent {
   selectedSuggestionIndex: number = -1; // Initialize to -1 for no selection
   showCreateNewMedicineLink: any;
 
+  selectedSubIndex: number = -1;
+  suggestionsSubName: any[] = [];
+  subNameQuery: any;
+
+  selectedMediIndex: number = -1;
+  suggestionsMediName: any[] = [];
+  mediNameQuery: any;
+
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -174,6 +182,7 @@ export class ManageMedicineComponent {
             createdAt: this.formatDate(this.pharmacyForm.value.createdAt),
             hsn_code: this.pharmacyForm.value.hsn_code,
             batch: this.pharmacyForm.value.batch,
+            sgst: this.pharmacyForm.value.sgst,
             pack: this.pharmacyForm.value.pack,
             priceOfOne: this.pharmacyForm.value.priceOfOne,
             updatedBy: sessionStorage.getItem('user'),
@@ -504,5 +513,137 @@ export class ManageMedicineComponent {
         }
       );
     this.searchForm.reset();
+  }
+
+  // supplierSaerch
+  onSearchMediName(query: string) {
+    this.mediNameQuery = query;
+    if (this.mediNameQuery.length > 2) {
+      // Ensure minimum 3 characters for search
+      this.http.getProductByName(query).subscribe(
+        (res) => {
+          this.suggestionsMediName = res as any;
+        },
+        (error) => {
+          console.error('Search error:', error);
+          this.suggestionsMediName = []; // Clear suggestions on error
+        }
+      );
+    } else {
+      // Clear suggestions and hide the "Create New Patient" link if less than 3 characters
+      this.suggestionsMediName = [];
+    }
+  }
+
+  onInputMediChange(event: Event) {
+    const input = event.target as HTMLInputElement; // Cast event.target to HTMLInputElement
+    this.mediNameQuery = input.value; // Store query in a class variable for further use
+    this.onSearchMediName(input.value); // Trigger search based on input value
+  }
+  handleMediNameKeyDown(event: KeyboardEvent) {
+    if (this.suggestionsMediName.length > 0) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.selectedMediIndex =
+          (this.selectedMediIndex + 1) % this.suggestionsMediName.length;
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.selectedMediIndex =
+          (this.selectedMediIndex - 1 + this.suggestionsMediName.length) %
+          this.suggestionsMediName.length;
+      } else if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent default form submission
+        if (this.selectedMediIndex >= 0) {
+          const selectedMedi = this.suggestionsMediName[this.selectedMediIndex];
+          this.onSelectMediName(selectedMedi);
+        } else if (this.suggestionsMediName.length > 0) {
+          // If no specific selection, select the first suggestion
+          this.onSelectMediName(this.suggestionsMediName[0]);
+        }
+      }
+    } else if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent default form submission
+    }
+  }
+
+  onSelectMediName(res: any) {
+    this.pharmacyForm.patchValue({
+      medicineName: res.medicineName,
+      batch: res.batch,
+      hsn_code: res.hsn_code,
+      sgst: res.sgst,
+    });
+
+    // Clear the suggestions array after selection
+    this.suggestionsMediName = [];
+    this.selectedMediIndex = -1; // Reset index after selection
+
+    // Hide the "Create New Patient" link
+  }
+
+  //MediSearch
+  // supplierSaerch
+  onSearchSubName(query: string) {
+    this.subNameQuery = query;
+    if (this.subNameQuery.length > 2) {
+      // Ensure minimum 3 characters for search
+      this.http.getProductBySupplierName(query).subscribe(
+        (res) => {
+          this.suggestionsSubName = res as any;
+        },
+        (error) => {
+          console.error('Search error:', error);
+          this.suggestionsSubName = []; // Clear suggestions on error
+        }
+      );
+    } else {
+      // Clear suggestions and hide the "Create New Patient" link if less than 3 characters
+      this.suggestionsSubName = [];
+    }
+  }
+
+  onInputSubChange(event: Event) {
+    const input = event.target as HTMLInputElement; // Cast event.target to HTMLInputElement
+    this.subNameQuery = input.value; // Store query in a class variable for further use
+    this.onSearchSubName(input.value); // Trigger search based on input value
+  }
+  handleSubNameKeyDown(event: KeyboardEvent) {
+    if (this.suggestionsSubName.length > 0) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.selectedSubIndex =
+          (this.selectedSubIndex + 1) % this.suggestionsSubName.length;
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.selectedSubIndex =
+          (this.selectedSubIndex - 1 + this.suggestionsSubName.length) %
+          this.suggestionsSubName.length;
+      } else if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent default form submission
+        if (this.selectedSubIndex >= 0) {
+          const selectedSub = this.suggestionsSubName[this.selectedSubIndex];
+          this.onSelectSubName(selectedSub);
+        } else if (this.suggestionsSubName.length > 0) {
+          // If no specific selection, select the first suggestion
+          this.onSelectSubName(this.suggestionsSubName[0]);
+        }
+      }
+    } else if (event.key === 'Enter') {
+      event.preventDefault(); // Prevent default form submission
+    }
+  }
+
+  onSelectSubName(res: any) {
+    this.pharmacyForm.patchValue({
+      supplierName: res.supplierName,
+      supplierAddress: res.supplierAddress,
+      supplierPhoneNumber: res.supplierPhone,
+    });
+
+    // Clear the suggestions array after selection
+    this.suggestionsSubName = [];
+    this.selectedSubIndex = -1; // Reset index after selection
+
+    // Hide the "Create New Patient" link
   }
 }

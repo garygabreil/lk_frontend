@@ -15,22 +15,27 @@
     <form [formGroup]="pharmacyForm">
       <div class="container">
         <div class="row">
-          <div class="col-3">
+          <div class="col-4">
             <label for="supplierName" class="fw-bolder text-capitalize"
               >Supplier Name</label
             >
             <input
-              id="supplierName"
+              type="text"
               formControlName="supplierName"
-              class="form-control fw-bolder text-capitalize"
-              placeholder="Enter supplier name"
+              (input)="onInputChange($event)"
+              (keydown)="handlePatientNameKeyDown($event)"
+              placeholder="Search for Supplier"
+              class="form-control fw-bolder"
             />
-            <div
-              *ngIf="pharmacyForm.get('supplierName')?.invalid"
-              style="color: red; font-size: small"
-            >
-              Required
-            </div>
+            <ul *ngIf="suggestionsPatientName.length > 0">
+              <li
+                *ngFor="let suggestion of suggestionsPatientName; let i = index"
+                (click)="onSelectPatientName(suggestion)"
+                [class.highlighted]="i === selectedPatientIndex"
+              >
+                {{ suggestion.supplierName }}, {{ suggestion.supplierAddress }}
+              </li>
+            </ul>
           </div>
           <div class="col-3">
             <label for="supplierAddress" class="fw-bolder text-capitalize"
@@ -79,23 +84,28 @@
         </div>
         <div class="row">
           <!-- Medicine Name -->
-          <div class="col-3">
+          <div class="col-4">
             <div class="form-group">
               <label for="medicineName" class="fw-bolder text-capitalize"
                 >Medicine Name</label
               >
               <input
-                id="medicineName"
+                type="text"
                 formControlName="medicineName"
-                class="form-control fw-bolder text-capitalize"
-                placeholder="Enter medicine name"
+                (input)="onInputChangeMed($event)"
+                (keydown)="handleMedNameKeyDown($event)"
+                placeholder="Search Medicine"
+                class="form-control fw-bolder"
               />
-              <div
-                *ngIf="pharmacyForm.get('medicineName')?.invalid"
-                style="color: red; font-size: small"
-              >
-                Required
-              </div>
+              <ul *ngIf="suggestionsMedName.length > 0">
+                <li
+                  *ngFor="let suggestion of suggestionsMedName; let i = index"
+                  (click)="onSelectMedName(suggestion)"
+                  [class.highlighted]="i === selectedMedIndex"
+                >
+                  {{ suggestion.medicineName }},
+                </li>
+              </ul>
             </div>
           </div>
           <div class="col-3">
@@ -116,7 +126,7 @@
             </div>
           </div>
 
-          <div class="col-3">
+          <div class="col-2">
             <div class="form-group">
               <label for="pack" class="fw-bolder text-capitalize">Pack</label>
               <input
@@ -134,7 +144,7 @@
             </div>
           </div>
 
-          <div class="col-3">
+          <div class="col-2">
             <div class="form-group">
               <label for="hsn_code" class="fw-bolder text-capitalize"
                 >HSN code</label
