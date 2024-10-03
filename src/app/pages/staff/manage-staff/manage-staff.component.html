@@ -1,6 +1,6 @@
 <div style="margin-left: 17%; width: 90%">
   <button
-    class="btn btn-primary fw-lighter"
+    class="btn btn-dark fw-bolder"
     style="margin-bottom: 1%"
     routerLink="/invoice-home"
   >
@@ -8,14 +8,14 @@
   </button>
 </div>
 <div class="card" style="margin-left: 17%; width: 90%">
-  <div class="container fw-lighter">
+  <div class="container fw-bolder">
     <h5 class="mb-4 fw-bolder"></h5>
     <!-- Search input -->
     <div class="row">
       <div class="col-3">
         <input
           type="text"
-          class="form-control fw-lighter mb-2"
+          class="form-control fw-bolder mb-2"
           placeholder="Search..."
           aria-label="search"
           [(ngModel)]="search"
@@ -30,18 +30,18 @@
     <br />
     <!-- Table -->
     <table
-      class="table table-bordered table-striped fw-lighter"
+      class="table table-bordered table-striped fw-bolder"
       *ngIf="staffData.length > 0; else no_data_content"
     >
       <thead class="thead-dark">
         <tr>
-          <th class="fw-lighter text-capitalize">#</th>
-          <th class="fw-lighter text-capitalize">Staff Name</th>
-          <th class="fw-lighter">PID</th>
-          <th class="fw-lighter text-capitalize">type</th>
-          <th class="fw-lighter text-capitalize">phone number</th>
-          <th colspan="2" class="fw-lighter text-capitalize">edit</th>
-          <th class="fw-lighter text-capitalize">delete</th>
+          <th class="fw-bolder text-capitalize">#</th>
+          <th class="fw-bolder text-capitalize">Staff Name</th>
+          <th class="fw-bolder">PID</th>
+          <th class="fw-bolder text-capitalize">type</th>
+          <th class="fw-bolder text-capitalize">phone number</th>
+          <th colspan="2" class="fw-bolder text-capitalize">view</th>
+          <th class="fw-bolder text-capitalize">delete</th>
         </tr>
       </thead>
       <tbody id="tableBody">
@@ -53,28 +53,28 @@
             let i = index
           "
         >
-          <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-          <td class="fw-lighter text-capitalize">
+          <td class="fw-bolder text-capitalize">{{ i + 1 }}</td>
+          <td class="fw-bolder text-capitalize">
             {{ staff.title }}{{ staff.staffName }}
           </td>
-          <td class="fw-lighter text-capitalize">{{ staff.pid }}</td>
-          <td class="fw-lighter text-capitalize">
+          <td class="fw-bolder text-capitalize">{{ staff.pid }}</td>
+          <td class="fw-bolder text-capitalize">
             {{ staff.type }}
           </td>
-          <td class="fw-lighter text-capitalize">{{ staff.phone }}</td>
-          <td class="fw-lighter text-capitalize" colspan="2">
+          <td class="fw-bolder text-capitalize">{{ staff.phone }}</td>
+          <td class="fw-bolder text-capitalize" colspan="2">
             <button
-              class="btn btn-sm btn-success text-capitalize fw-lighter"
+              class="btn btn-sm btn-outline-dark text-capitalize fw-bolder"
               (click)="editStaffById(staff._id)"
               data-bs-toggle="modal"
               data-bs-target="#editModal"
             >
-              edit
+              view
             </button>
           </td>
           <td>
             <button
-              class="btn btn-sm btn-danger text-capitalize fw-lighter"
+              class="btn btn-sm btn-danger text-capitalize fw-bolder"
               (click)="deleteStaffById(staff._id)"
               data-bs-toggle="modal"
               data-bs-target="#deleteModal"
@@ -124,10 +124,10 @@
               <form [formGroup]="staffForm">
                 <div class="row">
                   <div class="col">
-                    <label for="title" class="fw-lighter">Title</label>
+                    <label for="title" class="fw-bolder">Title</label>
                     <input
                       type="text"
-                      class="form-control fw-lighter text-capitalize"
+                      class="form-control fw-bolder text-capitalize"
                       placeholder="title"
                       formControlName="title"
                     />
@@ -140,12 +140,12 @@
                   </div>
 
                   <div class="col">
-                    <label for="staffName" class="fw-lighter text-capitalize"
+                    <label for="staffName" class="fw-bolder text-capitalize"
                       >Staff Name</label
                     >
                     <input
                       type="text"
-                      class="form-control fw-lighter text-capitalize"
+                      class="form-control fw-bolder text-capitalize"
                       placeholder="Staff Name"
                       formControlName="staffName"
                     />
@@ -159,12 +159,12 @@
                 </div>
                 <div class="row">
                   <div class="col">
-                    <label for="type" class="fw-lighter text-capitalize"
+                    <label for="type" class="fw-bolder text-capitalize"
                       >type</label
                     >
                     <input
                       type="text"
-                      class="form-control fw-lighter text-capitalize"
+                      class="form-control fw-bolder text-capitalize"
                       placeholder="Type"
                       formControlName="type"
                     />
@@ -177,13 +177,13 @@
                     </div>
                   </div>
                   <div class="col">
-                    <label for="phoneNumber" class="fw-lighter text-capitalize"
+                    <label for="phoneNumber" class="fw-bolder text-capitalize"
                       >Phone Number</label
                     >
 
                     <input
                       type="text"
-                      class="form-control fw-lighter text-capitalize"
+                      class="form-control fw-bolder text-capitalize"
                       placeholder="Phone number"
                       formControlName="phone"
                     />
@@ -204,13 +204,13 @@
                     </div>
                   </div>
                   <div class="col">
-                    <label for="Address" class="fw-lighter text-capitalize"
+                    <label for="Address" class="fw-bolder text-capitalize"
                       >Address</label
                     >
 
                     <input
                       type="text"
-                      class="form-control fw-lighter text-capitalize"
+                      class="form-control fw-bolder text-capitalize"
                       placeholder="Address"
                       formControlName="address"
                     />
@@ -224,13 +224,13 @@
                 </div>
                 <div class="align-items-center align-text-center mt-1">
                   <button
-                    class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter text-capitalize"
+                    class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-bolder text-capitalize"
                     [disabled]="staffForm.invalid"
                     (click)="updateChanges()"
                     (keydown)="handleKeyboardEvent($event)"
                   >
                     <mat-icon *ngIf="!showProgressBar">save</mat-icon>
-                    <span *ngIf="!showProgressBar">Save</span>
+                    <span *ngIf="!showProgressBar">update</span>
                     <div
                       class="spinner-border text-light"
                       role="status"
@@ -245,11 +245,11 @@
           </div>
           <div class="container">
             <div
-              class="alert alert-success fw-lighter text-capitalize"
+              class="alert alert-success fw-bolder text-capitalize"
               role="alert"
               *ngIf="showAlert"
             >
-              <p class="alert-heading fw-lighter">
+              <p class="alert-heading fw-bolder">
                 Success! Staff details has been updated
               </p>
             </div>
@@ -281,10 +281,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1
-          class="modal-title fs-5 fw-lighter text-capitalize"
-          id="deleteModal"
-        >
+        <h1 class="modal-title fs-5 fw-bolder text-capitalize" id="deleteModal">
           Delete doctor
         </h1>
         <button
@@ -295,13 +292,13 @@
           (click)="deleteSessionByID()"
         ></button>
       </div>
-      <div class="modal-body fw-lighter">
+      <div class="modal-body fw-bolder">
         Are you sure, you want to delete the staff entry?
       </div>
       <div class="modal-footer">
         <button
           type="button"
-          class="btn btn-danger btn-sm fw-lighter text-capitalize"
+          class="btn btn-danger btn-sm fw-bolder text-capitalize"
           (click)="deleteStaff()"
         >
           <span *ngIf="!showDeleteProgressBar">yes</span>
@@ -315,7 +312,7 @@
         </button>
         <button
           type="button"
-          class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
+          class="btn btn-sm btn-dark fw-bolderm text-capitalize"
           data-bs-dismiss="modal"
           #closeModal
           (click)="deleteSessionByID()"

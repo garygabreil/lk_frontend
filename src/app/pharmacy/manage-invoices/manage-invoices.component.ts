@@ -472,6 +472,7 @@ export class ManageInvoicesComponent {
           (err) => {
             this.groupedInvoicesBySpecificDate = [];
             this.totalNumberOfEntriesForSpecific = 0;
+            this.showProgressBar = false;
           }
         );
       this.searchForm.reset();

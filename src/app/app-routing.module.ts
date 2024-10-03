@@ -19,6 +19,7 @@ import { CreatePoComponent } from './pharmacy/create-po/create-po.component';
 import { InvoiceHomeComponent } from './pages/invoice-home/invoice-home.component';
 import { ManagePoInvoicesComponent } from './pharmacy/manage-po-invoices/manage-po-invoices.component';
 import { ViewIndividualPoInvoicesComponent } from './pharmacy/view-individual-po-invoices/view-individual-po-invoices.component';
+import { PharmacyPatientCreationComponent } from './pages/pharmacy-patient-creation/pharmacy-patient-creation.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -41,6 +42,10 @@ const routes: Routes = [
   { path: 'invoice-home', component: InvoiceHomeComponent },
   { path: 'view-po-bill', component: ManagePoInvoicesComponent },
   { path: 'view-po-invoice/:id', component: ViewIndividualPoInvoicesComponent },
+  {
+    path: 'create-patient-pharmacy',
+    component: PharmacyPatientCreationComponent,
+  },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

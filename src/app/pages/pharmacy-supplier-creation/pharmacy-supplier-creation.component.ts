@@ -4,11 +4,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../services/http.service';
 
 @Component({
-  selector: 'app-create-medicine',
-  templateUrl: './create-medicine.component.html',
-  styleUrl: './create-medicine.component.css',
+  selector: 'app-pharmacy-supplier-creation',
+  templateUrl: './pharmacy-supplier-creation.component.html',
+  styleUrl: './pharmacy-supplier-creation.component.css',
 })
-export class CreateMedicineComponent {
+export class PharmacySupplierCreationComponent {
   pharmacyForm: FormGroup;
   showProgressBar: any;
   showAlert: any;
@@ -35,14 +35,16 @@ export class CreateMedicineComponent {
       quantity: [0],
       hsn_code: [''],
       sgst: [0],
-      pack: [],
       createdAt: [''],
       createdBy: [''],
       updatedBy: [''],
       updatedOn: [''],
-      supplierName: [''],
-      supplierAddress: [''],
-      supplierPhone: [],
+      supplierName: ['', Validators.required],
+      supplierAddress: ['', Validators.required],
+      supplierPhone: [
+        '',
+        [Validators.required, Validators.pattern('^[0-9]{10}$')],
+      ],
       mid: [''],
     });
   }
@@ -89,31 +91,34 @@ export class CreateMedicineComponent {
   }
 
   createMedicine() {
-    this.pharmacyForm.patchValue({
-      createdAt: this.currentDate,
-      createdBy: sessionStorage.getItem('user'),
-      expiryDate: this.formatDate(this.pharmacyForm.value.expiryDate),
-    });
-
     this.showProgressBar = true;
     setTimeout(() => {
-      this.http.createProduct(this.pharmacyForm.value).subscribe(
-        (res) => {
-          this.showProgressBar = true;
-          this.showAlert = true;
-          this.showProgressBar = false;
-          this.pharmacyForm.reset();
-          this.generateUniqueNumber();
-        },
-        (err) => {
-          this.showProgressBar = true;
-          this.showExistAlert = true;
-          this.pharmacyForm.reset();
-          this.showExistAlert = err.status;
-          this.showProgressBar = false;
-          this.generateUniqueNumber();
-        }
-      );
+      this.http
+        .createProduct({
+          createdAt: this.currentDate,
+          createdBy: sessionStorage.getItem('user'),
+          mid: this.pharmacyForm.value.mid,
+          supplierName: this.pharmacyForm.value.supplierName,
+          supplierAddress: this.pharmacyForm.value.supplierAddress,
+          supplierPhone: this.pharmacyForm.value.supplierPhone,
+        })
+        .subscribe(
+          (res) => {
+            this.showProgressBar = true;
+            this.showAlert = true;
+            this.showProgressBar = false;
+            this.pharmacyForm.reset();
+            this.generateUniqueNumber();
+          },
+          (err) => {
+            this.showProgressBar = true;
+            this.showExistAlert = true;
+            this.pharmacyForm.reset();
+            this.showExistAlert = err.status;
+            this.showProgressBar = false;
+            this.generateUniqueNumber();
+          }
+        );
     }, 1000);
   }
 

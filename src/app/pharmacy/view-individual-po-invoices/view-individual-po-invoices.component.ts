@@ -135,12 +135,9 @@ export class ViewIndividualPoInvoicesComponent {
       if (this.clickedGSTlink) {
         this.gstAmount = (res['total'] * this.gstRate) / 100;
         this.invoiceForm = this.fb.group({
-          supplierName: [res['supplierName'], Validators.required],
-          supplierPhoneNumber: [
-            res['supplierPhoneNumber'],
-            Validators.required,
-          ],
-          supplierAddress: [res['supplierAddress'], Validators.required],
+          supplierName: [res['supplierName']],
+          supplierPhoneNumber: [res['supplierPhoneNumber']],
+          supplierAddress: [res['supplierAddress']],
           paymentType: [res['paymentType'], Validators.required],
           paymentStatus: [res['paymentStatus'], Validators.required],
           invoiceID: [res['invoiceID'], Validators.required],
@@ -150,6 +147,8 @@ export class ViewIndividualPoInvoicesComponent {
           gstAdded: res['gstAdded'],
           items: this.fb.array([]), // FormArray for invoice items
           createdBy: [res['createdBy']],
+          updatedBy: sessionStorage.getItem('user'),
+          updatedOn: this.currentDate,
         });
         this.initializeItems(res['items']);
       } else {
@@ -172,6 +171,8 @@ export class ViewIndividualPoInvoicesComponent {
           gstAdded: res['gstAdded'],
           items: this.fb.array([]), // FormArray for invoice items
           createdBy: [res['createdBy']],
+          updatedBy: sessionStorage.getItem('user'),
+          updatedOn: this.currentDate,
         });
         this.initializeItems(res['items']);
       }
@@ -256,17 +257,23 @@ export class ViewIndividualPoInvoicesComponent {
       expiryDate: [''],
       mid: [''],
       total: [''],
+      pack: [''],
+      hsn_code: [''],
       mrp: [''],
       sgst: [''],
     });
 
     // Listen to changes in price or quantity to update the total for the item
     itemForm
-      .get('price')
+      .get('mrp')
       ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
     itemForm.get('quantity')?.valueChanges.subscribe(() => {
       this.updateTotal(itemForm);
     });
+    itemForm
+      .get('sgst')
+      ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
+
     this.items.push(itemForm);
     this.suggestions.push([]); // Add an empty array for suggestions for the new row
     this.addGST();
@@ -279,12 +286,15 @@ export class ViewIndividualPoInvoicesComponent {
       batch: item.batch,
       quantity: item.quantity,
       expiryDate: item.expiryDate,
+      pack: item.pack,
       mid: item.mid,
+      hsn_code: item.hsn_code,
       total: item.total,
       mrp: item.price,
       sgst: item.sgst,
     });
     this.items.push(itemFormGroup);
+
     this.calculateTotals(); // Recalculate totals whenever an item is added
   }
 
@@ -366,6 +376,7 @@ export class ViewIndividualPoInvoicesComponent {
     if (!Array.isArray(this.suggestions[index])) {
       this.suggestions[index] = [];
     }
+    console.log(medicine);
 
     const itemFormGroup = this.items.at(index) as FormGroup;
     itemFormGroup.patchValue({
@@ -373,7 +384,9 @@ export class ViewIndividualPoInvoicesComponent {
       price: medicine.price,
       mid: medicine.mid,
       batch: medicine.batch,
+      pack: medicine.pack,
       quantity: medicine.quantity,
+      hsn_code: medicine.hsn_code,
       expiryDate: medicine.expiryDate,
       mrp: medicine.price,
       sgst: medicine.sgst,
@@ -419,7 +432,7 @@ export class ViewIndividualPoInvoicesComponent {
   calculateItemTotal(index: number) {
     const item = this.items.at(index) as FormGroup;
     const quantity = item.get('quantity')?.value;
-    const price = item.get('price')?.value;
+    const price = item.get('mrp')?.value;
     const sgst = item.get('sgst')?.value || 0;
     const total = price * quantity;
     const gst = (total * sgst) / 100;
@@ -559,7 +572,9 @@ export class ViewIndividualPoInvoicesComponent {
           batch: item.batch,
           quantity: item.quantity,
           expiryDate: item.expiryDate,
-          mrp: item.price,
+          mrp: item.mrp,
+          pack: item.pack,
+          hsn_code: item.hsn_code,
           sgst: item.sgst,
           total: item.total,
         })
@@ -704,7 +719,7 @@ export class ViewIndividualPoInvoicesComponent {
 
   updateTotal(itemForm: FormGroup) {
     // this.clickedGSTlink = false;
-    const price = itemForm.get('price')?.value || 0;
+    const price = itemForm.get('mrp')?.value || 0;
     const quantity = itemForm.get('quantity')?.value || 0;
     const sgst = itemForm.get('sgst')?.value || 0;
     const total = price * quantity;

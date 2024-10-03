@@ -87,9 +87,9 @@ export class CreatePoComponent implements OnInit, OnDestroy {
     this.showCreateNewMedicineLink = [];
 
     this.invoiceForm = this.fb.group({
-      supplierName: ['', Validators.required],
-      supplierPhoneNumber: ['', Validators.required],
-      supplierAddress: ['', Validators.required],
+      supplierName: [''],
+      supplierPhoneNumber: [''],
+      supplierAddress: [''],
       paymentType: [null, Validators.required],
       paymentStatus: [null, Validators.required],
       invoiceID: [this.invoiceUniqueID, Validators.required],
@@ -187,27 +187,25 @@ export class CreatePoComponent implements OnInit, OnDestroy {
   // Method to add a new item to the FormArray
   addItem() {
     const itemForm = this.fb.group({
-      medicineName: ['', Validators.required],
-      price: ['', Validators.required],
+      medicineName: [''],
+      price: [''],
       quantity: [0],
-      mrp: ['', Validators.required],
-      sgst: ['', Validators.required],
+      mrp: [''],
+      sgst: [''],
       batch: [''],
       expiryDate: [''],
       mid: [''],
+      pack: [],
       hsn_code: [''],
-      total: ['', Validators.required],
+      total: [''],
     });
-
-    // Listen to changes in price or quantity to update the total for the item
-    itemForm
-      .get('price')
-      ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
 
     itemForm
       .get('sgst')
       ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
-
+    itemForm
+      .get('mrp')
+      ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
     itemForm.get('quantity')?.valueChanges.subscribe(() => {
       this.updateTotal(itemForm);
     });
@@ -218,7 +216,7 @@ export class CreatePoComponent implements OnInit, OnDestroy {
   }
 
   updateTotal(itemForm: FormGroup) {
-    const price = itemForm.get('price')?.value || 0;
+    const price = itemForm.get('mrp')?.value || 0;
     const quantity = itemForm.get('quantity')?.value || 0;
     const sgst = itemForm.get('sgst')?.value || 0;
     const total = price * quantity;
@@ -305,18 +303,25 @@ export class CreatePoComponent implements OnInit, OnDestroy {
     if (!Array.isArray(this.suggestions[index])) {
       this.suggestions[index] = [];
     }
-
     const itemFormGroup = this.items.at(index) as FormGroup;
+
+    this.updateTotal(itemFormGroup);
+
+    console.log(itemFormGroup.value.total);
+
     itemFormGroup.patchValue({
       medicineName: medicine.medicineName,
-      price: medicine.price,
-      mid: medicine.mid,
-      batch: medicine.batch,
-      quantity: medicine.quantity,
-      expiryDate: medicine.expiryDate,
       mrp: medicine.price,
+      expiryDate: medicine.expiryDate,
+      pack: medicine.pack,
+      quantity: medicine.quantity,
+      batch: medicine.batch,
+      hsn_code: medicine.hsn_code,
       sgst: medicine.sgst,
+      mid: medicine.mid,
     });
+
+    this.calculateTotal();
 
     this.checkQuantity(medicine.quantity, index);
 
@@ -516,6 +521,7 @@ export class CreatePoComponent implements OnInit, OnDestroy {
         invoiceID: this.invoiceUniqueID,
         invoiceDate: this.invoiceForm.value.invoiceDate,
         createdBy: sessionStorage.getItem('user'),
+        createdOn: this.currentDate,
       });
       this.showProgressBar = true;
 

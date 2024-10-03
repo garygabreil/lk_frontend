@@ -78,24 +78,22 @@ export class ManageMedicineComponent {
     });
 
     this.pharmacyForm = this.fb.group({
-      medicineName: ['', Validators.required],
-      batch: ['', Validators.required],
-      expiryDate: ['', Validators.required],
-      price: [0, Validators.required],
-      quantity: [0, [Validators.required, Validators.min(1)]],
-      hsn_code: ['', Validators.required],
-      sgst: ['', Validators.required],
+      medicineName: [''],
+      batch: [''],
+      expiryDate: [''],
+      price: [0],
+      quantity: [0],
+      hsn_code: [''],
+      sgst: [''],
       createdAt: [''],
       createdBy: [''],
       updatedBy: [''],
       updatedOn: [''],
       mid: [''],
-      supplierName: ['', Validators.required],
-      supplierAddress: ['', Validators.required],
-      supplierPhone: [
-        '',
-        [Validators.required, Validators.pattern('^[0-9]{10}$')],
-      ],
+      pack: [''],
+      supplierName: [''],
+      supplierAddress: [''],
+      supplierPhone: ['', [Validators.pattern('^[0-9]{10}$')]],
     });
     this.loadData();
   }
@@ -107,37 +105,51 @@ export class ManageMedicineComponent {
       this.checkReminders();
     });
   }
+  convertToDateInputFormat(dateString: string): string | null {
+    if (!dateString) return null;
 
+    const [day, month, year] = dateString.split('-').map(Number); // Split and convert to numbers
+    // Create Date object in UTC to avoid timezone issues
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return date.toISOString().split('T')[0]; // Convert to 'yyyy-mm-dd'
+  }
   async editMedicineById(id: any) {
     await this.http.getProductById(id).subscribe((res: any) => {
       this.pharmacyForm = this.fb.group({
-        medicineName: [res['medicineName'], Validators.required],
-        price: [res['price'], Validators.required],
-        quantity: [res['quantity'], [Validators.required, Validators.min(1)]],
-        hsn_code: [res['hsn_code'], [Validators.required]],
-        batch: [res['batch'], [Validators.required]],
-        mid: [res['mid'], [Validators.required]],
-        expiryDate: [
-          this.convertToISODate(res['expiryDate']),
-          Validators.required,
-        ],
+        medicineName: [res['medicineName']],
+        price: [res['price']],
+        quantity: [res['quantity']],
+        hsn_code: [res['hsn_code']],
+        batch: [res['batch']],
+        pack: [res['pack']],
+        mid: [res['mid']],
+        expiryDate: [this.convertToDateInputFormat(res['expiryDate'])],
         createdAt: this.convertToISODate(res['createdAt']),
         createdBy: res['createdBy'],
-        sgst: [res['sgst'], Validators.required],
-        supplierName: [res['supplierName'], Validators.required],
-        supplierAddress: [res['supplierAddress'], Validators.required],
-        supplierPhone: [res['supplierPhone'], Validators.required],
+        sgst: [res['sgst']],
+        supplierName: [res['supplierName']],
+        supplierAddress: [res['supplierAddress']],
+        supplierPhone: [res['supplierPhone']],
       });
       sessionStorage.setItem('editMedicineById', id);
     });
   }
   //date formatter
-  convertToISODate(date: string) {
-    let parts = date.split('-');
-    let day = parts[0];
-    let month = parts[1];
-    let year = parts[2];
-    return `${year}-${month}-${day}`;
+  public convertToISODate(dateString: string): string | null {
+    if (!dateString || typeof dateString !== 'string') {
+      return null; // Return null or handle error appropriately
+    }
+
+    const [day, month, year] = dateString.split('-').map(Number);
+
+    // Check if the parsed values are valid numbers
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+      return null; // Return null if any component is invalid
+    }
+
+    // Create a new Date object and return the ISO string
+    const date = new Date(year, month - 1, day); // Month is 0-based
+    return date.toISOString(); // Return ISO string format
   }
 
   //date formatter
@@ -162,6 +174,7 @@ export class ManageMedicineComponent {
             createdAt: this.formatDate(this.pharmacyForm.value.createdAt),
             hsn_code: this.pharmacyForm.value.hsn_code,
             batch: this.pharmacyForm.value.batch,
+            pack: this.pharmacyForm.value.pack,
             priceOfOne: this.pharmacyForm.value.priceOfOne,
             updatedBy: sessionStorage.getItem('user'),
             updatedOn: this.convertToISODate(this.currentDate),
@@ -277,7 +290,6 @@ export class ManageMedicineComponent {
           }
         );
     }, 1000);
-    window.location.reload();
   }
 
   deleteSessionByID() {
@@ -308,29 +320,40 @@ export class ManageMedicineComponent {
 
   public checkReminders(): void {
     const now = new Date();
-
     this.medicineData.forEach((medicine) => {
       const expiryDateString = medicine.expiryDate; // Assuming expiryDate is in dd-mm-yyyy format
       const expiryDate = this.reminderService.parseDate(expiryDateString); // Now accessible
-      const reminderDate = new Date(expiryDate);
-      reminderDate.setMonth(reminderDate.getMonth() - 1); // One month before
 
-      // Check if today is the reminder date
-      if (now.toDateString() === reminderDate.toDateString()) {
-        const reminderMessage = `Reminder: The expiry date for ${
-          medicine.medicineName
-        } is approaching on ${expiryDate.toLocaleDateString()}`;
-        this.reminderMessages.push(reminderMessage);
+      // Check if expiryDate is valid before proceeding
+      if (expiryDate) {
+        const reminderDate = new Date(expiryDate);
+        reminderDate.setMonth(reminderDate.getMonth() - 1); // One month before
+
+        // Check if today is the reminder date
+        if (now.toDateString() === reminderDate.toDateString()) {
+          const reminderMessage = `Reminder: The expiry date for ${
+            medicine.medicineName
+          } is approaching on ${expiryDate.toLocaleDateString()}`;
+          this.reminderMessages.push(reminderMessage);
+        }
+
+        this.medicineReminders.push({
+          name: medicine.medicineName,
+          expiryDate: expiryDate.toLocaleDateString(),
+          reminder: '',
+        });
+      } else {
       }
-      this.medicineReminders.push({
-        name: medicine.name,
-        expiryDate: expiryDate.toLocaleDateString(),
-        reminder: '',
-      });
     });
   }
   getStatus(expiryDateString: string): string {
     const expiryDate = this.reminderService.parseDate(expiryDateString);
+
+    // Check if expiryDate is valid
+    if (!expiryDate) {
+      return 'Invalid Date'; // or any other fallback status
+    }
+
     const now = new Date();
     const reminderDate = new Date(expiryDate);
     reminderDate.setMonth(reminderDate.getMonth() - 1); // Reminder 1 month before

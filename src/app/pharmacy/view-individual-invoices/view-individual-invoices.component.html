@@ -2,30 +2,39 @@
   <form [formGroup]="invoiceForm">
     <div class="container mt-3">
       <div class="row">
-        <div class="col-12 text-center">
+        <div class="col-12 text-center text-uppercase">
           <div>
-            <h4>SRI LAKSHMI MEDICAL</h4>
-            <p>26/1,Chekku Mettu St, Kallakurichi</p>
+            <h4 class="text-uppercase fw-bolder">SRI LAKSHMI MEDICAL</h4>
+            <p class="text-uppercase fw-bolder">
+              26/1,Chekku Mettu St, Kallakurichi
+            </p>
           </div>
         </div>
       </div>
 
       <!-- Invoice Details -->
       <div class="row">
-        <div class="col-6">
-          <p>
-            <strong>Patient Name:</strong> {{ invoiceForm.value.patientName }}
+        <div class="col-6 text-uppercase">
+          <p class="text-uppercase">
+            <strong class="text-uppercase">Patient Name:</strong>
+            {{ invoiceForm.value.patientName }}
           </p>
-          <p><strong>PID:</strong> {{ invoiceForm.value.pid }}</p>
           <p>
-            <strong>Consultant Name:</strong>
+            <strong class="text-uppercase">PID:</strong>
+            {{ invoiceForm.value.pid }}
+          </p>
+          <p class="text-uppercase">
+            <strong class="text-uppercase">Consultant Name:</strong>
             Dr. {{ invoiceForm.value.consultantName }}
           </p>
         </div>
         <div class="col-3" style="margin-left: 20%">
-          <p><strong>Invoice ID:</strong> {{ invoiceForm.value.invoiceID }}</p>
-          <p>
-            <strong>Invoice Date:</strong>
+          <p class="text-uppercase">
+            <strong class="text-uppercase">Invoice ID:</strong>
+            {{ invoiceForm.value.invoiceID }}
+          </p>
+          <p class="text-uppercase">
+            <strong class="text-uppercase">Invoice Date:</strong>
             {{ invoiceForm.value.invoiceDate }}
           </p>
         </div>
@@ -35,14 +44,14 @@
       <table class="table table-bordered table-sm">
         <thead>
           <tr>
-            <th>SNo</th>
-            <th>Description</th>
-            <th>Qty</th>
-            <th>Batch</th>
-            <th>Exp</th>
-            <th>MRP</th>
-            <th>SGST</th>
-            <th>Total</th>
+            <th class="text-uppercase">S.No</th>
+            <th class="text-uppercase">Description</th>
+            <th class="text-uppercase">Qty</th>
+            <th class="text-uppercase">Batch</th>
+            <th class="text-uppercase">Exp</th>
+            <th class="text-uppercase">MRP</th>
+            <th class="text-uppercase">SGST</th>
+            <th class="text-uppercase">Total</th>
           </tr>
         </thead>
         <tbody formArrayName="items">
@@ -51,36 +60,52 @@
             [formGroupName]="i"
           >
             <td>{{ i + 1 }}</td>
-            <td>
+            <td class="text-uppercase">
               {{ item.get("medicineName")?.value }}
             </td>
-            <td>
+            <td class="text-uppercase">
               {{ item.get("quantity")?.value }}
             </td>
-            <td>
+            <td class="text-uppercase">
               {{ item.get("batch")?.value }}
             </td>
-            <td>
+            <td class="text-uppercase">
               {{ item.get("expiryDate")?.value }}
             </td>
-            <td>{{ item.get("mrp")?.value }}.00</td>
-            <td>{{ item.get("sgst")?.value }}%</td>
-            <td>{{ item.get("total")?.value }}.00</td>
+            <td class="text-uppercase">
+              {{
+                item.get("mrp")?.value | currency : "INR" : "symbol" : "1.2-2"
+              }}
+            </td>
+            <td class="text-uppercase">{{ item.get("sgst")?.value }}%</td>
+            <td class="text-uppercase">
+              {{
+                item.get("total")?.value | currency : "INR" : "symbol" : "1.2-2"
+              }}
+            </td>
           </tr>
         </tbody>
       </table>
-      <div style="margin-left: 80%">
-        Total: {{ total | currency : "INR" : "symbol" : "1.2-2" }}
-        <div *ngIf="clickedGSTlink == false">
+      <div style="margin-left: 80%" class="text-uppercase">
+        Total:
+        {{
+          this.invoiceForm.value.total | currency : "INR" : "symbol" : "1.2-2"
+        }}
+        <div *ngIf="clickedGSTlink == false" class="text-uppercase">
           Grand Total:
-          {{ grandTotalWithOutGst | currency : "INR" : "symbol" : "1.2-2" }}
+          {{
+            this.grandTotalWithOutGst | currency : "INR" : "symbol" : "1.2-2"
+          }}
         </div>
-        <div *ngIf="clickedGSTlink == true">
+        <div *ngIf="clickedGSTlink == true" class="text-uppercase">
           gstAmount:
           {{ this.gstAmount | currency : "INR" : "symbol" : "1.2-2" }}
           <br />
           Grand Total:
-          {{ grandTotalWithGst | currency : "INR" : "symbol" : "1.2-2" }}
+          {{
+            this.invoiceForm.value.grandTotalWithGST
+              | currency : "INR" : "symbol" : "1.2-2"
+          }}
         </div>
         <br />
         <br />
@@ -97,13 +122,13 @@
 <div class="card" id="noshow" style="margin-left: 15%">
   <div class="card-body">
     <button
-      class="btn btn-primary"
+      class="btn btn-dark fw-bolder"
       style="margin-bottom: 1%"
       id="noshow"
       routerLink="/view-bill"
       (click)="removeSessionID()"
     >
-      back
+      <i class="bi bi-arrow-left"></i> Back
     </button>
     <br />
 
@@ -111,14 +136,14 @@
       <form [formGroup]="invoiceForm">
         <div class="row mb-3">
           <div class="col-md-3">
-            <label for="customerName" class="fw-lighter">Patient Name</label>
+            <label for="customerName" class="fw-bolder">Patient Name</label>
             <input
               type="text"
               formControlName="patientName"
               (input)="onInputChange($event)"
               (keydown)="handlePatientNameKeyDown($event)"
               placeholder="Search for Patient"
-              class="form-control fw-lighter"
+              class="form-control fw-bolder"
             />
             <ul *ngIf="suggestionsPatientName.length > 0">
               <li
@@ -133,7 +158,7 @@
               *ngIf="showCreateNewPatientLink == true"
               [class.highlighted]="selectedPatientIndex === -1"
               (click)="goToPatient()"
-              class="fw-lighter"
+              class="fw-bolder"
             >
               Create a new patient
             </div>
@@ -145,11 +170,11 @@
             </div>
           </div>
           <div class="col-md-3">
-            <label for="invoiceDate" class="fw-lighter">Patient Address</label>
+            <label for="invoiceDate" class="fw-bolder">Patient Address</label>
             <input
               formControlName="patientAddress"
               type="text"
-              class="form-control fw-lighter"
+              class="form-control fw-bolder"
               id="patientAddress"
               style="background-color: lightgray"
             />
@@ -161,11 +186,11 @@
             </div>
           </div>
           <div class="col-md-2">
-            <label for="invoiceDate" class="fw-lighter">PID</label>
+            <label for="invoiceDate" class="fw-bolder">PID</label>
             <input
               formControlName="pid"
               type="text"
-              class="form-control fw-lighter"
+              class="form-control fw-bolder"
               id="pid"
               readonly
               style="background-color: lightgray"
@@ -178,12 +203,12 @@
             </div>
           </div>
           <div class="col-md-3">
-            <label for="consultantName" class="fw-lighter"
+            <label for="consultantName" class="fw-bolder"
               >Consultant Name</label
             >
             <select
               formControlName="consultantName"
-              class="form-control fw-lighter dropdown-toggle text-capitalize"
+              class="form-control fw-bolder dropdown-toggle text-capitalize"
             >
               <option value="null">Select Consultant</option>
               <option
@@ -202,11 +227,11 @@
             </div>
           </div>
           <div class="col-md-3">
-            <label for="invoiceDate" class="fw-lighter">Invoice Date</label>
+            <label for="invoiceDate" class="fw-bolder">Invoice Date</label>
             <input
               formControlName="invoiceDate"
               type="date"
-              class="form-control fw-lighter"
+              class="form-control fw-bolder"
               id="invoiceDate"
             />
             <div
@@ -217,11 +242,11 @@
             </div>
           </div>
           <div class="col-md-3">
-            <label for="invoiceID" class="fw-lighter">Invoice ID</label>
+            <label for="invoiceID" class="fw-bolder">Invoice ID</label>
             <input
               formControlName="invoiceID"
               type="text"
-              class="form-control fw-lighter"
+              class="form-control fw-bolder"
               id="invoiceID"
               readonly
               style="background-color: lightgray"
@@ -234,11 +259,8 @@
             </div>
           </div>
           <div class="col-md-3">
-            <label for="paymentType" class="fw-lighter">Payment Type</label>
-            <select
-              class="form-select fw-lighter"
-              formControlName="paymentType"
-            >
+            <label for="paymentType" class="fw-bolder">Payment Type</label>
+            <select class="form-select fw-bolder" formControlName="paymentType">
               <option value="null">select payment type</option>
               <option value="UPI">UPI</option>
               <option value="CASH">CASH</option>
@@ -254,9 +276,9 @@
             </div>
           </div>
           <div class="col-md-3">
-            <label for="paymentStatus" class="fw-lighter">Payment Status</label>
+            <label for="paymentStatus" class="fw-bolder">Payment Status</label>
             <select
-              class="form-select fw-lighter"
+              class="form-select fw-bolder"
               formControlName="paymentStatus"
             >
               <option value="null">select payment status</option>
@@ -273,20 +295,26 @@
           </div>
         </div>
         <hr />
-        <div class="col fw-lighter" style="margin-left: 3%">
+        <div class="col fw-bolder" style="margin-left: 1%">
           Medicine
-          <span style="margin-left: 17%">price &#8377;</span>
-          <span style="margin-left: 8%">quantity</span>
-          <span style="margin-left: 5%">mrp &#8377;</span>
-          <span style="margin-left: 9%">sgst %</span>
-          <span style="margin-left: 8%">total &#8377;</span>
+          <span class="text-capitalize" style="margin-left: 20%"
+            >price &#8377;</span
+          >
+          <span class="text-capitalize" style="margin-left: 8%">quantity</span>
+          <span class="text-capitalize" style="margin-left: 7%"
+            >MRP &#8377;</span
+          >
+          <span class="" style="margin-left: 9%">SGST%</span>
+          <span class="text-capitalize" style="margin-left: 7.5%"
+            >total &#8377;</span
+          >
         </div>
         <div formArrayName="items">
           <div
             *ngFor="let item of items.controls; let i = index"
             [formGroupName]="i"
           >
-            <div class="row fw-lighter" style="margin-top: 1%">
+            <div class="row fw-bolder" style="margin-top: 1%">
               {{ i + 1 }})
               <div class="col-3">
                 <input
@@ -295,7 +323,7 @@
                   (keyup)="onSearch($event, i)"
                   (keydown)="handleKeyDown($event, i)"
                   placeholder="Search for medicine"
-                  class="form-control fw-lighter"
+                  class="form-control fw-bolder"
                 />
                 <div style="color: red" *ngIf="noStockAlert[i]">
                   no stock available
@@ -322,7 +350,7 @@
                   [routerLink]="['/create-medicine']"
                   *ngIf="showCreateNewMedicineLink[i]"
                   [ngClass]="{ highlighted: selectedSuggestionIndex === -1 }"
-                  class="fw-lighter"
+                  class="fw-bolder"
                 >
                   Not found
                 </div>
@@ -332,7 +360,7 @@
                 <input
                   formControlName="price"
                   placeholder="Price &#8377;"
-                  class="form-control fw-lighter"
+                  class="form-control fw-bolder"
                   readonly
                   style="background-color: lightgray"
                 />
@@ -343,7 +371,7 @@
                   formControlName="quantity"
                   placeholder="Quantity"
                   type="text"
-                  class="form-control fw-lighter"
+                  class="form-control fw-bolder"
                   (ngModelChange)="calculateItemTotal(i)"
                   (ngModelChange)="calculateTotal()"
                 />
@@ -353,7 +381,7 @@
                   formControlName="mrp"
                   placeholder="mrp"
                   type="text"
-                  class="form-control fw-lighter"
+                  class="form-control fw-bolder"
                   readonly
                   style="background-color: lightgray"
                 />
@@ -363,7 +391,7 @@
                   formControlName="sgst"
                   placeholder="sgst"
                   type="text"
-                  class="form-control fw-lighter"
+                  class="form-control fw-bolder"
                   readonly
                   style="background-color: lightgray"
                 />
@@ -374,7 +402,7 @@
                   formControlName="total"
                   placeholder="Total &#8377; "
                   type="text"
-                  class="form-control fw-lighter"
+                  class="form-control fw-bolder"
                   (keydown.Tab)="addItem1()"
                   (ngModelChange)="calculateTotals()"
                   readonly
@@ -383,7 +411,7 @@
               </div>
               <div class="col">
                 <button
-                  class="btn btn-sm btn-danger fw-lighter"
+                  class="btn btn-sm btn-danger fw-bolder"
                   type="button"
                   id="noshow"
                   (click)="deleteItem(i)"
@@ -396,20 +424,20 @@
         </div>
         <hr />
 
-        <div class="fw-lighter">
+        <div class="fw-bolder">
           <label for="">Total:</label>
           {{
             this.invoiceForm.value.total | currency : "INR" : "symbol" : "1.2-2"
           }}
         </div>
-        <div class="fw-lighter">
+        <div class="text fw-bolder">
           <label for=""
             >GST Amount:
             {{ this.gstAmount | currency : "INR" : "symbol" : "1.2-2" }}</label
           >
         </div>
         <!-- without GST -->
-        <div class="fw-lighter">
+        <div class="fw-bolder">
           <label for="">Grand Total:</label>
           {{
             this.invoiceForm.value.grandTotalWithGST
@@ -418,7 +446,7 @@
         </div>
         <!-- with GST -->
         <button
-          class="btn btn-sm btn-secondary fw-lighter"
+          class="btn btn-sm btn-secondary fw-bolder"
           (click)="addGST()"
           id="noshow"
           *ngIf="clickedGSTlink == false"
@@ -427,7 +455,7 @@
           add gst
         </button>
         <button
-          class="btn btn-sm btn-secondary fw-lighter"
+          class="btn btn-sm btn-secondary fw-bolder"
           *ngIf="clickedGSTlink == true"
           (click)="removeGST()"
           id="noshow"
@@ -437,13 +465,15 @@
         </button>
         <hr />
         <div class="d-flex align-items-center justify-content-center mt-1">
+          <!-- Update Button with Save Icon -->
           <button
-            class="btn btn-success btn-sm fw-lighter text-capitalize me-2"
+            class="btn btn-outline-dark btn-sm fw-bolder text-capitalize me-2"
             [disabled]="invoiceForm.invalid"
             (click)="updateInvoice()"
             type="button"
           >
-            <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+            <i class="bi bi-save" *ngIf="!showProgressBar"></i>
+            <!-- Bootstrap 'save' icon -->
             <span *ngIf="!showProgressBar">update</span>
             <div
               class="spinner-border text-light"
@@ -454,19 +484,21 @@
             </div>
           </button>
 
+          <!-- Print Button with Print Icon -->
           <button
-            class="btn btn-success btn-sm fw-lighter"
+            class="btn btn-outline-primary btn-sm fw-bolder"
             (click)="triggerPrint()"
             type="button"
           >
-            <mat-icon>print</mat-icon>
-            <span>print</span>
+            <i class="bi bi-printer"></i>
+            <!-- Bootstrap 'printer' icon -->
+            <span>Print</span>
           </button>
         </div>
 
         <br id="noshow" />
         <div
-          class="alert alert-success fw-lighter"
+          class="alert alert-success fw-bolder"
           role="alert"
           id="noshow"
           *ngIf="showAlert"

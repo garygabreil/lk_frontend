@@ -1,6 +1,6 @@
 <div style="margin-left: 20%">
   <button
-    class="btn btn-primary fw-lighter"
+    class="btn btn-dark fw-bolder"
     style="margin-bottom: 1%"
     routerLink="/invoice-home"
   >
@@ -9,19 +9,20 @@
 </div>
 
 <div class="card" style="width: 80%; margin-left: 20%">
-  <div class="card-body fw-lighter">
-    <h3 class="fw-lighter text-capitalize">Add new medicine</h3>
+  <div class="card-body fw-bolder">
+    <h3 class="fw-bolder text-capitalize">Add new medicine</h3>
+    <br />
     <form [formGroup]="pharmacyForm">
       <div class="container">
         <div class="row">
           <div class="col-3">
-            <label for="supplierName" class="fw-lighter text-capitalize"
+            <label for="supplierName" class="fw-bolder text-capitalize"
               >Supplier Name</label
             >
             <input
               id="supplierName"
               formControlName="supplierName"
-              class="form-control fw-lighter text-capitalize"
+              class="form-control fw-bolder text-capitalize"
               placeholder="Enter supplier name"
             />
             <div
@@ -32,13 +33,13 @@
             </div>
           </div>
           <div class="col-3">
-            <label for="supplierAddress" class="fw-lighter text-capitalize"
+            <label for="supplierAddress" class="fw-bolder text-capitalize"
               >Supplier Address</label
             >
             <input
               id="supplierAddress"
               formControlName="supplierAddress"
-              class="form-control fw-lighter text-capitalize"
+              class="form-control fw-bolder text-capitalize"
               placeholder="Enter supplier address"
             />
             <div
@@ -49,13 +50,13 @@
             </div>
           </div>
           <div class="col-3">
-            <label for="supplierPhone" class="fw-lighter text-capitalize"
+            <label for="supplierPhone" class="fw-bolder text-capitalize"
               >Supplier Phone</label
             >
             <input
               id="supplierPhone"
               formControlName="supplierPhone"
-              class="form-control fw-lighter text-capitalize"
+              class="form-control fw-bolder text-capitalize"
               placeholder="Enter supplier phone"
             />
             <div
@@ -78,15 +79,15 @@
         </div>
         <div class="row">
           <!-- Medicine Name -->
-          <div class="col-6">
+          <div class="col-3">
             <div class="form-group">
-              <label for="medicineName" class="fw-lighter text-capitalize"
+              <label for="medicineName" class="fw-bolder text-capitalize"
                 >Medicine Name</label
               >
               <input
                 id="medicineName"
                 formControlName="medicineName"
-                class="form-control fw-lighter text-capitalize"
+                class="form-control fw-bolder text-capitalize"
                 placeholder="Enter medicine name"
               />
               <div
@@ -99,13 +100,11 @@
           </div>
           <div class="col-3">
             <div class="form-group">
-              <label for="batch" class="fw-lighter text-capitalize"
-                >Batch</label
-              >
+              <label for="batch" class="fw-bolder text-capitalize">Batch</label>
               <input
                 id="batch"
                 formControlName="batch"
-                class="form-control fw-lighter text-capitalize"
+                class="form-control fw-bolder text-capitalize"
                 placeholder="Enter batch"
               />
               <div
@@ -116,16 +115,35 @@
               </div>
             </div>
           </div>
+
           <div class="col-3">
             <div class="form-group">
-              <label for="hsn_code" class="fw-lighter text-capitalize"
+              <label for="pack" class="fw-bolder text-capitalize">Pack</label>
+              <input
+                id="pack"
+                formControlName="pack"
+                class="form-control fw-bolder text-capitalize"
+                placeholder="Enter pack"
+              />
+              <div
+                *ngIf="pharmacyForm.get('pack')?.invalid"
+                style="color: red; font-size: small"
+              >
+                Required
+              </div>
+            </div>
+          </div>
+
+          <div class="col-3">
+            <div class="form-group">
+              <label for="hsn_code" class="fw-bolder text-capitalize"
                 >HSN code</label
               >
               <input
                 id="batch"
                 formControlName="hsn_code"
-                class="form-control fw-lighter text-capitalize"
-                placeholder="Enter batch"
+                class="form-control fw-bolder text-capitalize"
+                placeholder="Enter hsn_code"
               />
               <div
                 *ngIf="pharmacyForm.get('hsn_code')?.invalid"
@@ -141,14 +159,14 @@
           <!-- Quantity -->
           <div class="col-md-3">
             <div class="form-group">
-              <label for="quantity" class="fw-lighter text-capitalize"
+              <label for="quantity" class="fw-bolder text-capitalize"
                 >Quantity</label
               >
               <input
                 id="quantity"
                 type="number"
                 formControlName="quantity"
-                class="form-control fw-lighter text-capitalize"
+                class="form-control fw-bolder text-capitalize"
                 placeholder="Enter quantity"
               />
               <div
@@ -163,13 +181,13 @@
           <!-- Price -->
           <div class="col-md-3">
             <div class="form-group">
-              <label for="price" class="fw-lighter text-capitalize"
+              <label for="price" class="fw-bolder text-capitalize"
                 >Price/Rate &#8377;</label
               >
               <input
                 id="price"
                 formControlName="price"
-                class="form-control fw-lighter text-capitalize"
+                class="form-control fw-bolder text-capitalize"
                 placeholder="Enter price/rate &#8377;"
                 (ngModelChange)="calculatePerQun()"
                 (change)="onPriceChange($event)"
@@ -186,11 +204,11 @@
           <!-- expiry date -->
           <div class="col-md-4">
             <div class="form-group">
-              <label for="price" class="fw-lighter">Expiry Date</label>
+              <label for="price" class="fw-bolder">Expiry Date</label>
               <input
                 id="expiryDate"
                 formControlName="expiryDate"
-                class="form-control fw-lighter"
+                class="form-control fw-bolder"
                 placeholder="Enter expiry date"
                 type="date"
               />
@@ -204,11 +222,11 @@
           </div>
           <div class="col-md-3">
             <div class="form-group">
-              <label for="price" class="fw-lighter">SGST %</label>
+              <label for="price" class="fw-bolder">SGST %</label>
               <input
                 id="expiryDate"
                 formControlName="sgst"
-                class="form-control fw-lighter"
+                class="form-control fw-bolder"
                 placeholder="Enter sgst %"
                 type="number"
               />
@@ -222,11 +240,11 @@
           </div>
           <div class="col-md-3">
             <div class="form-group">
-              <label for="quantity" class="fw-lighter">MID</label>
+              <label for="quantity" class="fw-bolder">MID</label>
               <input
                 id="mid"
                 formControlName="mid"
-                class="form-control fw-lighter text-capitalize"
+                class="form-control fw-bolder text-capitalize"
                 placeholder="mid"
                 readonly
                 style="background-color: lightgray"
@@ -244,11 +262,12 @@
         <br />
         <!-- Submit Button -->
         <button
-          class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
+          class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-bolder"
           [disabled]="pharmacyForm.invalid"
           (click)="createMedicine()"
         >
-          <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+          <i class="bi bi-save me-2" *ngIf="!showProgressBar"></i>
+          <!-- Bootstrap Save Icon -->
           <span *ngIf="!showProgressBar">Save</span>
           <div
             class="spinner-border text-light"
@@ -262,29 +281,15 @@
     </form>
   </div>
   <div class="container">
-    <div class="alert alert-success fw-lighter" role="alert" *ngIf="showAlert">
-      Medicine entry has been completed
-      <button
-        type="button"
-        class="btn btn-link fw-lighter"
-        [routerLink]="['/create-bill']"
-      >
-        go to create bill
-      </button>
-      <button
-        type="button"
-        class="btn btn-link fw-lighter"
-        [routerLink]="['/manage-medicine']"
-      >
-        view medicines
-      </button>
+    <div class="alert alert-success fw-bolder" role="alert" *ngIf="showAlert">
+      Entry has been completed
     </div>
     <div
-      class="alert alert-danger fw-lighter"
+      class="alert alert-danger fw-bolder"
       role="alert"
       *ngIf="showExistAlert"
     >
-      Medicine entry exist!
+      Entry already exist!
     </div>
   </div>
 </div>

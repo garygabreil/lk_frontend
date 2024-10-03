@@ -14,6 +14,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ReminderService } from '../../services/reminder.service';
+import { PrintServiceService } from '../../services/print-service.service';
 
 @Component({
   selector: 'app-create-bill',
@@ -67,6 +68,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       // Add keydown event listener
       document.addEventListener('keydown', this.handleKeyboardEvent.bind(this));
+      this.printService.attachPrintListener();
     }
   }
 
@@ -79,6 +81,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
       );
     }
     this.isPrinting = false;
+    this.printService.removePrintListener();
   }
 
   constructor(
@@ -89,7 +92,8 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     @Inject(PLATFORM_ID) private platformId: Object,
     private matIconRegistry: MatIconRegistry,
     private domSanitizer: DomSanitizer,
-    public reminderService: ReminderService
+    public reminderService: ReminderService,
+    private printService: PrintServiceService
   ) {
     this.suggestions = [];
 
@@ -97,7 +101,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
     this.showCreateNewMedicineLink = [];
     this.invoiceForm = this.fb.group({
       patientName: ['', Validators.required],
-      patientAddress: ['', Validators.required],
+      patientAddress: [''],
       pid: ['', Validators.required],
       title: [''],
       gender: [''],
@@ -156,27 +160,11 @@ export class CreateBillComponent implements OnInit, OnDestroy {
           this.showAlertForm = false;
         }, 1000);
       }
-    } else if (event.ctrlKey && event.key === 'p') {
-      event.preventDefault(); // Prevent the default print action
-      if (!this.isPrinting) {
-        this.isPrinting = true;
-        this.triggerPrint();
-      }
     }
   }
 
   triggerPrint(): void {
-    setTimeout(() => {
-      window.print();
-      this.resetPrintFlag();
-    }, 500); // Slight delay to ensure page is fully rendered before print
-  }
-
-  // Reset the flag after printing is done
-  resetPrintFlag(): void {
-    setTimeout(() => {
-      this.isPrinting = false;
-    }, 1000); // Reset after 1 second to allow future prints
+    window.print();
   }
 
   getAllDoctor() {
@@ -533,6 +521,7 @@ export class CreateBillComponent implements OnInit, OnDestroy {
       });
       this.invoiceForm.patchValue({
         createdBy: sessionStorage.getItem('user'),
+        createdOn: this.currentDate,
       });
 
       this.invoiceForm.patchValue({
@@ -540,8 +529,6 @@ export class CreateBillComponent implements OnInit, OnDestroy {
         invoiceDate: this.invoiceForm.value.invoiceDate,
       });
       this.showProgressBar = true;
-
-      console.log(this.invoiceForm.value);
       setTimeout(
         () =>
           this.http
@@ -611,35 +598,46 @@ export class CreateBillComponent implements OnInit, OnDestroy {
   }
 
   goToPatient() {
-    this.router.navigateByUrl('/create-patient');
+    this.router.navigateByUrl('/create-patient-pharmacy');
   }
 
   // reminder
   public checkReminders(): void {
     const now = new Date();
-
     this.medicineData.forEach((medicine) => {
       const expiryDateString = medicine.expiryDate; // Assuming expiryDate is in dd-mm-yyyy format
       const expiryDate = this.reminderService.parseDate(expiryDateString); // Now accessible
-      const reminderDate = new Date(expiryDate);
-      reminderDate.setMonth(reminderDate.getMonth() - 1); // One month before
 
-      // Check if today is the reminder date
-      if (now.toDateString() === reminderDate.toDateString()) {
-        const reminderMessage = `Reminder: The expiry date for ${
-          medicine.medicineName
-        } is approaching on ${expiryDate.toLocaleDateString()}`;
-        this.reminderMessages.push(reminderMessage);
+      // Check if expiryDate is valid before proceeding
+      if (expiryDate) {
+        const reminderDate = new Date(expiryDate);
+        reminderDate.setMonth(reminderDate.getMonth() - 1); // One month before
+
+        // Check if today is the reminder date
+        if (now.toDateString() === reminderDate.toDateString()) {
+          const reminderMessage = `Reminder: The expiry date for ${
+            medicine.medicineName
+          } is approaching on ${expiryDate.toLocaleDateString()}`;
+          this.reminderMessages.push(reminderMessage);
+        }
+
+        this.medicineReminders.push({
+          name: medicine.medicineName,
+          expiryDate: expiryDate.toLocaleDateString(),
+          reminder: '',
+        });
+      } else {
       }
-      this.medicineReminders.push({
-        name: medicine.name,
-        expiryDate: expiryDate.toLocaleDateString(),
-        reminder: '',
-      });
     });
   }
   getStatus(expiryDateString: string): string {
     const expiryDate = this.reminderService.parseDate(expiryDateString);
+
+    // Check if expiryDate is valid
+    if (!expiryDate) {
+      return 'Invalid Date'; // or any other fallback status
+    }
+
     const now = new Date();
     const reminderDate = new Date(expiryDate);
     reminderDate.setMonth(reminderDate.getMonth() - 1); // Reminder 1 month before

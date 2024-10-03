@@ -9,10 +9,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1
-          class="modal-title fs-5 fw-lighter text-capitalize"
-          id="deleteModal"
-        >
+        <h1 class="modal-title fs-5 fw-bolder text-capitalize" id="deleteModal">
           Delete Invoice
         </h1>
         <button
@@ -23,13 +20,13 @@
           (click)="deleteSessionByID()"
         ></button>
       </div>
-      <div class="modal-body fw-lighter">
+      <div class="modal-body fw-bolder">
         Are you sure, you want to delete the invoice entry?
       </div>
       <div class="modal-footer">
         <button
           type="button"
-          class="btn btn-danger btn-sm fw-lighter text-capitalize"
+          class="btn btn-danger btn-sm fw-bolder text-capitalize"
           (click)="deleteInvoice()"
         >
           <span *ngIf="!showDeleteProgressBar">yes</span>
@@ -43,7 +40,7 @@
         </button>
         <button
           type="button"
-          class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
+          class="btn btn-sm btn-dark fw-bolderm text-capitalize"
           data-bs-dismiss="modal"
           #closeModal
           (click)="deleteSessionByID()"
@@ -58,19 +55,19 @@
 <!-- report -->
 <div class="container" style="width: 93%; margin-left: 15%">
   <button
-    class="btn btn-primary fw-lighter"
+    class="btn btn-dark fw-bolder"
     style="margin-bottom: 1%"
     routerLink="/invoice-home"
   >
     <i class="bi bi-arrow-left"></i> Back
   </button>
   <hr />
-  <h4 class="fw-lighter">Purchase Order Management</h4>
+  <h4 class="fw-bolder">Purchase Order Management</h4>
   <div class="accordion" id="accordionExample">
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingOne">
         <button
-          class="accordion-button fw-lighter"
+          class="accordion-button fw-bolder"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseOne"
@@ -82,20 +79,20 @@
       </h2>
       <div
         id="collapseOne"
-        class="accordion-collapse collapse fw-lighter"
+        class="accordion-collapse collapse fw-bolder"
         aria-labelledby="headingOne"
         data-bs-parent="#accordionExample"
       >
-        <div class="accordion-body fw-lighter">
+        <div class="accordion-body fw-bolder">
           <!--  -->
           <div class="card" id="noshow">
             <br />
-            <div class="container fw-lighter">
+            <div class="container fw-bolder">
               <div class="row">
                 <div class="col-3">
                   <input
                     type="text"
-                    class="form-control fw-lighter mb-2"
+                    class="form-control fw-bolder mb-2"
                     placeholder="Search..."
                     aria-label="search"
                     [(ngModel)]="search"
@@ -110,19 +107,20 @@
               <br />
               <!-- Table -->
               <table
-                class="table table-bordered table-striped fw-lighter"
+                class="table table-bordered table-striped fw-bolder"
                 *ngIf="invoiceData.length > 0; else no_data_content"
               >
                 <thead class="thead-dark">
                   <tr>
-                    <th class="fw-lighter text-capitalize">#</th>
-                    <th class="fw-lighter text-capitalize">Invoice ID</th>
-                    <th class="fw-lighter text-capitalize">Created Date</th>
-                    <th class="fw-lighter text-capitalize">Supplier Name</th>
-                    <th class="fw-lighter text-capitalize">Payment Type</th>
-                    <th class="fw-lighter text-capitalize">Payment Status</th>
-                    <th class="fw-lighter text-capitalize">view</th>
-                    <th class="fw-lighter text-capitalize">delete</th>
+                    <th class="fw-bolder text-capitalize">#</th>
+                    <th class="fw-bolder text-capitalize">Invoice ID</th>
+                    <th class="fw-bolder text-capitalize">Created Date</th>
+                    <th class="fw-bolder text-capitalize">Supplier Name</th>
+                    <th class="fw-bolder text-capitalize">Payment Type</th>
+                    <th class="fw-bolder text-capitalize">Payment Status</th>
+                    <th class="fw-bolder text-capitalize">Total</th>
+                    <th class="fw-bolder text-capitalize">view</th>
+                    <th class="fw-bolder text-capitalize">delete</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -134,27 +132,33 @@
                       let i = index
                     "
                   >
-                    <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">{{ i + 1 }}</td>
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.invoiceID }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.invoiceDate }}
                     </td>
 
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.supplierName }}
                     </td>
 
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.paymentType }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.paymentStatus }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
+                      {{
+                        medicine.grandTotalWithGST
+                          | currency : "INR" : "symbol" : "1.2-2"
+                      }}
+                    </td>
+                    <td class="fw-bolder text-capitalize">
                       <button
-                        class="btn btn-sm btn-success text-capitalize fw-lighter"
+                        class="btn btn-sm btn-outline-dark text-capitalize fw-bolder"
                         data-bs-toggle="modal"
                         data-bs-target="#editModal"
                         (click)="viewInvoice(medicine._id)"
@@ -164,7 +168,7 @@
                     </td>
                     <td>
                       <button
-                        class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                        class="btn btn-sm btn-danger text-capitalize fw-bolder"
                         data-bs-toggle="modal"
                         data-bs-target="#deleteModal"
                         (click)="deleteMedicineById(medicine._id)"
@@ -190,7 +194,7 @@
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingTwo">
         <button
-          class="accordion-button collapsed fw-lighter"
+          class="accordion-button collapsed fw-bolder"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseTwo"
@@ -206,7 +210,7 @@
         aria-labelledby="headingTwo"
         data-bs-parent="#accordionExample"
       >
-        <div class="accordion-body fw-lighter">
+        <div class="accordion-body fw-bolder">
           <form (ngSubmit)="searchInvoices()" [formGroup]="searchForm">
             <div class="container">
               <div class="row">
@@ -252,7 +256,7 @@
                     (input)="onInputChange($event)"
                     (keydown)="handlePatientNameKeyDown($event)"
                     placeholder="Search for Supplier"
-                    class="form-control fw-lighter"
+                    class="form-control fw-bolder"
                   />
                   <ul *ngIf="suggestionsPatientName.length > 0">
                     <li
@@ -270,7 +274,7 @@
                   <div
                     *ngIf="showCreateNewPatientLink == true"
                     [class.highlighted]="selectedPatientIndex === -1"
-                    class="fw-lighter"
+                    class="fw-bolder"
                   >
                     Not found
                   </div>
@@ -302,7 +306,7 @@
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
 
-              <button type="submit" class="btn btn-success fw-lighter">
+              <button type="submit" class="btn btn-outline-dark fw-bolder">
                 Search Invoices
               </button>
               <div
@@ -321,14 +325,14 @@
           </form>
 
           <div class="card" id="noshow">
-            <div class="container fw-lighter">
+            <div class="container fw-bolder">
               <h5 class="mb-4 fw-bolder"></h5>
               <!-- Search input -->
               <div class="row">
                 <div class="col-3">
                   <input
                     type="text"
-                    class="form-control fw-lighter mb-2"
+                    class="form-control fw-bolder mb-2"
                     placeholder="Search..."
                     aria-label="search"
                     [(ngModel)]="search"
@@ -343,7 +347,7 @@
               <br />
               <!-- Table -->
               <table
-                class="table table-bordered table-striped fw-lighter"
+                class="table table-bordered table-striped fw-bolder"
                 *ngIf="
                   totalNumberOfEntriesForSpecific > 0;
                   else no_data_content
@@ -351,14 +355,15 @@
               >
                 <thead class="thead-dark">
                   <tr>
-                    <th class="fw-lighter text-capitalize">#</th>
-                    <th class="fw-lighter text-capitalize">Invoice ID</th>
-                    <th class="fw-lighter text-capitalize">Created Date</th>
-                    <th class="fw-lighter text-capitalize">Supplier Name</th>
-                    <th class="fw-lighter text-capitalize">Payment Type</th>
-                    <th class="fw-lighter text-capitalize">Payment Status</th>
-                    <th class="fw-lighter text-capitalize">view</th>
-                    <th class="fw-lighter text-capitalize">delete</th>
+                    <th class="fw-bolder text-capitalize">#</th>
+                    <th class="fw-bolder text-capitalize">Invoice ID</th>
+                    <th class="fw-bolder text-capitalize">Created Date</th>
+                    <th class="fw-bolder text-capitalize">Supplier Name</th>
+                    <th class="fw-bolder text-capitalize">Payment Type</th>
+                    <th class="fw-bolder text-capitalize">Payment Status</th>
+                    <th class="fw-bolder text-capitalize">Total</th>
+                    <th class="fw-bolder text-capitalize">view</th>
+                    <th class="fw-bolder text-capitalize">delete</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -370,26 +375,32 @@
                       let i = index
                     "
                   >
-                    <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">{{ i + 1 }}</td>
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.invoiceID }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.invoiceDate }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.supplierName }}
                     </td>
 
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.paymentType }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.paymentStatus }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
+                      {{
+                        medicine.grandTotalWithGST
+                          | currency : "INR" : "symbol" : "1.2-2"
+                      }}
+                    </td>
+                    <td class="fw-bolder text-capitalize">
                       <button
-                        class="btn btn-sm btn-success text-capitalize fw-lighter"
+                        class="btn btn-sm btn-outline-darktext-capitalize fw-bolder"
                         (click)="viewInvoice(medicine._id)"
                       >
                         view
@@ -397,7 +408,7 @@
                     </td>
                     <td>
                       <button
-                        class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                        class="btn btn-sm btn-danger text-capitalize fw-bolder"
                         data-bs-toggle="modal"
                         data-bs-target="#deleteModal"
                         (click)="deleteMedicineById(medicine._id)"
@@ -423,7 +434,7 @@
     <div class="accordion-item">
       <h2 class="accordion-header" id="headingThree">
         <button
-          class="accordion-button collapsed fw-lighter"
+          class="accordion-button collapsed fw-bolder"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseThree"
@@ -439,16 +450,16 @@
         aria-labelledby="headingThree"
         data-bs-parent="#accordionExampleThree"
       >
-        <div class="accordion-body fw-lighter">
+        <div class="accordion-body fw-bolder">
           <div class="card" id="noshow">
-            <div class="container fw-lighter">
+            <div class="container fw-bolder">
               <h5 class="mb-4 fw-bolder"></h5>
               <!-- Search input -->
               <div class="row">
                 <div class="col-3">
                   <input
                     type="text"
-                    class="form-control fw-lighter mb-2"
+                    class="form-control fw-bolder mb-2"
                     placeholder="Search..."
                     aria-label="search"
                     [(ngModel)]="search"
@@ -463,19 +474,21 @@
               <br />
               <!-- Table -->
               <table
-                class="table table-bordered table-striped fw-lighter"
+                class="table table-bordered table-striped fw-bolder"
                 *ngIf="invoiceDataAll?.length > 0; else no_data_content"
               >
                 <thead class="thead-dark">
                   <tr>
-                    <th class="fw-lighter text-capitalize">#</th>
-                    <th class="fw-lighter text-capitalize">Invoice ID</th>
-                    <th class="fw-lighter text-capitalize">Created Date</th>
-                    <th class="fw-lighter text-capitalize">Supplier Name</th>
-                    <th class="fw-lighter text-capitalize">Payment Type</th>
-                    <th class="fw-lighter text-capitalize">Payment Status</th>
-                    <th class="fw-lighter text-capitalize">view</th>
-                    <th class="fw-lighter text-capitalize">delete</th>
+                    <th class="fw-bolder text-capitalize">#</th>
+                    <th class="fw-bolder text-capitalize">Invoice ID</th>
+                    <th class="fw-bolder text-capitalize">Created Date</th>
+                    <th class="fw-bolder text-capitalize">Supplier Name</th>
+                    <th class="fw-bolder text-capitalize">Payment Type</th>
+                    <th class="fw-bolder text-capitalize">Payment Status</th>
+                    <th class="fw-bolder text-capitalize">Total</th>
+
+                    <th class="fw-bolder text-capitalize">view</th>
+                    <th class="fw-bolder text-capitalize">delete</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -487,26 +500,32 @@
                       let i = index
                     "
                   >
-                    <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">{{ i + 1 }}</td>
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.invoiceID }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.invoiceDate }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.supplierName }}
                     </td>
 
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.paymentType }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
                       {{ medicine.paymentStatus }}
                     </td>
-                    <td class="fw-lighter text-capitalize">
+                    <td class="fw-bolder text-capitalize">
+                      {{
+                        medicine.grandTotalWithGST
+                          | currency : "INR" : "symbol" : "1.2-2"
+                      }}
+                    </td>
+                    <td class="fw-bolder text-capitalize">
                       <button
-                        class="btn btn-sm btn-success text-capitalize fw-lighter"
+                        class="btn btn-sm btn-outline-dark text-capitalize fw-bolder"
                         (click)="viewInvoice(medicine._id)"
                       >
                         view
@@ -514,7 +533,7 @@
                     </td>
                     <td>
                       <button
-                        class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                        class="btn btn-sm btn-danger text-capitalize fw-bolder"
                         data-bs-toggle="modal"
                         data-bs-target="#deleteModal"
                         (click)="deleteMedicineById(medicine._id)"

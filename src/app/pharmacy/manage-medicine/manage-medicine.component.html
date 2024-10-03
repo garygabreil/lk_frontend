@@ -1,6 +1,6 @@
-<div style="margin-left: 20%">
+<div style="margin-left: 18%">
   <button
-    class="btn btn-primary fw-lighter"
+    class="btn btn-dark fw-bolder"
     style="margin-bottom: 1%"
     routerLink="/invoice-home"
   >
@@ -9,7 +9,10 @@
 </div>
 
 <div class="container" style="margin-left: 17%; width: 85%">
-  <div class="scrolling-reminders" style="padding: 2%">
+  <div
+    class="scrolling-reminders"
+    style="width: 90%; margin-left: 1%; height: 15%"
+  >
     <marquee *ngIf="reminderMessages.length > 0">
       {{ reminderMessages.join(" | ") }}
     </marquee>
@@ -24,7 +27,7 @@
   <div class="accordion-item">
     <h2 class="accordion-header" id="flush-headingOneM">
       <button
-        class="accordion-button collapsed fw-lighter"
+        class="accordion-button collapsed fw-bolder"
         type="button"
         data-bs-toggle="collapse"
         data-bs-target="#flush-collapseOneM"
@@ -41,13 +44,13 @@
       data-bs-parent="#accordionFlushExample"
     >
       <div class="accordion-body">
-        <div class="container fw-lighter">
+        <div class="container fw-bolder">
           <!-- Search input -->
           <div class="row">
             <div class="col-3" style="margin-top: 1%">
               <input
                 type="text"
-                class="form-control fw-lighter mb-2"
+                class="form-control fw-bolder mb-2 btn-outline-dark"
                 placeholder="Search..."
                 aria-label="search"
                 [(ngModel)]="search"
@@ -60,22 +63,22 @@
           <br />
           <!-- Table -->
           <table
-            class="table table-bordered table-striped fw-lighter"
+            class="table table-bordered table-striped fw-bolder"
             *ngIf="medicineData.length > 0; else no_data_content"
           >
             <thead class="thead-dark">
               <tr>
-                <th class="fw-lighter text-capitalize">#</th>
-                <th class="fw-lighter text-capitalize">Medicine Name</th>
-                <th class="fw-lighter text-capitalize">Price (&#8377;)</th>
-                <th class="fw-lighter text-capitalize">Quantity</th>
-                <th class="fw-lighter text-capitalize">Expiry Date</th>
-                <th class="fw-lighter text-capitalize">Status</th>
-                <th class="fw-lighter text-capitalize">batch</th>
-                <th class="fw-lighter">HSN_code</th>
+                <th class="fw-bolder text-capitalize">#</th>
+                <th class="fw-bolder text-capitalize">Medicine Name</th>
+                <th class="fw-bolder text-capitalize">Price (&#8377;)</th>
+                <th class="fw-bolder text-capitalize">Quantity</th>
+                <th class="fw-bolder text-capitalize">Expiry Date</th>
+                <th class="fw-bolder text-capitalize">Status</th>
+                <th class="fw-bolder text-capitalize">batch</th>
+                <th class="fw-bolder">HSN_code</th>
 
-                <th colspan="2" class="fw-lighter text-capitalize">edit</th>
-                <th class="fw-lighter text-capitalize">delete</th>
+                <th colspan="2" class="fw-bolder text-capitalize">view</th>
+                <th class="fw-bolder text-capitalize">delete</th>
               </tr>
             </thead>
             <tbody id="tableBody">
@@ -87,44 +90,44 @@
                   let i = index
                 "
               >
-                <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-                <td class="fw-lighter text-capitalize">
+                <td class="fw-bolder text-capitalize">{{ i + 1 }}</td>
+                <td class="fw-bolder text-capitalize">
                   {{ medicine.medicineName }}
                 </td>
-                <td class="fw-lighter text-capitalize">
-                  {{ medicine.price }}
+                <td class="fw-bolder text-capitalize">
+                  {{ medicine.price | currency : "INR" : "symbol" : "1.2-2" }}
                 </td>
-                <td class="fw-lighter text-capitalize">
+                <td class="fw-bolder text-capitalize">
                   {{ medicine.quantity }}
                 </td>
 
-                <td class="fw-lighter text-capitalize">
+                <td class="fw-bolder text-capitalize">
                   {{
                     this.reminderService.parseDate(medicine.expiryDate)
                       | date : "dd-MM-yyyy"
                   }}
                 </td>
-                <td class="fw-lighter text-capitalize">
+                <td class="fw-bolder text-capitalize">
                   {{ getStatus(medicine.expiryDate) }}
                 </td>
-                <td class="fw-lighter text-capitalize">{{ medicine.batch }}</td>
-                <td class="fw-lighter text-capitalize">
+                <td class="fw-bolder text-capitalize">{{ medicine.batch }}</td>
+                <td class="fw-bolder text-capitalize">
                   {{ medicine.hsn_code }}
                 </td>
 
-                <td class="fw-lighter text-capitalize" colspan="2">
+                <td class="fw-bolder text-capitalize" colspan="2">
                   <button
-                    class="btn btn-sm btn-success text-capitalize fw-lighter"
+                    class="btn btn-sm btn-outline-dark text-capitalize fw-bolder"
                     (click)="editMedicineById(medicine._id)"
                     data-bs-toggle="modal"
                     data-bs-target="#editModal"
                   >
-                    edit
+                    view
                   </button>
                 </td>
                 <td>
                   <button
-                    class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                    class="btn btn-sm btn-danger text-capitalize fw-bolder"
                     (click)="deleteMedicineById(medicine._id)"
                     data-bs-toggle="modal"
                     data-bs-target="#deleteModal"
@@ -149,7 +152,7 @@
   <div class="accordion-item">
     <h2 class="accordion-header" id="flush-headingTwoM">
       <button
-        class="accordion-button collapsed fw-lighter"
+        class="accordion-button collapsed fw-bolder"
         type="button"
         data-bs-toggle="collapse"
         data-bs-target="#flush-collapseTwoM"
@@ -171,7 +174,7 @@
             <div class="row">
               <div class="col-5">
                 <div class="form-group">
-                  <label for="medicineName" class="mr-2 fw-lighter"
+                  <label for="medicineName" class="mr-2 fw-bolder"
                     >Medicine Name</label
                   >
                   <input
@@ -180,7 +183,7 @@
                     (keyup)="onSearch($event)"
                     (keydown)="handlePKeyDown($event)"
                     placeholder="Search for medicine"
-                    class="form-control fw-lighter"
+                    class="form-control fw-bolder"
                   />
 
                   <!-- Check if suggestions exist and if they have length greater than 0 -->
@@ -206,7 +209,7 @@
                     [routerLink]="['/create-medicine']"
                     *ngIf="showCreateNewMedicineLink"
                     [ngClass]="{ highlighted: selectedSuggestionIndex === -1 }"
-                    class="fw-lighter"
+                    class="fw-bolder"
                   >
                     Not found
                   </div>
@@ -214,24 +217,24 @@
               </div>
               <div class="col-3">
                 <div class="form-group">
-                  <label for="supplierName" class="mr-2 fw-lighter"
+                  <label for="supplierName" class="mr-2 fw-bolder"
                     >Supplier Name</label
                   >
                   <input
                     type="text"
                     formControlName="supplierName"
                     placeholder="Search for Supplier"
-                    class="form-control fw-lighter"
+                    class="form-control fw-bolder"
                   />
                 </div>
               </div>
 
               <div class="col-3">
                 <div class="form-group mx-sm-3 mb-2">
-                  <label for="hsn_code" class="mr-2 fw-lighter">HSN Code</label>
+                  <label for="hsn_code" class="mr-2 fw-bolder">HSN Code</label>
                   <input
                     type="text"
-                    class="form-control fw-lighter"
+                    class="form-control fw-bolder"
                     id="hsn_code"
                     name="hsn_code"
                     formControlName="hsn_code"
@@ -241,10 +244,10 @@
               </div>
               <div class="col-3">
                 <div class="form-group mb-2">
-                  <label for="batch" class="mr-2 fw-lighter">Batch</label>
+                  <label for="batch" class="mr-2 fw-bolder">Batch</label>
                   <input
                     type="text"
-                    class="form-control fw-lighter"
+                    class="form-control fw-bolder"
                     id="batch"
                     name="batch"
                     formControlName="batch"
@@ -256,7 +259,7 @@
 
             <button
               type="submit "
-              class="btn btn-primary mb-2 fw-lighter"
+              class="btn mb-2 fw-bolder btn-outline-dark"
               (click)="searchBySpecific()"
             >
               Search
@@ -266,7 +269,7 @@
         <br />
         <!--  -->
         <table
-          class="table table-bordered table-striped fw-lighter"
+          class="table table-bordered table-striped fw-bolder"
           *ngIf="
             totalNumberOfEntriesForSpecificSearch > 0;
             else no_data_content
@@ -274,17 +277,17 @@
         >
           <thead class="thead-dark">
             <tr>
-              <th class="fw-lighter text-capitalize">#</th>
-              <th class="fw-lighter text-capitalize">Medicine Name</th>
-              <th class="fw-lighter text-capitalize">Price (&#8377;)</th>
-              <th class="fw-lighter text-capitalize">Quantity</th>
-              <th class="fw-lighter text-capitalize">Expiry Date</th>
-              <th class="fw-lighter text-capitalize">Status</th>
-              <th class="fw-lighter text-capitalize">batch</th>
-              <th class="fw-lighter">HSN_code</th>
+              <th class="fw-bolder text-capitalize">#</th>
+              <th class="fw-bolder text-capitalize">Medicine Name</th>
+              <th class="fw-bolder text-capitalize">Price (&#8377;)</th>
+              <th class="fw-bolder text-capitalize">Quantity</th>
+              <th class="fw-bolder text-capitalize">Expiry Date</th>
+              <th class="fw-bolder text-capitalize">Status</th>
+              <th class="fw-bolder text-capitalize">batch</th>
+              <th class="fw-bolder">HSN_code</th>
 
-              <th colspan="2" class="fw-lighter text-capitalize">edit</th>
-              <th class="fw-lighter text-capitalize">delete</th>
+              <th colspan="2" class="fw-bolder text-capitalize">view</th>
+              <th class="fw-bolder text-capitalize">delete</th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -296,44 +299,44 @@
                 let i = index
               "
             >
-              <td class="fw-lighter text-capitalize">{{ i + 1 }}</td>
-              <td class="fw-lighter text-capitalize">
+              <td class="fw-bolder text-capitalize">{{ i + 1 }}</td>
+              <td class="fw-bolder text-capitalize">
                 {{ medicine.medicineName }}
               </td>
-              <td class="fw-lighter text-capitalize">
-                {{ medicine.price }}
+              <td class="fw-bolder text-capitalize">
+                {{ medicine.price | currency : "INR" : "symbol" : "1.2-2" }}
               </td>
-              <td class="fw-lighter text-capitalize">
+              <td class="fw-bolder text-capitalize">
                 {{ medicine.quantity }}
               </td>
 
-              <td class="fw-lighter text-capitalize">
+              <td class="fw-bolder text-capitalize">
                 {{
                   this.reminderService.parseDate(medicine.expiryDate)
                     | date : "dd-MM-yyyy"
                 }}
               </td>
-              <td class="fw-lighter text-capitalize">
+              <td class="fw-bolder text-capitalize">
                 {{ getStatus(medicine.expiryDate) }}
               </td>
-              <td class="fw-lighter text-capitalize">{{ medicine.batch }}</td>
-              <td class="fw-lighter text-capitalize">
+              <td class="fw-bolder text-capitalize">{{ medicine.batch }}</td>
+              <td class="fw-bolder text-capitalize">
                 {{ medicine.hsn_code }}
               </td>
 
-              <td class="fw-lighter text-capitalize" colspan="2">
+              <td class="fw-bolder text-capitalize" colspan="2">
                 <button
-                  class="btn btn-sm btn-success text-capitalize fw-lighter"
+                  class="btn btn-sm btn-outline-dark text-capitalize fw-bolder"
                   (click)="editMedicineById(medicine._id)"
                   data-bs-toggle="modal"
                   data-bs-target="#editModal"
                 >
-                  edit
+                  view
                 </button>
               </td>
               <td>
                 <button
-                  class="btn btn-sm btn-danger text-capitalize fw-lighter"
+                  class="btn btn-sm btn-danger text-capitalize fw-bolder"
                   (click)="deleteMedicineById(medicine._id)"
                   data-bs-toggle="modal"
                   data-bs-target="#deleteModal"
@@ -386,13 +389,13 @@
                     <div class="col-3">
                       <label
                         for="supplierName"
-                        class="fw-lighter text-capitalize"
+                        class="fw-bolder text-capitalize"
                         >Supplier Name</label
                       >
                       <input
                         id="supplierName"
                         formControlName="supplierName"
-                        class="form-control fw-lighter text-capitalize"
+                        class="form-control fw-bolder text-capitalize"
                         placeholder="Enter supplier name"
                       />
                       <div
@@ -405,13 +408,13 @@
                     <div class="col-4">
                       <label
                         for="supplierAddress"
-                        class="fw-lighter text-capitalize"
+                        class="fw-bolder text-capitalize"
                         >Supplier Address</label
                       >
                       <input
                         id="supplierAddress"
                         formControlName="supplierAddress"
-                        class="form-control fw-lighter text-capitalize"
+                        class="form-control fw-bolder text-capitalize"
                         placeholder="Enter supplier address"
                       />
                       <div
@@ -424,13 +427,13 @@
                     <div class="col-3">
                       <label
                         for="supplierPhone"
-                        class="fw-lighter text-capitalize"
+                        class="fw-bolder text-capitalize"
                         >Supplier Phone</label
                       >
                       <input
                         id="supplierPhone"
                         formControlName="supplierPhone"
-                        class="form-control fw-lighter text-capitalize"
+                        class="form-control fw-bolder text-capitalize"
                         placeholder="Enter supplier phone"
                       />
                       <div
@@ -453,17 +456,17 @@
                   </div>
                   <div class="row">
                     <!-- Medicine Name -->
-                    <div class="col-4">
+                    <div class="col-3">
                       <div class="form-group">
                         <label
                           for="medicineName"
-                          class="fw-lighter text-capitalize"
+                          class="fw-bolder text-capitalize"
                           >Medicine Name</label
                         >
                         <input
                           id="medicineName"
                           formControlName="medicineName"
-                          class="form-control fw-lighter text-capitalize"
+                          class="form-control fw-bolder text-capitalize"
                           placeholder="Enter medicine name"
                         />
                         <div
@@ -476,13 +479,13 @@
                     </div>
                     <div class="col-3">
                       <div class="form-group">
-                        <label for="batch" class="fw-lighter text-capitalize"
+                        <label for="batch" class="fw-bolder text-capitalize"
                           >Batch</label
                         >
                         <input
                           id="batch"
                           formControlName="batch"
-                          class="form-control fw-lighter text-capitalize"
+                          class="form-control fw-bolder text-capitalize"
                           placeholder="Enter batch"
                         />
                         <div
@@ -495,13 +498,33 @@
                     </div>
                     <div class="col-3">
                       <div class="form-group">
-                        <label for="hsn_code" class="fw-lighter text-capitalize"
+                        <label for="pack" class="fw-bolder text-capitalize"
+                          >Pack</label
+                        >
+                        <input
+                          id="pack"
+                          formControlName="pack"
+                          class="form-control fw-bolder text-capitalize"
+                          placeholder="Enter pack"
+                        />
+                        <div
+                          *ngIf="pharmacyForm.get('pack')?.invalid"
+                          style="color: red; font-size: small"
+                        >
+                          Required
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-3">
+                      <div class="form-group">
+                        <label for="hsn_code" class="fw-bolder text-capitalize"
                           >HSN code</label
                         >
                         <input
                           id="batch"
                           formControlName="hsn_code"
-                          class="form-control fw-lighter text-capitalize"
+                          class="form-control fw-bolder text-capitalize"
                           placeholder="Enter batch"
                         />
                         <div
@@ -518,14 +541,14 @@
                     <!-- Quantity -->
                     <div class="col-md-3">
                       <div class="form-group">
-                        <label for="quantity" class="fw-lighter text-capitalize"
+                        <label for="quantity" class="fw-bolder text-capitalize"
                           >Quantity</label
                         >
                         <input
                           id="quantity"
                           type="number"
                           formControlName="quantity"
-                          class="form-control fw-lighter text-capitalize"
+                          class="form-control fw-bolder text-capitalize"
                           placeholder="Enter quantity"
                         />
                         <div
@@ -540,13 +563,13 @@
                     <!-- Price -->
                     <div class="col-md-3">
                       <div class="form-group">
-                        <label for="price" class="fw-lighter text-capitalize"
+                        <label for="price" class="fw-bolder text-capitalize"
                           >Price/Rate &#8377;</label
                         >
                         <input
                           id="price"
                           formControlName="price"
-                          class="form-control fw-lighter text-capitalize"
+                          class="form-control fw-bolder text-capitalize"
                           placeholder="Enter price/rate &#8377;"
                           (ngModelChange)="calculatePerQun()"
                           (change)="onPriceChange($event)"
@@ -563,13 +586,11 @@
                     <!-- expiry date -->
                     <div class="col-md-4">
                       <div class="form-group">
-                        <label for="price" class="fw-lighter"
-                          >Expiry Date</label
-                        >
+                        <label for="price" class="fw-bolder">Expiry Date</label>
                         <input
                           id="expiryDate"
                           formControlName="expiryDate"
-                          class="form-control fw-lighter"
+                          class="form-control fw-bolder"
                           placeholder="Enter expiry date"
                           type="date"
                         />
@@ -583,11 +604,11 @@
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <label for="price" class="fw-lighter">SGST %</label>
+                        <label for="price" class="fw-bolder">SGST %</label>
                         <input
                           id="expiryDate"
                           formControlName="sgst"
-                          class="form-control fw-lighter"
+                          class="form-control fw-bolder"
                           placeholder="Enter sgst %"
                           type="number"
                         />
@@ -601,11 +622,11 @@
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <label for="quantity" class="fw-lighter">MID</label>
+                        <label for="quantity" class="fw-bolder">MID</label>
                         <input
                           id="mid"
                           formControlName="mid"
-                          class="form-control fw-lighter text-capitalize"
+                          class="form-control fw-bolder text-capitalize"
                           placeholder="mid"
                           readonly
                           style="background-color: lightgray"
@@ -623,12 +644,13 @@
                   <br />
                   <!-- Submit Button -->
                   <button
-                    class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-lighter"
+                    class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-bolder"
                     [disabled]="pharmacyForm.invalid"
                     (click)="updateChanges()"
                   >
-                    <mat-icon *ngIf="!showProgressBar">save</mat-icon>
-                    <span *ngIf="!showProgressBar">Save</span>
+                    <i class="bi bi-save me-2" *ngIf="!showProgressBar"></i>
+                    <!-- Bootstrap Save Icon -->
+                    <span *ngIf="!showProgressBar">update</span>
                     <div
                       class="spinner-border text-light"
                       role="status"
@@ -642,7 +664,7 @@
             </div>
             <div class="container">
               <div
-                class="alert alert-success fw-lighter"
+                class="alert alert-success fw-bolder"
                 role="alert"
                 *ngIf="showAlertForUpdate"
               >
@@ -677,7 +699,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1
-            class="modal-title fs-5 fw-lighter text-capitalize"
+            class="modal-title fs-5 fw-bolder text-capitalize"
             id="deleteModal"
           >
             Delete Medicine
@@ -690,13 +712,13 @@
             (click)="deleteSessionByID()"
           ></button>
         </div>
-        <div class="modal-body fw-lighter">
+        <div class="modal-body fw-bolder">
           Are you sure, you want to delete the Medicine entry?
         </div>
         <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-danger btn-sm fw-lighter text-capitalize"
+            class="btn btn-danger btn-sm fw-bolder text-capitalize"
             (click)="deleteMedicine()"
           >
             <span *ngIf="!showDeleteProgressBar">yes</span>
@@ -710,7 +732,7 @@
           </button>
           <button
             type="button"
-            class="btn btn-sm btn-secondary fw-lighterm text-capitalize"
+            class="btn btn-sm btn-dark fw-bolderm text-capitalize"
             data-bs-dismiss="modal"
             #closeModal
             (click)="deleteSessionByID()"

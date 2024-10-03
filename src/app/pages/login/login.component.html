@@ -3,12 +3,12 @@
     class="container d-flex justify-content-center align-items-center vh-100"
   >
     <div class="card p-4" style="width: 300px">
-      <h4 class="text-center fw-lighter">Lakshmi Hospital</h4>
-      <div class="form-group fw-lighter">
+      <h4 class="text-center text-uppercase fw-bolder">Sri Lakshmi Hospital</h4>
+      <div class="form-group fw-bolder">
         <label>PID</label>
         <input
           type="password"
-          class="form-control fw-lighter"
+          class="form-control fw-bolder"
           name="username"
           placeholder="Enter your PID"
           formControlName="pid"
@@ -20,11 +20,7 @@
       >
         Required
       </div>
-      <button
-        type="submit"
-        class="btn btn-success mt-3 w-100"
-        (click)="login()"
-      >
+      <button type="submit" class="btn btn-dark mt-3 w-100" (click)="login()">
         <span *ngIf="!showProgressBar">Login</span>
         <div
           class="spinner-border text-light"
@@ -35,7 +31,7 @@
         </div>
       </button>
       <br />
-      <div class="alert alert-danger fw-lighter" role="alert" *ngIf="showAlert">
+      <div class="alert alert-danger fw-bolder" role="alert" *ngIf="showAlert">
         User not found!
       </div>
     </div>

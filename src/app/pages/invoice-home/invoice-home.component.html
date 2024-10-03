@@ -3,11 +3,11 @@
     <!-- Section 1 -->
     <div class="col-md-12 mb-4">
       <div class="card text-center">
-        <h4 class="fw-lighter">Invoices</h4>
+        <h4 class="fw-bolder">Invoices</h4>
         <div class="card-body">
           <div class="d-flex justify-content-around mt-3">
             <button
-              class="btn btn-success fw-lighter"
+              class="btn fw-bolder btn-outline-dark"
               routerLink="/create-bill"
             >
               <i class="bi bi-currency-dollar"></i> Sales
@@ -15,21 +15,16 @@
 
             <!-- Purchase Order Button -->
             <button
-              class="btn btn-success fw-lighter"
-              style="color: white"
+              class="btn fw-bolder btn-outline-dark"
               routerLink="/create-po"
             >
               <i class="bi bi-bag-fill"></i> Purchase Order
             </button>
-            <button
-              class="btn btn-warning fw-lighter"
-              style="color: white"
-              routerLink="/view-bill"
-            >
+            <button class="btn btn-dark fw-bolder" routerLink="/view-bill">
               <i class="bi bi-list-ul"></i> Manage Invoices
             </button>
             <button
-              class="btn btn-warning fw-lighter"
+              class="btn btn-dark fw-bolder"
               style="color: white"
               routerLink="/view-po-bill"
             >
@@ -43,13 +38,13 @@
     <!-- Section 2 -->
     <div class="col-md-6 mb-4">
       <div class="card text-center">
-        <h4 class="fw-lighter">Medicines</h4>
+        <h4 class="fw-bolder">Medicines</h4>
 
         <div class="card-body">
           <div class="d-flex justify-content-around mt-3">
             <!-- Create Medicine Button -->
             <button
-              class="btn btn-success fw-lighter"
+              class="btn btn-outline-dark fw-bolder"
               routerLink="/create-medicine"
             >
               <i class="bi bi-plus-circle"></i> Create Medicine
@@ -57,7 +52,7 @@
 
             <!-- Manage Medicine Button -->
             <button
-              class="btn btn-warning fw-lighter"
+              class="btn btn-dark fw-bolder"
               routerLink="/manage-medicine"
               style="color: white"
             >
@@ -71,12 +66,12 @@
     <!-- Section 3 -->
     <div class="col-md-6 mb-4">
       <div class="card text-center">
-        <h4 class="fw-lighter">User Managements</h4>
+        <h4 class="fw-bolder">User Managements</h4>
         <div class="card-body">
           <div class="d-flex justify-content-around mt-3">
             <button
               type="button"
-              class="btn btn-success fw-lighter"
+              class="btn btn-outline-dark fw-bolder"
               data-bs-toggle="modal"
               data-bs-target="#userAccess"
             >
@@ -85,7 +80,7 @@
             </button>
 
             <button
-              class="btn btn-warning fw-lighter"
+              class="btn btn-dark fw-bolder"
               style="color: white"
               data-bs-toggle="modal"
               data-bs-target="#userManagement"
@@ -111,7 +106,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5 fw-lighter" id="userAccess">
+          <h1 class="modal-title fs-5 fw-bolder" id="userAccess">
             Create Users
           </h1>
           <button
@@ -128,8 +123,8 @@
             <div class="col-12 col-md-6 text-center">
               <!-- Create Patient Button -->
               <button
-                class="btn btn-success fw-lighter mb-3"
-                style="color: white; width: 100%"
+                class="btn btn-outline-dark fw-bolder mb-3"
+                style="width: 100%"
                 (click)="goToCreatePatient()"
               >
                 <i class="bi bi-person-plus"></i>Patient
@@ -137,8 +132,8 @@
 
               <!-- Create Doctor Button -->
               <button
-                class="btn btn-success fw-lighter mb-3"
-                style="color: white; width: 100%"
+                class="btn btn-outline-dark fw-bolder mb-3"
+                style="width: 100%"
                 (click)="goToCreateDoctor()"
               >
                 <i class="bi bi-person-badge"></i>Doctor
@@ -146,8 +141,8 @@
 
               <!-- Create Staff Button -->
               <button
-                class="btn btn-success fw-lighter"
-                style="color: white; width: 100%"
+                class="btn btn-outline-dark fw-bolder"
+                style="width: 100%"
                 (click)="goToCreateStaff()"
               >
                 <i class="bi bi-person-workspace"></i> Access Control
@@ -158,7 +153,7 @@
         <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-secondary fw-lighter"
+            class="btn btn-secondary fw-bolder"
             data-bs-dismiss="modal"
             #closeModal
           >
@@ -180,7 +175,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5 fw-lighter" id="userManagement">
+          <h1 class="modal-title fs-5 fw-bolder" id="userManagement">
             Management
           </h1>
           <button
@@ -197,7 +192,7 @@
             <div class="col-12 col-md-6 text-center">
               <!-- Create Patient Button -->
               <button
-                class="btn btn-warning fw-lighter mb-3"
+                class="btn btn-dark fw-bolder mb-3"
                 style="color: white; width: 100%"
                 (click)="goToManagePatient()"
               >
@@ -206,7 +201,7 @@
 
               <!-- Create Doctor Button -->
               <button
-                class="btn btn-warning fw-lighter mb-3"
+                class="btn btn-dark fw-bolder mb-3"
                 style="color: white; width: 100%"
                 (click)="goToManageDoctor()"
               >
@@ -215,7 +210,7 @@
 
               <!-- Create Staff Button -->
               <button
-                class="btn btn-warning fw-lighter"
+                class="btn btn-dark fw-bolder"
                 style="color: white; width: 100%"
                 (click)="goToManageStaff()"
               >
@@ -227,7 +222,7 @@
         <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-secondary fw-lighter"
+            class="btn btn-secondary fw-bolder"
             data-bs-dismiss="modal"
             #closeModal
           >

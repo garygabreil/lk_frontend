@@ -136,7 +136,7 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
         this.gstAmount = (res['total'] * this.gstRate) / 100;
         this.invoiceForm = this.fb.group({
           patientName: [res['patientName'], Validators.required],
-          patientAddress: [res['patientAddress'], Validators.required],
+          patientAddress: [res['patientAddress']],
           pid: [res['pid'], Validators.required],
           title: res['title'],
           gender: res['gender'],
@@ -149,14 +149,17 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
           grandTotalWithGST: res['grandTotalWithGST'],
           total: res['total'],
           gstAdded: res['gstAdded'],
-          items: this.fb.array([]), // FormArray for invoice items
+          items: this.fb.array([]),
+          updatedBy: sessionStorage.getItem('user'),
+          updatedOn: this.currentDate,
+          // FormArray for invoice items
         });
         this.initializeItems(res['items']);
       } else {
         this.gstAmount = (res['total'] * this.gstRate) / 100;
         this.invoiceForm = this.fb.group({
           patientName: [res['patientName'], Validators.required],
-          patientAddress: [res['patientAddress'], Validators.required],
+          patientAddress: [res['patientAddress']],
           pid: [res['pid'], Validators.required],
           title: res['title'],
           gender: res['gender'],
@@ -170,6 +173,8 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
           total: res['total'],
           gstAdded: res['gstAdded'],
           items: this.fb.array([]), // FormArray for invoice items
+          updatedBy: sessionStorage.getItem('user'),
+          updatedOn: this.currentDate,
         });
         this.initializeItems(res['items']);
       }
@@ -194,10 +199,9 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
       total: [''],
       items: this.fb.array([]),
       gstAdded: [''],
-      updatedBy: [''],
-      updatedOn: [''],
     });
     this.loadData();
+    this.loadUserSession();
     this.getAllDoctor();
     this.items.valueChanges.subscribe(() => this.calculateTotals());
     this.getAllInvoicesForToday();
@@ -223,6 +227,13 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
   getAllDoctor() {
     this.http.getAllDoctors().subscribe((res) => {
       this.doctorData = res as any;
+    });
+  }
+
+  loadUserSession() {
+    this.invoiceForm.patchValue({
+      updatedBy: sessionStorage.getItem('user'),
+      updatedOn: this.currentDate,
     });
   }
 
@@ -263,11 +274,14 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
 
     // Listen to changes in price or quantity to update the total for the item
     itemForm
-      .get('price')
+      .get('mrp')
       ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
     itemForm.get('quantity')?.valueChanges.subscribe(() => {
       this.updateTotal(itemForm);
     });
+    itemForm
+      .get('sgst')
+      ?.valueChanges.subscribe(() => this.updateTotal(itemForm));
     this.items.push(itemForm);
     this.suggestions.push([]); // Add an empty array for suggestions for the new row
     this.addGST();
@@ -592,11 +606,6 @@ export class ViewIndividualInvoicesComponent implements OnInit, OnDestroy {
     this.invoiceForm.patchValue({
       invoiceID: this.invoiceForm.value.invoiceID,
       invoiceDate: this.invoiceForm.value.invoiceDate,
-    });
-
-    this.invoiceForm.patchValue({
-      updatedBy: sessionStorage.getItem('user'),
-      updatedOn: this.currentDate,
     });
 
     this.invoiceForm.patchValue({

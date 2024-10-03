@@ -1,7 +1,7 @@
 <ng-container *ngIf="!isLoginPage()">
   <!-- <nav class="navbar" style="background-color: #495057 !important">
     <div class="container-fluid">
-      <a class="navbar-brand fw-lighter" href="#" style="color: white"
+      <a class="navbar-brand fw-bolder" href="#" style="color: white"
         >Lakshmi Hospital</a
       >
     </div>
@@ -13,7 +13,7 @@
     <div class="container-fluid">
       <!-- Heading on the left -->
       <a
-        class="navbar-brand fw-lighter"
+        class="navbar-brand fw-bolder"
         href="#"
         style="color: white"
         id="noshow"
@@ -41,7 +41,7 @@
           <li class="nav-item">
             <button
               type="submit"
-              class="btn btn-sm btn-success fw-lighter"
+              class="btn btn-sm btn-success fw-bolder"
               (click)="logOut()"
             >
               <span *ngIf="!showProgressBar">Logout</span>

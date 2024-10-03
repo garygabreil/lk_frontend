@@ -42,6 +42,9 @@ import { InvoiceHomeComponent } from './pages/invoice-home/invoice-home.componen
 import { MatButtonModule } from '@angular/material/button';
 import { ManagePoInvoicesComponent } from './pharmacy/manage-po-invoices/manage-po-invoices.component';
 import { ViewIndividualPoInvoicesComponent } from './pharmacy/view-individual-po-invoices/view-individual-po-invoices.component';
+import { PrintServiceService } from './services/print-service.service';
+import { PharmacyPatientCreationComponent } from './pages/pharmacy-patient-creation/pharmacy-patient-creation.component';
+import { PharmacySupplierCreationComponent } from './pages/pharmacy-supplier-creation/pharmacy-supplier-creation.component';
 
 @NgModule({
   declarations: [
@@ -67,6 +70,8 @@ import { ViewIndividualPoInvoicesComponent } from './pharmacy/view-individual-po
     InvoiceHomeComponent,
     ManagePoInvoicesComponent,
     ViewIndividualPoInvoicesComponent,
+    PharmacyPatientCreationComponent,
+    PharmacySupplierCreationComponent,
   ],
   imports: [
     BrowserModule,
@@ -90,6 +95,7 @@ import { ViewIndividualPoInvoicesComponent } from './pharmacy/view-individual-po
     provideAnimationsAsync(),
     SearchPipe,
     DatePipe,
+    PrintServiceService,
     provideHttpClient(withFetch()),
   ],
   bootstrap: [AppComponent],

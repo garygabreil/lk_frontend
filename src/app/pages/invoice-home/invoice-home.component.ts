@@ -15,7 +15,7 @@ export class InvoiceHomeComponent {
   constructor(private router: Router) {}
 
   goToCreatePatient() {
-    this.router.navigateByUrl('/create-patient');
+    this.router.navigateByUrl('/create-patient-pharmacy');
     this.closeModal.nativeElement.click();
   }
 

@@ -1,0 +1,199 @@
+<div style="margin-left: 20%">
+  <button
+    class="btn btn-dark fw-bolder"
+    style="margin-bottom: 1%"
+    routerLink="/invoice-home"
+  >
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+</div>
+
+<div class="container" style="margin-left: 19%; width: 80%">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">New Patient</h5>
+      <form [formGroup]="patientForm">
+        <div class="row">
+          <!-- title -->
+          <div class="col-md-2 mb-3">
+            <label
+              for="patientName"
+              class="form-label fw-bolder text-capitalize"
+              >title</label
+            >
+            <select
+              id="title"
+              class="form-control fw-bolder text-capitalize"
+              formControlName="title"
+            >
+              <option value="null">choose...</option>
+              <option>Mr.</option>
+              <option>Mrs.</option>
+              <option>Miss.</option>
+              <option>Master.</option>
+            </select>
+            <div
+              *ngIf="
+                patientForm.get('title')?.invalid ||
+                !patientForm.get('title')?.dirty
+              "
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <!-- Patient Name -->
+          <div class="col-md-4 mb-3">
+            <label for="patientName" class="form-label fw-bolder"
+              >Patient Name</label
+            >
+            <input
+              type="text"
+              class="form-control fw-bolder text-capitalize"
+              id="patientName"
+              placeholder="Enter patient name"
+              formControlName="patientName"
+            />
+            <div
+              *ngIf="patientForm.get('patientName')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+
+          <!-- dob -->
+          <div class="col-md-2 mb-3">
+            <label for="age" class="form-label fw-bolder text-capitalize"
+              >age</label
+            >
+            <input
+              type="text"
+              class="form-control fw-bolder text-capitalize"
+              id="age"
+              placeholder="age"
+              formControlName="age"
+            />
+            <div
+              *ngIf="patientForm.get('age')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+
+          <!-- admissionDate -->
+          <div class="col-md-3 mb-3">
+            <label
+              for="admissionDate"
+              class="form-label fw-bolder text-capitalize"
+              >visit Date</label
+            >
+            <input
+              type="date"
+              class="form-control fw-bolder"
+              id="visitDate"
+              formControlName="visitDate"
+              (keydown)="onKeyDown($event)"
+            />
+            <div
+              *ngIf="patientForm.get('visitDate')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <!-- pid -->
+          <div class="col-md-3 mb-3">
+            <label for="pid" class="form-label fw-bolder">PID</label>
+            <input
+              type="text"
+              class="form-control fw-bolder"
+              id="pincode"
+              placeholder="PatientID"
+              formControlName="pid"
+              style="background-color: lightgray"
+              readonly
+            />
+            <div
+              *ngIf="patientForm.get('pid')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="pid" class="form-label fw-bolder"
+              >Consultant Name</label
+            >
+            <select
+              formControlName="consultantName"
+              class="form-control fw-bolder dropdown-toggle text-capitalize"
+            >
+              <option value="null">Select Consultant</option>
+              <option
+                *ngFor="let doctor of doctorData"
+                [value]="doctor.consultantName"
+                selected
+              >
+                Dr.{{ doctor.consultantName }}
+              </option>
+            </select>
+            <div
+              *ngIf="patientForm.get('consultantName')?.invalid"
+              style="color: red; font-size: small"
+            >
+              Required
+            </div>
+          </div>
+        </div>
+
+        <div class="align-items-center align-text-center mt-1">
+          <!--             -->
+          <button
+            class="btn btn-success btn-sm d-flex align-items-center justify-content-center fw-bolder"
+            [disabled]="patientForm.invalid"
+            (click)="onSubmit()"
+          >
+            <mat-icon *ngIf="!showProgressBar">save</mat-icon>
+            <span *ngIf="!showProgressBar">Save</span>
+            <div
+              class="spinner-border text-light"
+              role="status"
+              *ngIf="showProgressBar"
+            >
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <button
+    style="margin-top: 1%"
+    class="btn btn-secondary btn-sm d-flex align-items-center justify-content-center fw-bolder"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
+
+  <div class="alert alert-success fw-bolder" role="alert" *ngIf="showAlert">
+    Patient entry has been completed
+    <button
+      type="button"
+      class="btn btn-link fw-bolder"
+      [routerLink]="['/invoice-home']"
+    >
+      home
+    </button>
+  </div>
+  <div class="alert alert-danger fw-bolder" role="alert" *ngIf="showExistAlert">
+    Patient entry exist!
+    <button
+      type="button"
+      class="btn btn-link fw-bolder"
+      [routerLink]="['/invoice-home']"
+    >
+      home
+    </button>
+  </div>
+</div>

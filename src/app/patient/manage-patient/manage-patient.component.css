@@ -10,7 +10,7 @@ table {
 th,
 td {
   padding: 4px 8px; /* Reduce padding */
-  font-size: 14px; /* Reduce font size */
+  font-size: 10px; /* Reduce font size */
 }
 
 th {
